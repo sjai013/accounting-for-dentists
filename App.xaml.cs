@@ -1,4 +1,4 @@
-﻿namespace accounting_for_dentists;
+﻿namespace AccountingForDentists;
 
 public partial class App : Application
 {

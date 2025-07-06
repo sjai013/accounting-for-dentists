@@ -1,13 +1,15 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:local="clr-namespace:accounting_for_dentists"
-             xmlns:components="clr-namespace:accounting_for_dentists.Components"
-             x:Class="accounting_for_dentists.MainPage">
+             xmlns:local="clr-namespace:AccountingForDentists"
+             xmlns:components="clr-namespace:AccountingForDentists.Components"
+             x:Class="AccountingForDentists.MainPage">
 
-    <BlazorWebView x:Name="blazorWebView" HostPage="wwwroot/index.html">
+    <BlazorWebView x:Name="blazorWebView"
+            HostPage="wwwroot/index.html">
         <BlazorWebView.RootComponents>
-            <RootComponent Selector="#app" ComponentType="{x:Type components:Routes}" />
+            <RootComponent Selector="#app"
+                    ComponentType="{x:Type components:Routes}"/>
         </BlazorWebView.RootComponents>
     </BlazorWebView>
 

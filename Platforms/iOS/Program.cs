@@ -1,7 +1,7 @@
 ﻿using ObjCRuntime;
 using UIKit;
 
-namespace accounting_for_dentists;
+namespace AccountingForDentists;
 
 public class Program
 {

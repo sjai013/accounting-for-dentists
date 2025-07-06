@@ -2,7 +2,7 @@ using System;
 using Microsoft.Maui;
 using Microsoft.Maui.Hosting;
 
-namespace accounting_for_dentists;
+namespace AccountingForDentists;
 
 class Program : MauiApplication
 {

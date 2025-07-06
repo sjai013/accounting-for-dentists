@@ -1,6 +1,6 @@
 ﻿using Foundation;
 
-namespace accounting_for_dentists;
+namespace AccountingForDentists;
 
 [Register("AppDelegate")]
 public class AppDelegate : MauiUIApplicationDelegate

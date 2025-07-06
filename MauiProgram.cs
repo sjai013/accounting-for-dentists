@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 
-namespace accounting_for_dentists;
+namespace AccountingForDentists;
 
 public static class MauiProgram
 {

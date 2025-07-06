@@ -1,7 +1,7 @@
 ﻿using Android.App;
 using Android.Runtime;
 
-namespace accounting_for_dentists;
+namespace AccountingForDentists;
 
 [Application]
 public class MainApplication : MauiApplication
