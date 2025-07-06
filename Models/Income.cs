@@ -8,5 +8,6 @@ namespace AccountingForDentists.Models
         public decimal Amount { get; set; }
         public decimal GST { get; set; }
         public decimal Total { get; set; }
+        public string Description { get; set; } = string.Empty;
     }
 }

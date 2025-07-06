@@ -15,6 +15,7 @@ public class AccountingContext : DbContext
         modelBuilder.HasAutoscaleThroughput(400);
 
         modelBuilder.Entity<Income>()
+        .ToContainer("Income")
         .HasNoDiscriminator()
         .HasPartitionKey(x => x.TenantId)
         .HasKey(x => x.IncomeId);
