@@ -1,0 +1,8 @@
+@page "/business/"
+@rendermode InteractiveServer
+
+
+@foreach (var item in GetBusinessEntities())
+{
+    <p>@item.BusinessEntityId</p>
+}

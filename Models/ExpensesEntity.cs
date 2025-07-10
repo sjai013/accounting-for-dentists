@@ -2,7 +2,8 @@ namespace AccountingForDentists.Models
 {
     public record ExpensesEntity
     {
-        public Guid TenantId { get; set; }
+        public required string TenantId { get; set; }
+        public required string UserObjectId { get; set; }
         public Guid ExpensesId { get; set; }
         public DateOnly Date { get; set; }
         public decimal Amount { get; set; }

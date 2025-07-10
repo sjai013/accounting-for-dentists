@@ -1,0 +1,18 @@
+@rendermode InteractiveServer
+
+
+
+@code {
+    [SupplyParameterFromForm]
+    private BusinessEntityModel? Model { get; set; }
+
+    protected override void OnInitialized() => Model ??= new();
+
+    private void Submit() => Logger.LogInformation("Id = {Id}", Model?.Business);
+
+    public class BusinessEntityModel
+    {
+        public string BusinessName { get; set; }
+    }
+
+}
