@@ -1,5 +1,20 @@
 @rendermode InteractiveServer
 
+<EditForm Model="Model" OnSubmit="Submit" FormName="AddBusiness">
+    <div class="row g-3 align-items-center">
+        <div class="col-auto">
+            <label for="name" class="col-form-label">Business Name:</label>
+        </div>
+        <div class="col-auto">
+            <InputText class="form-control" @bind-Value="Model!.BusinessName" id="name" />
+
+        </div>
+        <div class="col-auto">
+            <button disabled="@string.IsNullOrWhiteSpace(Model.BusinessName)" class="btn btn-outline-dark"
+                type="submit"><i class="bi bi-plus"></i> Add</button>
+        </div>
+    </div>
+</EditForm>
 
 
 @code {
@@ -7,8 +22,6 @@
     private BusinessEntityModel? Model { get; set; }
 
     protected override void OnInitialized() => Model ??= new();
-
-    private void Submit() => Logger.LogInformation("Id = {Id}", Model?.Business);
 
     public class BusinessEntityModel
     {

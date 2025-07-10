@@ -1,42 +1,5 @@
 @page "/Income/ServiceFacilitiesAgreement"
+@using AccountingForDentists.Components.Pages.Income.Shared
 @inject ILogger<ServiceFacilitiesAgreement> Logger
 
-<EditForm Model="Model" OnSubmit="Submit" FormName="Starship1" class="d-flex flex-column gap-3">
-    <div>
-        <label for="Model.Business">Business Name</label>
-        <InputText class="form-control" @bind-Value="Model!.Business" />
-    </div>
-    <div>
-        <label for="Model.TotalSales">Total Sales</label>
-        <div class="input-group">
-            <span class="input-group-text">$</span>
-            <InputNumber class="form-control" @bind-Value="Model!.TotalSales" />
-        </div>
-    </div>
-    <div>
-        <label for="Model.SalesGst">GST on Sales</label>
-        <div class="input-group">
-            <span class="input-group-text">$</span>
-            <InputNumber class="form-control" @bind-Value="Model!.SalesGst" />
-        </div>
-    </div>
-    <div>
-        <button class="btn btn-outline-primary" type="submit">Submit</button>
-    </div>
-</EditForm>
-
-@code {
-    [SupplyParameterFromForm]
-    private Starship? Model { get; set; }
-
-    protected override void OnInitialized() => Model ??= new();
-
-    private void Submit() => Logger.LogInformation("Id = {Id}", Model?.Business);
-
-    public class Starship
-    {
-        public string Business { get; set; }
-        public decimal TotalSales { get; set; }
-        public decimal SalesGst { get; set; }
-    }
-}
+<AddSFAForm></AddSFAForm>

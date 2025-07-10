@@ -1,7 +1,5 @@
 
 using AccountingForDentists.Models;
-using Microsoft.Azure.Cosmos;
-using Microsoft.Azure.Cosmos.Linq;
 using Microsoft.EntityFrameworkCore;
 
 namespace AccountingForDentists.Infrastructure;
@@ -14,6 +12,7 @@ public class AccountingContext(DbContextOptions options, TenantProvider tenantPr
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+
         var tenantId = tenantProvider.TenantId;
         var userObjectId = tenantProvider.UserObjectId;
 
@@ -22,23 +21,19 @@ public class AccountingContext(DbContextOptions options, TenantProvider tenantPr
             throw new Exception("tenantId or userId is null.  Database access is not authorised.");
         }
 
+        modelBuilder.HasDefaultContainer($"tid-{tenantId}_oid-{userObjectId}");
+
         modelBuilder.Entity<SalesEntity>()
-        .HasQueryFilter(o => o.TenantId == tenantId && o.UserObjectId == userObjectId)
-        .HasNoDiscriminator()
-        .HasPartitionKey(x => x.TenantId)
-        .HasKey(x => x.SalesId);
+        .HasPartitionKey(x => new { x.SalesId })
+        .HasKey(x => new { x.SalesId });
 
         modelBuilder.Entity<ExpensesEntity>()
-        .HasQueryFilter(o => o.TenantId == tenantId && o.UserObjectId == userObjectId)
-        .HasNoDiscriminator()
-        .HasPartitionKey(x => x.TenantId)
-        .HasKey(x => x.ExpensesId);
+        .HasPartitionKey(x => new { x.ExpensesId })
+        .HasKey(x => new { x.ExpensesId });
 
         modelBuilder.Entity<BusinessEntity>()
-        .HasQueryFilter(o => o.TenantId == tenantId && o.UserObjectId == userObjectId)
-         .HasNoDiscriminator()
-         .HasPartitionKey(x => x.TenantId)
-         .HasKey(x => x.Name);
+         .HasPartitionKey(x => new { x.Name })
+         .HasKey(x => new { x.Name });
 
     }
 }

@@ -1,8 +1,17 @@
 @page "/business/"
+@using AccountingForDentists.Components.Pages.Business.Shared
 @rendermode InteractiveServer
 
+<AddBusinessForm OnSaveSuccessful="BusinessListUpdated"></AddBusinessForm>
 
-@foreach (var item in GetBusinessEntities())
-{
-    <p>@item.BusinessEntityId</p>
-}
+<hr />
+<ul class="list-group">
+    @foreach (var item in BusinessEntities)
+    {
+        <li class="p-0 list-group-item d-flex gap-2 align-items-center">
+            <button @onclick="() => DeleteBusinessItem(item)" class="btn"><i class="bi bi-x-lg"></i></button>
+            <div>@item.Name</div>
+        </li>
+    }
+
+</ul>

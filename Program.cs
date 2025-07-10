@@ -1,13 +1,11 @@
+using AccountingForDentists;
 using AccountingForDentists.Components;
 using AccountingForDentists.Infrastructure;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Azure.Cosmos.Serialization.HybridRow;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -23,6 +21,8 @@ builder.Services.AddDbContext<AccountingContext>(options =>
             .MaxRequestsPerTcpConnection(16)
             .MaxTcpConnectionsPerEndpoint(32)
     ));
+
+builder.Services.AddScoped<TenantProvider>();
 
 Console.WriteLine($"Using secret {builder.Configuration["Authentication:Microsoft:ClientId"]}");
 
@@ -78,10 +78,10 @@ app.MapGet("/account/logout", async context =>
 
 });
 
-app.MapGet("/account/login", [Authorize] () =>
+app.MapGet("/account/login", [Authorize] async (AccountingContext context) =>
 {
+    await context.Database.EnsureCreatedAsync();
     return Results.Redirect("/");
 });
-
 
 app.Run();

@@ -2,8 +2,6 @@ namespace AccountingForDentists.Models
 {
     public record ExpensesEntity
     {
-        public required string TenantId { get; set; }
-        public required string UserObjectId { get; set; }
         public Guid ExpensesId { get; set; }
         public DateOnly Date { get; set; }
         public decimal Amount { get; set; }
@@ -11,7 +9,7 @@ namespace AccountingForDentists.Models
         public decimal Total { get; set; }
         public string Description { get; set; } = string.Empty;
         public SalesEntity? Sales { get; set; }
-        public BusinessEntity? BusinessEntity { get; set; }
+        public string BusinessEntity { get; set; } = string.Empty;
     }
 
 }

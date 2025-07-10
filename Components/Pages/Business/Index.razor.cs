@@ -6,8 +6,28 @@ namespace AccountingForDentists.Components.Pages.Business;
 
 public partial class Index(AccountingContext context)
 {
-    public IEnumerable<BusinessEntity> GetBusinessEntities()
+    public List<BusinessEntity> BusinessEntities { get; set; } = [];
+    protected override async Task OnInitializedAsync()
     {
-        return context.Businesses.AsEnumerable();
+        await UpdateBusinessEntities();
+    }
+
+    private async Task UpdateBusinessEntities()
+    {
+        BusinessEntities = await context.Businesses.ToListAsync();
+
+    }
+    private async void BusinessListUpdated(BusinessEntity args)
+    {
+        await UpdateBusinessEntities();
+        this.StateHasChanged();
+    }
+
+    private async void DeleteBusinessItem(BusinessEntity entity)
+    {
+        context.Businesses.Remove(entity);
+        await context.SaveChangesAsync();
+        await UpdateBusinessEntities();
+        this.StateHasChanged();
     }
 }

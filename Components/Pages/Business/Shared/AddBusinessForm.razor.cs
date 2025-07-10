@@ -1,24 +1,36 @@
-using System.Threading.Tasks;
 using AccountingForDentists.Infrastructure;
 using AccountingForDentists.Models;
+using Microsoft.AspNetCore.Components;
 
 namespace AccountingForDentists.Components.Pages.Business.Shared;
 
-public partial class AddBusinessForm(AccountingContext context, TenantProvider tenantProvider)
+public partial class AddBusinessForm(AccountingContext context)
 {
-    public async Task AddNewEntity(BusinessEntityModel model)
+    [Parameter]
+    public Action<BusinessEntity>? OnSaveSuccessful { get; set; } = null;
+
+    public async Task Submit()
     {
-        var tenantId = tenantProvider.TenantId;
-        var userObjectId = tenantProvider.UserObjectId;
+        if (Model is null) return;
 
         var businessEntity = new BusinessEntity()
         {
-            TenantId = tenantId,
-            UserObjectId = userObjectId,
-            Name = model.BusinessName,
+            Name = Model.BusinessName,
         };
 
-        context.Businesses.Add(businessEntity);
-        await context.SaveChangesAsync();
+        try
+        {
+            context.Businesses.Add(businessEntity);
+            await context.SaveChangesAsync();
+            OnSaveSuccessful?.Invoke(businessEntity);
+        }
+        catch (Exception e)
+        {
+
+        }
+        finally
+        {
+            Model = new();
+        }
     }
 }
