@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AccountingForDentists.Components.Pages;
 
-public partial class ServiceFacilitiesAgreement(AccountingContext context)
+public partial class ServiceFacilitiesAgreement(AccountingContext context, NavigationManager navigationManager)
 {
     [SupplyParameterFromForm]
     public SFAViewModel Model { get; set; } = new();
@@ -21,7 +21,7 @@ public partial class ServiceFacilitiesAgreement(AccountingContext context)
             GST = Model.TotalSalesGSTAmount,
             Date = DateOnly.FromDateTime(Model.InvoiceDate),
             BusinessName = Model.ClinicName,
-            Description = "Service and Facilities Agreement Sales",
+            Description = "Services and Facilities Agreement Sales",
         };
 
         ExpensesEntity expensesEntity = new()
@@ -31,13 +31,14 @@ public partial class ServiceFacilitiesAgreement(AccountingContext context)
             GST = Model.TotalExpensesGSTAmount,
             Date = DateOnly.FromDateTime(Model.InvoiceDate),
             BusinessName = Model.ClinicName,
-            Description = "Service and Facilities Agreement Expenses",
+            Description = "Services and Facilities Agreement Expenses",
             Sales = salesEntity
         };
         context.Sales.Add(salesEntity);
         context.Expenses.Add(expensesEntity);
         await context.SaveChangesAsync();
-        Console.WriteLine("Save completed!");
+        var currentUri = navigationManager.Uri;
+        navigationManager.NavigateTo(currentUri, true);
     }
 
     protected override async Task OnInitializedAsync()

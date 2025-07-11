@@ -2,7 +2,7 @@ using AccountingForDentists.Infrastructure;
 using AccountingForDentists.Models;
 using Microsoft.AspNetCore.Components;
 
-namespace AccountingForDentists.Components.Pages.Business.Shared;
+namespace AccountingForDentists.Components.Pages.Shared;
 
 public partial class AddBusinessForm(AccountingContext context)
 {

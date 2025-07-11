@@ -2,9 +2,9 @@ using AccountingForDentists.Infrastructure;
 using AccountingForDentists.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace AccountingForDentists.Components.Pages.Business;
+namespace AccountingForDentists.Components.Pages;
 
-public partial class Index(AccountingContext context)
+public partial class Businesses(AccountingContext context)
 {
     public List<BusinessEntity> BusinessEntities { get; set; } = [];
     protected override async Task OnInitializedAsync()
