@@ -6,9 +6,8 @@ namespace AccountingForDentists.Models
         public DateOnly Date { get; set; }
         public decimal Amount { get; set; }
         public decimal GST { get; set; }
-        public decimal Total { get; set; }
+        public decimal Total => Amount + GST;
         public string Description { get; set; } = string.Empty;
-        public ICollection<ExpensesEntity>? Expenses { get; set; }
         public string BusinessName { get; set; } = string.Empty;
     }
 

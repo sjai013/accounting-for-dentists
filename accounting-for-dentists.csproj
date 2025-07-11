@@ -7,6 +7,7 @@
     <RootNamespace>AccountingForDentists</RootNamespace>
     <AssemblyName>$(AssemblyName.Replace(' ', '_'))</AssemblyName>
     <UserSecretsId>5cf335a3-4be1-4f91-a423-a57ab6947927</UserSecretsId>
+    <LangVersion>preview</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
