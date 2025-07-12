@@ -69,4 +69,20 @@ public partial class Index(AccountingContext context, NavigationManager navigati
         }
         navigationManager.NavigateTo(newUri);
     }
+
+    async Task DeleteSFA(ServiceFacilitiesAgreementEntity item)
+    {
+        // Delete expense
+        if (item.ExpensesEntity is not null) context.Expenses.Remove(item.ExpensesEntity);
+
+        // Delete sale
+        if (item.SalesEntity is not null) context.Sales.Remove(item.SalesEntity);
+
+        // Delete SFA record
+        context.ServiceFacilitiesAgreements.Remove(item);
+
+        SFAEntities.Remove(item);
+
+        await context.SaveChangesAsync();
+    }
 }

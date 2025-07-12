@@ -83,7 +83,7 @@ public partial class BAS(AccountingContext context, NavigationManager navigation
     public class BASViewModel
     {
         public int Sales { get; set; }
-        public int GSTFreeSales => Sales - SalesGST;
+        public int GSTFreeSales => Sales + SalesGST;
         public int SalesGST { get; set; }
         public int Expenses { get; set; }
         public int ExpenseGST { get; set; }
