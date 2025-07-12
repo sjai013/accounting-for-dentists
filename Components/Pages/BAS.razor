@@ -1,18 +1,7 @@
 @page "/BAS"
-@page "/BAS/{FY:int}"
+@using AccountingForDentists.Components.Pages.Shared
 @rendermode InteractiveServer
-
-<div class="d-flex flex-column gap-2">
-    <EditForm class="d-flex flex-row gap-2" Model=@FYModel OnSubmit="ChangeFY" FormName="FY">
-        <InputSelect class="form-select" @bind-value="FYModel">
-            @for (int i = 2020; i <= maxFinancialYear; i++)
-            {
-                <option value="@i">@i</option>
-            }
-        </InputSelect>
-        <button type="submit" value="Submit" class="btn btn-outline-dark">Go</button>
-    </EditForm>
-</div>
+<FYButtonGroup @bind-SelectedFY:get="FY" @bind-SelectedFY:set="ChangeFY"></FYButtonGroup>
 <hr />
 <h1 class="display-6">FY@(FY - 2000) BAS</h1>
 <table class="table">

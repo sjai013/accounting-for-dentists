@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Components;
 
 namespace AccountingForDentists.Components.Pages.Shared;
 
-public partial class AddBusinessForm(AccountingContext context)
+public partial class AddBusinessForm(AccountingContext context, TenantProvider tenantProvider)
 {
     [Parameter]
     public Action<BusinessEntity>? OnSaveSuccessful { get; set; } = null;
@@ -15,6 +15,8 @@ public partial class AddBusinessForm(AccountingContext context)
 
         var businessEntity = new BusinessEntity()
         {
+            TenantId = tenantProvider.GetTenantId(),
+            UserId = tenantProvider.GetUserObjectId(),
             Name = Model.BusinessName,
         };
 

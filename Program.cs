@@ -15,12 +15,7 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
 builder.Services.AddDbContext<AccountingContext>(options =>
-    options.UseCosmos(builder.Configuration.GetConnectionString("AccountingForDentists")!, "main",
-        cosmos => cosmos
-            .ConnectionMode(Microsoft.Azure.Cosmos.ConnectionMode.Direct)
-            .MaxRequestsPerTcpConnection(16)
-            .MaxTcpConnectionsPerEndpoint(32)
-    ));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("AccountingForDentists")!));
 
 builder.Services.AddScoped<TenantProvider>();
 

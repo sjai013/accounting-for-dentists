@@ -1,0 +1,47 @@
+@page "/SFA"
+@using AccountingForDentists.Components.Pages.Shared
+@rendermode InteractiveServer
+
+<div class="d-flex flex-row gap-2">
+    <div class="d-flex flex-row gap-3">
+        <div class="align-content-center">FY</div>
+        <FYButtonGroup @bind-SelectedFY:get="FY" @bind-SelectedFY:set="SelectFY"></FYButtonGroup>
+    </div>
+
+    <div class="d-flex flex-row gap-3">
+        <div class="d-flex flex-row gap-3">
+            <div class="align-content-center">Clinic:</div>
+            <ButtonGroup Items="Businesses!" TextDelegate="(s) => s" @bind-Selected:get="Business"
+                @bind-Selected:set="SelectBusiness">
+            </ButtonGroup>
+
+        </div>
+    </div>
+</div>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th scope="col">Date</th>
+            <th scope="col">Clinic</th>
+            <th scope="col">Sales</th>
+            <th scope="col">Expenses</th>
+            <th scope="col">Income</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var entity in SFAEntities)
+        {
+            <tr>
+                <td>@entity.InvoiceDate.ToString("dd/MM/yyyy")</td>
+                <td>@entity.BusinessName</td>
+                <td>$@((entity.SalesEntity?.Total ?? 0).ToString("0.00"))</td>
+                <td>$@((entity.ExpensesEntity?.Total ?? 0).ToString("0.00"))</td>
+                <td>$@(((entity.SalesEntity?.Total ?? 0) - (entity.ExpensesEntity?.Total ?? 0)).ToString("0.00"))</td>
+            </tr>
+        }
+    </tbody>
+    <tfoot>
+
+    </tfoot>
+</table>

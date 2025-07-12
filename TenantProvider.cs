@@ -2,8 +2,22 @@ namespace AccountingForDentists;
 
 public sealed class TenantProvider(IHttpContextAccessor httpContextAccessor)
 {
+    public Guid GetTenantId()
+    {
+        if (!Guid.TryParse(httpContextAccessor.HttpContext?.User.Claims.Where(x => x.Type == "tid").SingleOrDefault()?.Value, out var guid))
+        {
+            return guid;
+        }
+        return Guid.Empty;
+    }
 
-    public string TenantId => httpContextAccessor.HttpContext?.User.Claims.Where(x => x.Type == "tid").SingleOrDefault()?.Value ?? "";
-    public string UserObjectId => httpContextAccessor.HttpContext?.User.Claims.Where(x => x.Type == "oid").SingleOrDefault()?.Value ?? "";
+    public Guid GetUserObjectId()
+    {
+        if (!Guid.TryParse(httpContextAccessor.HttpContext?.User.Claims.Where(x => x.Type == "oid").SingleOrDefault()?.Value, out var guid))
+        {
+            return guid;
+        }
+        return Guid.Empty;
+    }
 
 }

@@ -3,9 +3,9 @@ using AccountingForDentists.Models;
 using Microsoft.AspNetCore.Components;
 using Microsoft.EntityFrameworkCore;
 
-namespace AccountingForDentists.Components.Pages;
+namespace AccountingForDentists.Components.Pages.SFA;
 
-public partial class ServiceFacilitiesAgreement(AccountingContext context, NavigationManager navigationManager)
+public partial class Add(AccountingContext context, TenantProvider tenantProvider, NavigationManager navigationManager)
 {
     [SupplyParameterFromForm]
     public SFAViewModel Model { get; set; } = new();
@@ -16,6 +16,8 @@ public partial class ServiceFacilitiesAgreement(AccountingContext context, Navig
     {
         SalesEntity salesEntity = new()
         {
+            TenantId = tenantProvider.GetTenantId(),
+            UserId = tenantProvider.GetUserObjectId(),
             SalesId = Guid.CreateVersion7(),
             Amount = Model.TotalSalesAmount,
             GST = Model.TotalSalesGSTAmount,
@@ -26,6 +28,8 @@ public partial class ServiceFacilitiesAgreement(AccountingContext context, Navig
 
         ExpensesEntity expensesEntity = new()
         {
+            TenantId = tenantProvider.GetTenantId(),
+            UserId = tenantProvider.GetUserObjectId(),
             ExpensesId = Guid.CreateVersion7(),
             Amount = Model.TotalExpensesAmount,
             GST = Model.TotalExpensesGSTAmount,
@@ -34,6 +38,18 @@ public partial class ServiceFacilitiesAgreement(AccountingContext context, Navig
             Description = "Services and Facilities Agreement Expenses",
             Sales = salesEntity
         };
+
+        ServiceFacilitiesAgreementEntity serviceFacilitiesAgreementEntity = new()
+        {
+            TenantId = tenantProvider.GetTenantId(),
+            UserId = tenantProvider.GetUserObjectId(),
+            ServiceFacilityAgreementId = Guid.CreateVersion7(),
+            BusinessName = Model.ClinicName,
+            InvoiceDate = DateOnly.FromDateTime(Model.InvoiceDate),
+            ExpensesEntity = expensesEntity,
+            SalesEntity = salesEntity,
+        };
+        context.ServiceFacilitiesAgreements.Add(serviceFacilitiesAgreementEntity);
         context.Sales.Add(salesEntity);
         context.Expenses.Add(expensesEntity);
         await context.SaveChangesAsync();

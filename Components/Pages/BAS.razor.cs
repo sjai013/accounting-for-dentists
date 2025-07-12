@@ -7,24 +7,22 @@ namespace AccountingForDentists.Components.Pages;
 
 public partial class BAS(AccountingContext context, NavigationManager navigationManager)
 {
-    private readonly int maxFinancialYear = DateTime.Now.AddMonths(6).Year;
 
-    [Parameter]
-    public int? FY { get; set; }
+    [SupplyParameterFromQuery]
+    int FY { get; set; }
 
-    private int FYModel { get; set; }
     private Dictionary<MonthModel, BASViewModel> MonthlyBAS { get; set; } = [];
 
-    public async override Task SetParametersAsync(ParameterView parameters)
+
+    private async Task UpdateModel()
     {
-        await base.SetParametersAsync(parameters);
-        FY ??= DateTime.Now.AddMonths(6).Year;
-    }
-    protected override async Task OnInitializedAsync()
-    {
-        FYModel = FY ??= DateTime.Now.AddMonths(6).Year;
-        DateOnly startDate = DateOnly.FromDateTime(new DateTime(FYModel - 1, 7, 1));
-        DateOnly endDate = DateOnly.FromDateTime(new DateTime(FYModel, 7, 1));
+        if (FY == default)
+        {
+            FY = DateTime.Now.AddMonths(6).Year;
+        }
+
+        DateOnly startDate = DateOnly.FromDateTime(new DateTime(FY - 1, 7, 1));
+        DateOnly endDate = DateOnly.FromDateTime(new DateTime(FY, 7, 1));
 
         var expenses = await context.Expenses.Where(x => x.Date >= startDate && x.Date < endDate).ToListAsync();
         var sales = await context.Sales.Where(x => x.Date >= startDate && x.Date < endDate).ToListAsync();
@@ -35,6 +33,7 @@ public partial class BAS(AccountingContext context, NavigationManager navigation
 
         var uniqueMonths = monthlyExpenses.Select(x => x.Key).Union(monthlySales.Select(x => x.Key)).ToList();
 
+        MonthlyBAS.Clear();
         foreach (var month in uniqueMonths)
         {
             Models.ExpensesEntity[] expenseInMonth = monthlyExpenses[month].ToArray();
@@ -50,6 +49,28 @@ public partial class BAS(AccountingContext context, NavigationManager navigation
 
             MonthlyBAS.Add(month, BAS);
         }
+
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await UpdateModel();
+    }
+
+
+
+    private void ChangeFY(int FY)
+    {
+        string newUri;
+        if (FY == default)
+        {
+            newUri = navigationManager.GetUriWithQueryParameter("FY", (int?)null);
+        }
+        else
+        {
+            newUri = navigationManager.GetUriWithQueryParameter("FY", FY);
+        }
+        navigationManager.NavigateTo(newUri);
     }
 
     private record MonthModel
@@ -67,9 +88,5 @@ public partial class BAS(AccountingContext context, NavigationManager navigation
         public int Expenses { get; set; }
         public int ExpenseGST { get; set; }
 
-    }
-    private void ChangeFY(Microsoft.AspNetCore.Components.Forms.EditContext args)
-    {
-        navigationManager.NavigateTo($"./BAS/{FYModel}");
     }
 }
