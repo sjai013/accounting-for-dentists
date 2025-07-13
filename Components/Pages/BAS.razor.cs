@@ -2,10 +2,11 @@
 using AccountingForDentists.Infrastructure;
 using Microsoft.AspNetCore.Components;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Internal;
 
 namespace AccountingForDentists.Components.Pages;
 
-public partial class BAS(AccountingContext context, NavigationManager navigationManager)
+public partial class BAS(IDbContextFactory<AccountingContext> contextFactory, NavigationManager navigationManager)
 {
 
     [SupplyParameterFromQuery]
@@ -16,6 +17,7 @@ public partial class BAS(AccountingContext context, NavigationManager navigation
 
     private async Task UpdateModel()
     {
+        using var context = await contextFactory.CreateDbContextAsync();
         if (FY == default)
         {
             FY = DateTime.Now.AddMonths(6).Year;

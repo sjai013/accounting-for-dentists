@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AccountingForDentists.Components.Pages;
 
-public partial class Businesses(AccountingContext context)
+public partial class Businesses(IDbContextFactory<AccountingContext> contextFactory)
 {
     public List<BusinessEntity> BusinessEntities { get; set; } = [];
     protected override async Task OnInitializedAsync()
@@ -14,6 +14,7 @@ public partial class Businesses(AccountingContext context)
 
     private async Task UpdateBusinessEntities()
     {
+        using var context = await contextFactory.CreateDbContextAsync();
         BusinessEntities = await context.Businesses.ToListAsync();
 
     }
@@ -25,6 +26,7 @@ public partial class Businesses(AccountingContext context)
 
     private async void DeleteBusinessItem(BusinessEntity entity)
     {
+        using var context = await contextFactory.CreateDbContextAsync();
         context.Businesses.Remove(entity);
         await context.SaveChangesAsync();
         await UpdateBusinessEntities();

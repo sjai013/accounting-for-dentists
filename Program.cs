@@ -14,8 +14,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
-builder.Services.AddDbContext<AccountingContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("AccountingForDentists")!));
+builder.Services.AddDbContextFactory<AccountingContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("AccountingForDentists")!), ServiceLifetime.Scoped);
 
 builder.Services.AddScoped<TenantProvider>();
 

@@ -1,4 +1,5 @@
-@page "/Contracts/Edit/{entityGuidString}"
+@page "/Contracts/Edit/{EntityGuidString}"
+@using AccountingForDentists.Components.Pages.Contract.Shared
+@rendermode InteractiveServer
 
-<p>A: @entityGuidString</p>
-<p>B: @entity?.ContractualAgreementId</p>
+<ContractIncomeForm InitialModel="InitialModel" OnSubmit="Submit"></ContractIncomeForm>

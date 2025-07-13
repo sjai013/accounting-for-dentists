@@ -1,18 +1,15 @@
+using AccountingForDentists.Components.Pages.Contract.Shared;
 using AccountingForDentists.Infrastructure;
 using AccountingForDentists.Models;
 using Microsoft.AspNetCore.Components;
-using Microsoft.EntityFrameworkCore;
 
 namespace AccountingForDentists.Components.Pages.Contract;
 
 public partial class Add(AccountingContext context, TenantProvider tenantProvider, NavigationManager navigationManager)
 {
-    [SupplyParameterFromForm]
-    public ContractViewModel Model { get; set; } = new();
-
     public string[] RegisteredBusinessNames { get; set; } = [];
 
-    public async Task Submit()
+    public async Task Submit(ContractViewModel Model)
     {
         SalesEntity salesEntity = new()
         {
@@ -57,24 +54,5 @@ public partial class Add(AccountingContext context, TenantProvider tenantProvide
         var currentUri = navigationManager.Uri;
         navigationManager.NavigateTo(currentUri, true);
     }
-
-    protected override async Task OnInitializedAsync()
-    {
-        RegisteredBusinessNames = await context.Businesses.Select(x => x.Name).ToArrayAsync();
-    }
-
-    public class ContractViewModel
-    {
-        public decimal TotalSalesAmount { get; set; }
-        public decimal TotalSalesGSTAmount { get; set; }
-        public decimal TotalExpensesAmount { get; set; }
-        public decimal TotalExpensesGSTAmount { get; set; }
-        public decimal IncomeAmount { get => (TotalSalesAmount + TotalSalesGSTAmount) - (TotalExpensesAmount + TotalExpensesGSTAmount); }
-        public decimal IncomeGST { get => TotalExpensesGSTAmount - TotalSalesGSTAmount; }
-        public decimal TotalIncome { get => IncomeAmount + IncomeGST; }
-        public DateTime InvoiceDate { get; set; } = DateTime.Today;
-        public string ClinicName { get; set; } = string.Empty;
-    }
-
 
 }
