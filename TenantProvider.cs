@@ -4,7 +4,7 @@ public sealed class TenantProvider(IHttpContextAccessor httpContextAccessor)
 {
     public Guid GetTenantId()
     {
-        if (!Guid.TryParse(httpContextAccessor.HttpContext?.User.Claims.Where(x => x.Type == "tid").SingleOrDefault()?.Value, out var guid))
+        if (Guid.TryParse(httpContextAccessor.HttpContext?.User.Claims.Where(x => x.Type == "tid").SingleOrDefault()?.Value, out var guid))
         {
             return guid;
         }
@@ -13,7 +13,7 @@ public sealed class TenantProvider(IHttpContextAccessor httpContextAccessor)
 
     public Guid GetUserObjectId()
     {
-        if (!Guid.TryParse(httpContextAccessor.HttpContext?.User.Claims.Where(x => x.Type == "oid").SingleOrDefault()?.Value, out var guid))
+        if (Guid.TryParse(httpContextAccessor.HttpContext?.User.Claims.Where(x => x.Type == "oid").SingleOrDefault()?.Value, out var guid))
         {
             return guid;
         }

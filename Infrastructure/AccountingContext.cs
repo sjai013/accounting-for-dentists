@@ -11,7 +11,7 @@ public class AccountingContext(DbContextOptions options, TenantProvider tenantPr
     public DbSet<ExpensesEntity> Expenses { get; set; }
     public DbSet<BusinessEntity> Businesses { get; set; }
 
-    public DbSet<ServiceFacilitiesAgreementEntity> ServiceFacilitiesAgreements { get; set; }
+    public DbSet<ContractualAgreementsEntity> ContractIncome { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -21,19 +21,33 @@ public class AccountingContext(DbContextOptions options, TenantProvider tenantPr
 
         modelBuilder.Entity<SalesEntity>()
         .HasQueryFilter(x => x.TenantId == tenantId && x.UserId == userObjectId)
-        .HasKey(x => new { x.TenantId, x.UserId, x.SalesId });
+        .HasKey(x => new { x.SalesId });
+
+        modelBuilder.Entity<SalesEntity>()
+        .HasIndex(x => new { x.UserId, x.TenantId });
+
+
 
         modelBuilder.Entity<ExpensesEntity>()
         .HasQueryFilter(x => x.TenantId == tenantId && x.UserId == userObjectId)
-        .HasKey(x => new { x.TenantId, x.UserId, x.ExpensesId });
+        .HasKey(x => new { x.ExpensesId });
+
+        modelBuilder.Entity<ExpensesEntity>()
+        .HasIndex(x => new { x.TenantId, x.UserId });
 
         modelBuilder.Entity<BusinessEntity>()
         .HasQueryFilter(x => x.TenantId == tenantId && x.UserId == userObjectId)
          .HasKey(x => new { x.TenantId, x.UserId, x.Name });
 
-        modelBuilder.Entity<ServiceFacilitiesAgreementEntity>()
+        modelBuilder.Entity<BusinessEntity>()
+        .HasIndex(x => new { x.TenantId, x.UserId });
+
+        modelBuilder.Entity<ContractualAgreementsEntity>()
         .HasQueryFilter(x => x.TenantId == tenantId && x.UserId == userObjectId)
-         .HasKey(x => new { x.TenantId, x.UserId, x.ServiceFacilityAgreementId });
+         .HasKey(x => new { x.ContractualAgreementId });
+
+        modelBuilder.Entity<ContractualAgreementsEntity>()
+        .HasIndex(x => new { x.TenantId, x.UserId });
 
     }
 }

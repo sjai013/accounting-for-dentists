@@ -3,12 +3,12 @@ using AccountingForDentists.Models;
 using Microsoft.AspNetCore.Components;
 using Microsoft.EntityFrameworkCore;
 
-namespace AccountingForDentists.Components.Pages.SFA;
+namespace AccountingForDentists.Components.Pages.Contract;
 
 public partial class Add(AccountingContext context, TenantProvider tenantProvider, NavigationManager navigationManager)
 {
     [SupplyParameterFromForm]
-    public SFAViewModel Model { get; set; } = new();
+    public ContractViewModel Model { get; set; } = new();
 
     public string[] RegisteredBusinessNames { get; set; } = [];
 
@@ -36,22 +36,23 @@ public partial class Add(AccountingContext context, TenantProvider tenantProvide
             Date = DateOnly.FromDateTime(Model.InvoiceDate),
             BusinessName = Model.ClinicName,
             Description = "Services and Facilities Agreement Expenses",
-            Sales = salesEntity
         };
 
-        ServiceFacilitiesAgreementEntity serviceFacilitiesAgreementEntity = new()
+        ContractualAgreementsEntity contractIncomeEntity = new()
         {
             TenantId = tenantProvider.GetTenantId(),
             UserId = tenantProvider.GetUserObjectId(),
-            ServiceFacilityAgreementId = Guid.CreateVersion7(),
+            ContractualAgreementId = Guid.CreateVersion7(),
             BusinessName = Model.ClinicName,
             InvoiceDate = DateOnly.FromDateTime(Model.InvoiceDate),
             ExpensesEntity = expensesEntity,
             SalesEntity = salesEntity,
         };
-        context.ServiceFacilitiesAgreements.Add(serviceFacilitiesAgreementEntity);
+        context.ContractIncome.Add(contractIncomeEntity);
+
         context.Sales.Add(salesEntity);
         context.Expenses.Add(expensesEntity);
+
         await context.SaveChangesAsync();
         var currentUri = navigationManager.Uri;
         navigationManager.NavigateTo(currentUri, true);
@@ -62,7 +63,7 @@ public partial class Add(AccountingContext context, TenantProvider tenantProvide
         RegisteredBusinessNames = await context.Businesses.Select(x => x.Name).ToArrayAsync();
     }
 
-    public class SFAViewModel
+    public class ContractViewModel
     {
         public decimal TotalSalesAmount { get; set; }
         public decimal TotalSalesGSTAmount { get; set; }

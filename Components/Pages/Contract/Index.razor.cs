@@ -3,11 +3,11 @@ using AccountingForDentists.Models;
 using Microsoft.AspNetCore.Components;
 using Microsoft.EntityFrameworkCore;
 
-namespace AccountingForDentists.Components.Pages.SFA;
+namespace AccountingForDentists.Components.Pages.Contract;
 
 public partial class Index(AccountingContext context, NavigationManager navigationManager)
 {
-    List<ServiceFacilitiesAgreementEntity> SFAEntities = [];
+    List<ContractualAgreementsEntity> SFAEntities = [];
 
     [SupplyParameterFromQuery]
     public string? Business { get; set; }
@@ -19,7 +19,7 @@ public partial class Index(AccountingContext context, NavigationManager navigati
 
     protected override async Task OnParametersSetAsync()
     {
-        var sfaEntitiesQuery = context.ServiceFacilitiesAgreements
+        var sfaEntitiesQuery = context.ContractIncome
             .Include(x => x.SalesEntity)
             .Include(x => x.ExpensesEntity)
             .Where(x => x.BusinessName == Business || Business == null);
@@ -70,7 +70,7 @@ public partial class Index(AccountingContext context, NavigationManager navigati
         navigationManager.NavigateTo(newUri);
     }
 
-    async Task DeleteSFA(ServiceFacilitiesAgreementEntity item)
+    async Task DeleteSFA(ContractualAgreementsEntity item)
     {
         // Delete expense
         if (item.ExpensesEntity is not null) context.Expenses.Remove(item.ExpensesEntity);
@@ -79,7 +79,7 @@ public partial class Index(AccountingContext context, NavigationManager navigati
         if (item.SalesEntity is not null) context.Sales.Remove(item.SalesEntity);
 
         // Delete SFA record
-        context.ServiceFacilitiesAgreements.Remove(item);
+        context.ContractIncome.Remove(item);
 
         SFAEntities.Remove(item);
 

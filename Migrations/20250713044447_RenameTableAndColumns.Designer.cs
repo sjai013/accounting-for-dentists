@@ -4,6 +4,7 @@ using AccountingForDentists.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AccountingForDentists.Migrations
 {
     [DbContext(typeof(AccountingContext))]
-    partial class AccountingContextModelSnapshot : ModelSnapshot
+    [Migration("20250713044447_RenameTableAndColumns")]
+    partial class RenameTableAndColumns
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -99,6 +102,9 @@ namespace AccountingForDentists.Migrations
                     b.Property<decimal>("GST")
                         .HasColumnType("decimal(9,2)");
 
+                    b.Property<Guid?>("SalesId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<Guid>("TenantId")
                         .HasColumnType("uniqueidentifier");
 
@@ -106,6 +112,8 @@ namespace AccountingForDentists.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("ExpensesId");
+
+                    b.HasIndex("SalesId");
 
                     b.HasIndex("TenantId", "UserId");
 
@@ -161,6 +169,15 @@ namespace AccountingForDentists.Migrations
                     b.Navigation("ExpensesEntity");
 
                     b.Navigation("SalesEntity");
+                });
+
+            modelBuilder.Entity("AccountingForDentists.Models.ExpensesEntity", b =>
+                {
+                    b.HasOne("AccountingForDentists.Models.SalesEntity", "Sales")
+                        .WithMany()
+                        .HasForeignKey("SalesId");
+
+                    b.Navigation("Sales");
                 });
 #pragma warning restore 612, 618
         }

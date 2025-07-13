@@ -17,7 +17,6 @@ namespace AccountingForDentists.Models
         public decimal GST { get; set; }
         public decimal Total => Amount + GST;
         public string Description { get; set; } = string.Empty;
-        public SalesEntity? Sales { get; set; }
         public string BusinessName { get; set; } = string.Empty;
     }
 
