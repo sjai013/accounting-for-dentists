@@ -2,7 +2,6 @@
 using AccountingForDentists.Infrastructure;
 using Microsoft.AspNetCore.Components;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Internal;
 
 namespace AccountingForDentists.Components.Pages;
 

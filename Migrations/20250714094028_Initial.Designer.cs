@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AccountingForDentists.Migrations
 {
     [DbContext(typeof(AccountingContext))]
-    [Migration("20250712095703_MakePKRequired")]
-    partial class MakePKRequired
+    [Migration("20250714094028_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -27,106 +27,26 @@ namespace AccountingForDentists.Migrations
 
             modelBuilder.Entity("AccountingForDentists.Models.BusinessEntity", b =>
                 {
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(450)");
+
                     b.Property<Guid>("TenantId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("UserId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("Name")
-                        .HasColumnType("nvarchar(450)");
+                    b.HasKey("Name");
 
-                    b.HasKey("TenantId", "UserId", "Name");
+                    b.HasIndex("TenantId", "UserId");
 
                     b.ToTable("Businesses");
                 });
 
-            modelBuilder.Entity("AccountingForDentists.Models.ExpensesEntity", b =>
+            modelBuilder.Entity("AccountingForDentists.Models.ContractIncomeEntity", b =>
                 {
-                    b.Property<Guid>("TenantId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("ExpensesId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<decimal>("Amount")
-                        .HasColumnType("decimal(9,2)");
-
-                    b.Property<string>("BusinessName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateOnly>("Date")
-                        .HasColumnType("date");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<decimal>("GST")
-                        .HasColumnType("decimal(9,2)");
-
-                    b.Property<Guid?>("SalesId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("SalesTenantId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("SalesUserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("TenantId", "UserId", "ExpensesId");
-
-                    b.HasIndex("SalesTenantId", "SalesUserId", "SalesId");
-
-                    b.ToTable("Expenses");
-                });
-
-            modelBuilder.Entity("AccountingForDentists.Models.SalesEntity", b =>
-                {
-                    b.Property<Guid>("TenantId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("SalesId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<decimal>("Amount")
-                        .HasColumnType("decimal(9,2)");
-
-                    b.Property<string>("BusinessName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateOnly>("Date")
-                        .HasColumnType("date");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<decimal>("GST")
-                        .HasColumnType("decimal(9,2)");
-
-                    b.HasKey("TenantId", "UserId", "SalesId");
-
-                    b.ToTable("Sales");
-                });
-
-            modelBuilder.Entity("AccountingForDentists.Models.ServiceFacilitiesAgreementEntity", b =>
-                {
-                    b.Property<Guid>("TenantId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("ServiceFacilityAgreementId")
+                    b.Property<Guid>("ContractualAgreementId")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("BusinessName")
@@ -136,51 +56,110 @@ namespace AccountingForDentists.Migrations
                     b.Property<Guid?>("ExpensesEntityExpensesId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("ExpensesEntityTenantId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("ExpensesEntityUserId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<DateOnly>("InvoiceDate")
                         .HasColumnType("date");
 
                     b.Property<Guid?>("SalesEntitySalesId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("SalesEntityTenantId")
+                    b.Property<Guid>("TenantId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("SalesEntityUserId")
+                    b.Property<Guid>("UserId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.HasKey("TenantId", "UserId", "ServiceFacilityAgreementId");
+                    b.HasKey("ContractualAgreementId");
 
-                    b.HasIndex("ExpensesEntityTenantId", "ExpensesEntityUserId", "ExpensesEntityExpensesId");
+                    b.HasIndex("ExpensesEntityExpensesId");
 
-                    b.HasIndex("SalesEntityTenantId", "SalesEntityUserId", "SalesEntitySalesId");
+                    b.HasIndex("SalesEntitySalesId");
 
-                    b.ToTable("ServiceFacilitiesAgreements");
+                    b.HasIndex("TenantId", "UserId");
+
+                    b.ToTable("ContractIncome");
                 });
 
             modelBuilder.Entity("AccountingForDentists.Models.ExpensesEntity", b =>
                 {
-                    b.HasOne("AccountingForDentists.Models.SalesEntity", "Sales")
-                        .WithMany()
-                        .HasForeignKey("SalesTenantId", "SalesUserId", "SalesId");
+                    b.Property<Guid>("ExpensesId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
 
-                    b.Navigation("Sales");
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(9,2)");
+
+                    b.Property<string>("BusinessName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateOnly>("Date")
+                        .HasColumnType("date");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("GST")
+                        .HasColumnType("decimal(9,2)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("ExpensesId");
+
+                    b.HasIndex("TenantId", "UserId");
+
+                    b.ToTable("Expenses");
                 });
 
-            modelBuilder.Entity("AccountingForDentists.Models.ServiceFacilitiesAgreementEntity", b =>
+            modelBuilder.Entity("AccountingForDentists.Models.SalesEntity", b =>
+                {
+                    b.Property<Guid>("SalesId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(9,2)");
+
+                    b.Property<string>("BusinessName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateOnly>("Date")
+                        .HasColumnType("date");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("GST")
+                        .HasColumnType("decimal(9,2)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("SalesId");
+
+                    b.HasIndex("UserId", "TenantId");
+
+                    b.ToTable("Sales");
+                });
+
+            modelBuilder.Entity("AccountingForDentists.Models.ContractIncomeEntity", b =>
                 {
                     b.HasOne("AccountingForDentists.Models.ExpensesEntity", "ExpensesEntity")
                         .WithMany()
-                        .HasForeignKey("ExpensesEntityTenantId", "ExpensesEntityUserId", "ExpensesEntityExpensesId");
+                        .HasForeignKey("ExpensesEntityExpensesId");
 
                     b.HasOne("AccountingForDentists.Models.SalesEntity", "SalesEntity")
                         .WithMany()
-                        .HasForeignKey("SalesEntityTenantId", "SalesEntityUserId", "SalesEntitySalesId");
+                        .HasForeignKey("SalesEntitySalesId");
 
                     b.Navigation("ExpensesEntity");
 

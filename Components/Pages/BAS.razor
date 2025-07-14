@@ -1,7 +1,10 @@
 @page "/BAS"
 @using AccountingForDentists.Components.Pages.Shared
 @rendermode InteractiveServer
-<FYButtonGroup @bind-SelectedFY:get="FY" @bind-SelectedFY:set="ChangeFY"></FYButtonGroup>
+<div class="h3">
+    FY
+    <FYOptionList @bind-SelectedFY:get="FY" @bind-SelectedFY:set="ChangeFY" />
+</div>
 <hr />
 <h1 class="display-6">FY@(FY - 2000) BAS</h1>
 <table class="table table-sm table-striped-columns">

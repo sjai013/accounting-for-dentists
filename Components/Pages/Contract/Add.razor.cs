@@ -35,7 +35,7 @@ public partial class Add(AccountingContext context, TenantProvider tenantProvide
             Description = "Services and Facilities Agreement Expenses",
         };
 
-        ContractualAgreementsEntity contractIncomeEntity = new()
+        ContractIncomeEntity contractIncomeEntity = new()
         {
             TenantId = tenantProvider.GetTenantId(),
             UserId = tenantProvider.GetUserObjectId(),

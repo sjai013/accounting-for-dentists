@@ -1,3 +1,4 @@
+using AccountingForDentists.Components.Pages.Shared;
 using AccountingForDentists.Infrastructure;
 using AccountingForDentists.Models;
 using Microsoft.AspNetCore.Components;
@@ -7,7 +8,7 @@ namespace AccountingForDentists.Components.Pages.Contract;
 
 public partial class Index(AccountingContext context, NavigationManager navigationManager)
 {
-    List<ContractualAgreementsEntity> SFAEntities = [];
+    List<ContractIncomeEntity> SFAEntities = [];
 
     [SupplyParameterFromQuery]
     public string? Business { get; set; }
@@ -15,8 +16,12 @@ public partial class Index(AccountingContext context, NavigationManager navigati
     [SupplyParameterFromQuery]
     public int FY { get; set; }
 
-    List<string> Businesses { get; set; } = [];
+    List<OptionList<string>.Option> Businesses { get; set; } = [];
 
+    protected override void OnInitialized()
+    {
+        FY = DateTime.Now.AddMonths(6).Year;
+    }
     protected override async Task OnParametersSetAsync()
     {
         var sfaEntitiesQuery = context.ContractIncome
@@ -35,23 +40,22 @@ public partial class Index(AccountingContext context, NavigationManager navigati
             .OrderByDescending(x => x.InvoiceDate)
             .ToListAsync();
 
-        this.Businesses = await context.Businesses.Select(x => x.Name).OrderBy(x => x).ToListAsync();
+        var businessesEntities = await context.Businesses.OrderBy(x => x.Name).ToListAsync();
+
+        this.Businesses = [new OptionList<string>.Option() { Label = "", Value = null }, .. businessesEntities.Select(x => new OptionList<string>.Option() { Label = x.Name, Value = x.Name })];
     }
+
     private void SelectBusiness(string? selectedBusiness)
     {
         string newUri;
-        if (selectedBusiness == Business)
+        Dictionary<string, object?> uriParams = new()
         {
-            newUri = navigationManager.GetUriWithQueryParameter("Business", (string?)null);
-            Business = null;
+            ["Business"] = selectedBusiness,
+            ["FY"] = FY
+        };
 
-        }
-        else
-        {
-            newUri = navigationManager.GetUriWithQueryParameter("Business", selectedBusiness);
-            Business = selectedBusiness;
-
-        }
+        newUri = navigationManager.GetUriWithQueryParameters(uriParams);
+        Business = selectedBusiness;
         navigationManager.NavigateTo(newUri);
     }
 
@@ -70,7 +74,7 @@ public partial class Index(AccountingContext context, NavigationManager navigati
         navigationManager.NavigateTo(newUri);
     }
 
-    async Task DeleteSFA(ContractualAgreementsEntity item)
+    async Task DeleteSFA(ContractIncomeEntity item)
     {
         // Delete expense
         if (item.ExpensesEntity is not null) context.Expenses.Remove(item.ExpensesEntity);

@@ -24,23 +24,23 @@ namespace AccountingForDentists.Migrations
 
             modelBuilder.Entity("AccountingForDentists.Models.BusinessEntity", b =>
                 {
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(450)");
+
                     b.Property<Guid>("TenantId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("UserId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("Name")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("TenantId", "UserId", "Name");
+                    b.HasKey("Name");
 
                     b.HasIndex("TenantId", "UserId");
 
                     b.ToTable("Businesses");
                 });
 
-            modelBuilder.Entity("AccountingForDentists.Models.ContractualAgreementsEntity", b =>
+            modelBuilder.Entity("AccountingForDentists.Models.ContractIncomeEntity", b =>
                 {
                     b.Property<Guid>("ContractualAgreementId")
                         .ValueGeneratedOnAdd()
@@ -148,7 +148,7 @@ namespace AccountingForDentists.Migrations
                     b.ToTable("Sales");
                 });
 
-            modelBuilder.Entity("AccountingForDentists.Models.ContractualAgreementsEntity", b =>
+            modelBuilder.Entity("AccountingForDentists.Models.ContractIncomeEntity", b =>
                 {
                     b.HasOne("AccountingForDentists.Models.ExpensesEntity", "ExpensesEntity")
                         .WithMany()

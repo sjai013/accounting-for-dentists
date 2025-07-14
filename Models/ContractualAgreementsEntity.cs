@@ -1,6 +1,6 @@
 namespace AccountingForDentists.Models;
 
-public record ContractualAgreementsEntity
+public record ContractIncomeEntity
 {
     public required Guid TenantId { get; set; }
     public required Guid UserId { get; set; }

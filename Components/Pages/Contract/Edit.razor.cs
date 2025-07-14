@@ -11,7 +11,7 @@ public partial class Edit(IDbContextFactory<AccountingContext> contextFactory)
     [Parameter]
     public required string EntityGuidString { get; set; }
 
-    ContractualAgreementsEntity? entity { get; set; }
+    ContractIncomeEntity? entity { get; set; }
     ContractViewModel InitialModel { get; set; } = new();
 
     protected override async Task OnParametersSetAsync()
