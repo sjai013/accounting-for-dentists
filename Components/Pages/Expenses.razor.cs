@@ -11,7 +11,7 @@ public partial class Expenses(AccountingContext context)
 
     protected override async Task OnInitializedAsync()
     {
-        ExpenseEntities = await context.Expenses.OrderByDescending(x => x.Date).ToListAsync();
+        ExpenseEntities = await context.Expenses.OrderByDescending(x => x.DateReference).ToListAsync();
     }
 
     private async Task DeleteExpense(ExpensesEntity item)

@@ -11,6 +11,13 @@ public partial class Add(AccountingContext context, TenantProvider tenantProvide
 
     public async Task Submit(ContractViewModel Model)
     {
+        DateContainerEntity dateReference = new()
+        {
+            TenantId = tenantProvider.GetTenantId(),
+            UserId = tenantProvider.GetUserObjectId(),
+            DateContainerId = Guid.CreateVersion7(),
+            Date = DateOnly.FromDateTime(Model.InvoiceDate)
+        };
         SalesEntity salesEntity = new()
         {
             TenantId = tenantProvider.GetTenantId(),
@@ -18,7 +25,7 @@ public partial class Add(AccountingContext context, TenantProvider tenantProvide
             SalesId = Guid.CreateVersion7(),
             Amount = Model.TotalSalesAmount,
             GST = Model.TotalSalesGSTAmount,
-            Date = DateOnly.FromDateTime(Model.InvoiceDate),
+            DateReference = dateReference,
             BusinessName = Model.ClinicName,
             Description = "Services and Facilities Agreement Sales",
         };
@@ -30,7 +37,7 @@ public partial class Add(AccountingContext context, TenantProvider tenantProvide
             ExpensesId = Guid.CreateVersion7(),
             Amount = Model.TotalExpensesAmount,
             GST = Model.TotalExpensesGSTAmount,
-            Date = DateOnly.FromDateTime(Model.InvoiceDate),
+            DateReference = dateReference,
             BusinessName = Model.ClinicName,
             Description = "Services and Facilities Agreement Expenses",
         };
@@ -41,7 +48,7 @@ public partial class Add(AccountingContext context, TenantProvider tenantProvide
             UserId = tenantProvider.GetUserObjectId(),
             ContractualAgreementId = Guid.CreateVersion7(),
             BusinessName = Model.ClinicName,
-            InvoiceDate = DateOnly.FromDateTime(Model.InvoiceDate),
+            InvoiceDateReference = dateReference,
             ExpensesEntity = expensesEntity,
             SalesEntity = salesEntity,
         };
@@ -49,6 +56,7 @@ public partial class Add(AccountingContext context, TenantProvider tenantProvide
 
         context.Sales.Add(salesEntity);
         context.Expenses.Add(expensesEntity);
+        context.DateReferences.Add(dateReference);
 
         await context.SaveChangesAsync();
         var currentUri = navigationManager.Uri;

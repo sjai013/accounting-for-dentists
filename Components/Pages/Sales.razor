@@ -16,7 +16,7 @@
         @foreach (SalesEntity item in SalesEntities)
         {
             <tr>
-                <td class="align-content-center">@item.Date.ToString("dd/MM/yyyy")</td>
+                <td class="align-content-center">@item.DateReference.Date.ToString("dd/MM/yyyy")</td>
                 <td class="align-content-center">@item.BusinessName</td>
                 <td class="align-content-center">@item.Description</td>
                 <td class="align-content-center">@item.Amount.ToString("0.00")</td>

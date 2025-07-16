@@ -33,16 +33,16 @@ public partial class Index(AccountingContext context, NavigationManager navigati
         {
             DateOnly startDate = DateOnly.FromDateTime(new DateTime(FY - 1, 7, 1));
             DateOnly endDate = DateOnly.FromDateTime(new DateTime(FY, 7, 1));
-            sfaEntitiesQuery = sfaEntitiesQuery.Where(x => x.InvoiceDate >= startDate && x.InvoiceDate < endDate);
+            sfaEntitiesQuery = sfaEntitiesQuery.Where(x => x.InvoiceDateReference.Date >= startDate && x.InvoiceDateReference.Date < endDate);
         }
 
         this.SFAEntities = await sfaEntitiesQuery
-            .OrderByDescending(x => x.InvoiceDate)
+            .OrderByDescending(x => x.InvoiceDateReference)
             .ToListAsync();
 
         var businessesEntities = await context.Businesses.OrderBy(x => x.Name).ToListAsync();
 
-        this.Businesses = [new OptionList<string>.Option() { Label = "", Value = null }, .. businessesEntities.Select(x => new OptionList<string>.Option() { Label = x.Name, Value = x.Name })];
+        this.Businesses = [new OptionList<string>.Option() { Label = "All", Value = null }, .. businessesEntities.Select(x => new OptionList<string>.Option() { Label = x.Name, Value = x.Name })];
     }
 
     private void SelectBusiness(string? selectedBusiness)

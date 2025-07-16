@@ -32,7 +32,7 @@ public partial class Edit(IDbContextFactory<AccountingContext> contextFactory)
         InitialModel = new()
         {
             ClinicName = entity.BusinessName,
-            InvoiceDate = entity.InvoiceDate.ToDateTime(new()),
+            InvoiceDate = entity.InvoiceDateReference.Date.ToDateTime(new()),
             TotalExpensesAmount = entity.ExpensesEntity?.Amount ?? 0,
             TotalExpensesGSTAmount = entity.ExpensesEntity?.GST ?? 0,
             TotalSalesAmount = entity.SalesEntity?.Amount ?? 0,

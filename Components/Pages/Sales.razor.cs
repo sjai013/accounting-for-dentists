@@ -10,7 +10,7 @@ public partial class Sales(AccountingContext context)
 
     protected override async Task OnInitializedAsync()
     {
-        SalesEntities = await context.Sales.OrderByDescending(x => x.Date).ToListAsync();
+        SalesEntities = await context.Sales.OrderByDescending(x => x.DateReference).ToListAsync();
     }
 
     private async Task DeleteSale(SalesEntity item)

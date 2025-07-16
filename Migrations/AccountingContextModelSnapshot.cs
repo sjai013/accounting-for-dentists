@@ -53,8 +53,8 @@ namespace AccountingForDentists.Migrations
                     b.Property<Guid?>("ExpensesEntityExpensesId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateOnly>("InvoiceDate")
-                        .HasColumnType("date");
+                    b.Property<Guid>("InvoiceDateReferenceDateContainerId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid?>("SalesEntitySalesId")
                         .HasColumnType("uniqueidentifier");
@@ -69,11 +69,35 @@ namespace AccountingForDentists.Migrations
 
                     b.HasIndex("ExpensesEntityExpensesId");
 
+                    b.HasIndex("InvoiceDateReferenceDateContainerId");
+
                     b.HasIndex("SalesEntitySalesId");
 
                     b.HasIndex("TenantId", "UserId");
 
                     b.ToTable("ContractIncome");
+                });
+
+            modelBuilder.Entity("AccountingForDentists.Models.DateContainerEntity", b =>
+                {
+                    b.Property<Guid>("DateContainerId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateOnly>("Date")
+                        .HasColumnType("date");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("DateContainerId");
+
+                    b.HasIndex("TenantId", "UserId");
+
+                    b.ToTable("DateReferences");
                 });
 
             modelBuilder.Entity("AccountingForDentists.Models.ExpensesEntity", b =>
@@ -89,8 +113,8 @@ namespace AccountingForDentists.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateOnly>("Date")
-                        .HasColumnType("date");
+                    b.Property<Guid>("DateReferenceDateContainerId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Description")
                         .IsRequired()
@@ -106,6 +130,8 @@ namespace AccountingForDentists.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("ExpensesId");
+
+                    b.HasIndex("DateReferenceDateContainerId");
 
                     b.HasIndex("TenantId", "UserId");
 
@@ -125,8 +151,8 @@ namespace AccountingForDentists.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateOnly>("Date")
-                        .HasColumnType("date");
+                    b.Property<Guid>("DateReferenceDateContainerId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Description")
                         .IsRequired()
@@ -143,6 +169,8 @@ namespace AccountingForDentists.Migrations
 
                     b.HasKey("SalesId");
 
+                    b.HasIndex("DateReferenceDateContainerId");
+
                     b.HasIndex("UserId", "TenantId");
 
                     b.ToTable("Sales");
@@ -154,13 +182,43 @@ namespace AccountingForDentists.Migrations
                         .WithMany()
                         .HasForeignKey("ExpensesEntityExpensesId");
 
+                    b.HasOne("AccountingForDentists.Models.DateContainerEntity", "InvoiceDateReference")
+                        .WithMany()
+                        .HasForeignKey("InvoiceDateReferenceDateContainerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("AccountingForDentists.Models.SalesEntity", "SalesEntity")
                         .WithMany()
                         .HasForeignKey("SalesEntitySalesId");
 
                     b.Navigation("ExpensesEntity");
 
+                    b.Navigation("InvoiceDateReference");
+
                     b.Navigation("SalesEntity");
+                });
+
+            modelBuilder.Entity("AccountingForDentists.Models.ExpensesEntity", b =>
+                {
+                    b.HasOne("AccountingForDentists.Models.DateContainerEntity", "DateReference")
+                        .WithMany()
+                        .HasForeignKey("DateReferenceDateContainerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("DateReference");
+                });
+
+            modelBuilder.Entity("AccountingForDentists.Models.SalesEntity", b =>
+                {
+                    b.HasOne("AccountingForDentists.Models.DateContainerEntity", "DateReference")
+                        .WithMany()
+                        .HasForeignKey("DateReferenceDateContainerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("DateReference");
                 });
 #pragma warning restore 612, 618
         }
