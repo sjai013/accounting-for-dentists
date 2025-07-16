@@ -9,4 +9,5 @@ public record ContractIncomeEntity
     public string BusinessName { get; set; } = string.Empty;
     public ExpensesEntity? ExpensesEntity { get; set; }
     public SalesEntity? SalesEntity { get; set; }
+    public AttachmentEntity? Attachment { get; set; }
 }

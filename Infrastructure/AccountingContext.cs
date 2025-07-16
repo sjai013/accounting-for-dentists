@@ -11,6 +11,7 @@ public class AccountingContext(DbContextOptions options, TenantProvider tenantPr
     public DbSet<ContractIncomeEntity> ContractIncome { get; set; }
     public DbSet<DateContainerEntity> DateReferences { get; set; }
     public DbSet<BusinessEntity> Businesses { get; set; }
+    public DbSet<AttachmentEntity> Attachments { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -38,6 +39,9 @@ public class AccountingContext(DbContextOptions options, TenantProvider tenantPr
 
         modelBuilder.Entity<DateContainerEntity>()
         .HasQueryFilter(x => x.TenantId == tenantId && x.UserId == userObjectId);
+
+        modelBuilder.Entity<AttachmentEntity>()
+        .HasQueryFilter(x => x.TenantId == tenantId && x.UserId == userObjectId);
     }
 
     private void SetPrimaryKeys(ModelBuilder modelBuilder)
@@ -56,6 +60,9 @@ public class AccountingContext(DbContextOptions options, TenantProvider tenantPr
 
         modelBuilder.Entity<DateContainerEntity>()
             .HasKey(x => new { x.DateContainerId });
+
+        modelBuilder.Entity<AttachmentEntity>()
+            .HasKey(x => new { x.AttachmentId });
     }
 
     private void SetIndex(ModelBuilder modelBuilder)
@@ -73,6 +80,9 @@ public class AccountingContext(DbContextOptions options, TenantProvider tenantPr
         .HasIndex(x => new { x.TenantId, x.UserId });
 
         modelBuilder.Entity<DateContainerEntity>()
+        .HasIndex(x => new { x.TenantId, x.UserId });
+
+        modelBuilder.Entity<AttachmentEntity>()
         .HasIndex(x => new { x.TenantId, x.UserId });
     }
 
