@@ -8,9 +8,9 @@ public class AccountingContext(DbContextOptions options, TenantProvider tenantPr
 {
     public DbSet<SalesEntity> Sales { get; set; }
     public DbSet<ExpensesEntity> Expenses { get; set; }
-    public DbSet<BusinessEntity> Businesses { get; set; }
     public DbSet<ContractIncomeEntity> ContractIncome { get; set; }
     public DbSet<DateContainerEntity> DateReferences { get; set; }
+    public DbSet<BusinessEntity> Businesses { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

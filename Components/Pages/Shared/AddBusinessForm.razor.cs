@@ -1,10 +1,11 @@
 using AccountingForDentists.Infrastructure;
 using AccountingForDentists.Models;
 using Microsoft.AspNetCore.Components;
+using Microsoft.EntityFrameworkCore;
 
 namespace AccountingForDentists.Components.Pages.Shared;
 
-public partial class AddBusinessForm(AccountingContext context, TenantProvider tenantProvider)
+public partial class AddBusinessForm(IDbContextFactory<AccountingContext> contextFactory, TenantProvider tenantProvider)
 {
     [Parameter]
     public Action<BusinessEntity>? OnSaveSuccessful { get; set; } = null;
@@ -22,6 +23,8 @@ public partial class AddBusinessForm(AccountingContext context, TenantProvider t
 
         try
         {
+            using var context = await contextFactory.CreateDbContextAsync();
+
             context.Businesses.Add(businessEntity);
             await context.SaveChangesAsync();
             OnSaveSuccessful?.Invoke(businessEntity);

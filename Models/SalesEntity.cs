@@ -7,7 +7,7 @@ namespace AccountingForDentists.Models
         public required Guid TenantId { get; set; }
         public required Guid UserId { get; set; }
         public required Guid SalesId { get; set; }
-        public required DateContainerEntity? DateReference { get; set; }
+        public required DateContainerEntity DateReference { get; set; }
 
         [Column(TypeName = "decimal(9,2)")]
         public decimal Amount { get; set; }

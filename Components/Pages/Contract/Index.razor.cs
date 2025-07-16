@@ -2,11 +2,12 @@ using AccountingForDentists.Components.Pages.Shared;
 using AccountingForDentists.Infrastructure;
 using AccountingForDentists.Models;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
 
 namespace AccountingForDentists.Components.Pages.Contract;
 
-public partial class Index(AccountingContext context, NavigationManager navigationManager)
+public partial class Index(IDbContextFactory<AccountingContext> contextFactory, NavigationManager navigationManager)
 {
     List<ContractIncomeEntity> SFAEntities = [];
 
@@ -20,10 +21,13 @@ public partial class Index(AccountingContext context, NavigationManager navigati
 
     protected override void OnInitialized()
     {
-        FY = DateTime.Now.AddMonths(6).Year;
+        if (FY == default)
+            FY = DateTime.Now.AddMonths(6).Year;
     }
     protected override async Task OnParametersSetAsync()
     {
+        using var context = await contextFactory.CreateDbContextAsync();
+
         var sfaEntitiesQuery = context.ContractIncome
             .Include(x => x.SalesEntity)
             .Include(x => x.ExpensesEntity)
@@ -37,7 +41,8 @@ public partial class Index(AccountingContext context, NavigationManager navigati
         }
 
         this.SFAEntities = await sfaEntitiesQuery
-            .OrderByDescending(x => x.InvoiceDateReference)
+            .OrderByDescending(x => x.InvoiceDateReference.Date)
+            .Include(x => x.InvoiceDateReference)
             .ToListAsync();
 
         var businessesEntities = await context.Businesses.OrderBy(x => x.Name).ToListAsync();
@@ -76,6 +81,8 @@ public partial class Index(AccountingContext context, NavigationManager navigati
 
     async Task DeleteSFA(ContractIncomeEntity item)
     {
+        using var context = await contextFactory.CreateDbContextAsync();
+
         // Delete expense
         if (item.ExpensesEntity is not null) context.Expenses.Remove(item.ExpensesEntity);
 
@@ -88,5 +95,32 @@ public partial class Index(AccountingContext context, NavigationManager navigati
         SFAEntities.Remove(item);
 
         await context.SaveChangesAsync();
+    }
+
+    void EditContractIncome(ContractIncomeEntity item)
+    {
+        string currentBaseUri = navigationManager.ToAbsoluteUri(navigationManager.Uri).GetLeftPart(UriPartial.Path);
+        string baseEditUri = $"{currentBaseUri}/Edit/{item.ContractualAgreementId}";
+        Dictionary<string, string?> param = new() {
+            {"returnUri", navigationManager.Uri}
+        };
+
+        Uri editUri = new(QueryHelpers.AddQueryString(baseEditUri, param));
+
+        navigationManager.NavigateTo(editUri.ToString(), forceLoad: true);
+    }
+
+
+    void AddContractIncome(Microsoft.AspNetCore.Components.Web.MouseEventArgs args)
+    {
+        string currentBaseUri = navigationManager.ToAbsoluteUri(navigationManager.Uri).GetLeftPart(UriPartial.Path);
+        string baseAddUri = $"{currentBaseUri}/Add";
+        Dictionary<string, string?> param = new() {
+            {"returnUri", navigationManager.Uri}
+        };
+
+        Uri addUri = new(QueryHelpers.AddQueryString(baseAddUri, param));
+
+        navigationManager.NavigateTo(addUri.ToString(), forceLoad: true);
     }
 }

@@ -1,10 +1,11 @@
+using System.Threading.Tasks;
 using AccountingForDentists.Infrastructure;
 using Microsoft.AspNetCore.Components;
 using Microsoft.EntityFrameworkCore;
 
 namespace AccountingForDentists.Components.Pages.Contract.Shared;
 
-public partial class ContractIncomeForm(AccountingContext context)
+public partial class ContractIncomeForm(IDbContextFactory<AccountingContext> contextFactory)
 {
     [SupplyParameterFromForm]
     public ContractViewModel Model { get; set; } = new();
@@ -18,9 +19,13 @@ public partial class ContractIncomeForm(AccountingContext context)
     [Parameter]
     public required EventCallback<ContractViewModel> OnSubmit { get; set; }
 
+    [Parameter]
+    public required EventCallback OnCancel { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
+        using var context = await contextFactory.CreateDbContextAsync();
+
         RegisteredBusinessNames = await context.Businesses.Select(x => x.Name).ToArrayAsync();
     }
 
@@ -33,6 +38,10 @@ public partial class ContractIncomeForm(AccountingContext context)
     {
         await OnSubmit.InvokeAsync(Model);
 
+    }
+    private async Task Cancel(Microsoft.AspNetCore.Components.Web.MouseEventArgs args)
+    {
+        await OnCancel.InvokeAsync();
     }
 }
 

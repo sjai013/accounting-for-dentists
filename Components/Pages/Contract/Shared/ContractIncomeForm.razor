@@ -113,6 +113,9 @@
     </tbody>
 </table>
 
-<div>
-    <button class="w-100 btn btn-primary btn-block" form="contract-income-form" type="submit">Save</button>
+<div class="d-flex flex-row gap-2">
+    <button style="flex-basis: 100px;" class="flex-grow-1 btn btn-primary btn-block" form="contract-income-form"
+        type="submit">Save</button>
+    <button @onclick="Cancel" style="flex-basis: 50px;" class="btn btn-outline-danger btn-block"
+        form="contract-income-form" type="submit">Cancel</button>
 </div>

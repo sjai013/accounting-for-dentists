@@ -25,8 +25,8 @@ public partial class BAS(IDbContextFactory<AccountingContext> contextFactory, Na
         DateOnly startDate = DateOnly.FromDateTime(new DateTime(FY - 1, 7, 1));
         DateOnly endDate = DateOnly.FromDateTime(new DateTime(FY, 7, 1));
 
-        var expenses = await context.Expenses.Where(x => x.DateReference.Date >= startDate && x.DateReference.Date < endDate).ToListAsync();
-        var sales = await context.Sales.Where(x => x.DateReference.Date >= startDate && x.DateReference.Date < endDate).ToListAsync();
+        var expenses = await context.Expenses.Where(x => x.DateReference.Date >= startDate && x.DateReference.Date < endDate).Include(x => x.DateReference).ToListAsync();
+        var sales = await context.Sales.Where(x => x.DateReference.Date >= startDate && x.DateReference.Date < endDate).Include(x => x.DateReference).ToListAsync();
 
 
         var monthlyExpenses = expenses.ToLookup(e => new MonthModel { Year = e.DateReference.Date.Year, Month = e.DateReference.Date.Month }, e => e);

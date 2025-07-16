@@ -5,17 +5,20 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AccountingForDentists.Components.Pages;
 
-public partial class Expenses(AccountingContext context)
+public partial class Expenses(IDbContextFactory<AccountingContext> contextFactory)
 {
     public List<ExpensesEntity> ExpenseEntities { get; set; } = [];
 
     protected override async Task OnInitializedAsync()
     {
-        ExpenseEntities = await context.Expenses.OrderByDescending(x => x.DateReference).ToListAsync();
+        using var context = await contextFactory.CreateDbContextAsync();
+        ExpenseEntities = await context.Expenses.Include(x => x.DateReference).OrderByDescending(x => x.DateReference.Date).ToListAsync();
     }
 
     private async Task DeleteExpense(ExpensesEntity item)
     {
+        using var context = await contextFactory.CreateDbContextAsync();
+
         context.Expenses.Remove(item);
         await context.SaveChangesAsync();
         ExpenseEntities.Remove(item);

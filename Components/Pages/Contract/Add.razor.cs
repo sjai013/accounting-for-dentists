@@ -2,15 +2,20 @@ using AccountingForDentists.Components.Pages.Contract.Shared;
 using AccountingForDentists.Infrastructure;
 using AccountingForDentists.Models;
 using Microsoft.AspNetCore.Components;
+using Microsoft.EntityFrameworkCore;
 
 namespace AccountingForDentists.Components.Pages.Contract;
 
-public partial class Add(AccountingContext context, TenantProvider tenantProvider, NavigationManager navigationManager)
+public partial class Add(IDbContextFactory<AccountingContext> contextFactory, TenantProvider tenantProvider, NavigationManager navigationManager)
 {
     public string[] RegisteredBusinessNames { get; set; } = [];
 
+    [SupplyParameterFromQuery]
+    public string? ReturnUri { get; set; } = string.Empty;
+
     public async Task Submit(ContractViewModel Model)
     {
+        using var context = await contextFactory.CreateDbContextAsync();
         DateContainerEntity dateReference = new()
         {
             TenantId = tenantProvider.GetTenantId(),
@@ -59,8 +64,14 @@ public partial class Add(AccountingContext context, TenantProvider tenantProvide
         context.DateReferences.Add(dateReference);
 
         await context.SaveChangesAsync();
-        var currentUri = navigationManager.Uri;
-        navigationManager.NavigateTo(currentUri, true);
+        NavigateBack();
     }
 
+    public void NavigateBack()
+    {
+        if (!string.IsNullOrEmpty(ReturnUri))
+        {
+            navigationManager.NavigateTo(ReturnUri);
+        }
+    }
 }

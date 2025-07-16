@@ -22,9 +22,9 @@
             <tr>
                 <th scope="col">Date</th>
                 <th scope="col">Clinic</th>
-                <th scope="col">Sales</th>
-                <th scope="col">Expenses</th>
-                <th scope="col">Income</th>
+                <th class="text-end" scope="col">Sales</th>
+                <th class="text-end" scope="col">Expenses</th>
+                <th class="text-end" scope="col">Income</th>
                 <th scope="col"></th>
             </tr>
         </thead>
@@ -34,12 +34,18 @@
                 <tr>
                     <td class="align-content-center">@item.InvoiceDateReference.Date.ToString("dd/MM/yyyy")</td>
                     <td class="align-content-center">@item.BusinessName</td>
-                    <td class="align-content-center">$@((item.SalesEntity?.Total ?? 0).ToString("0.00"))</td>
-                    <td class="align-content-center">$@((item.ExpensesEntity?.Total ?? 0).ToString("0.00"))</td>
-                    <td class="align-content-center">$@(((item.SalesEntity?.Total ?? 0) - (item.ExpensesEntity?.Total ??
-                                            0)).ToString("0.00"))</td>
-                    <td class="align-content-center"><button class="btn" @onclick="() => DeleteSFA(item)"><i
-                                class="bi bi-x-lg"></i></button>
+                    <td class="text-end">$@((item.SalesEntity?.Total ?? 0).ToString("#,#0.00"))</td>
+                    <td class="text-end">$@((item.ExpensesEntity?.Total ?? 0).ToString("#,#0.00"))</td>
+                    <td class="text-end">$@((((item.SalesEntity?.Amount ?? 0) )-
+                                            (item.ExpensesEntity?.Total ??
+                                            0)).ToString("#,#0.00"))</td>
+                    <td class="text-end">
+                        <button class="btn" @onclick="() => DeleteSFA(item)">
+                            <i class="bi bi-x-lg"></i>
+                        </button>
+                        <button class="btn" @onclick="() => EditContractIncome(item)">
+                            <i class="bi bi-pencil"></i>
+                        </button>
                     </td>
                 </tr>
             }
@@ -48,11 +54,14 @@
             <tr>
                 <td></td>
                 <td></td>
-                <td>@SFAEntities.Sum(x => x.SalesEntity?.Total ?? 0).ToString("0")</td>
-                <td>@SFAEntities.Sum(x => x.ExpensesEntity?.Total ?? 0).ToString("0")</td>
-                <td>@SFAEntities.Sum(x => (x.SalesEntity?.Total ?? 0) - (x.ExpensesEntity?.Total ?? 0)).ToString("0")
+                <td class="text-end">$@SFAEntities.Sum(x => x.SalesEntity?.Total ?? 0).ToString("#,#0.00")</td>
+                <td class="text-end">$@SFAEntities.Sum(x => x.ExpensesEntity?.Amount ?? 0).ToString("#,#0.00")</td>
+                <td class="text-end">$@SFAEntities.Sum(x => (x.SalesEntity?.Amount ?? 0) - (x.ExpensesEntity?.Amount ??
+                                        0)).ToString("#,#0.00")
                 </td>
+                <td></td>
             </tr>
         </tfoot>
     </table>
 </div>
+<button class="btn btn-primary w-100" @onclick="AddContractIncome">Add New</button>
