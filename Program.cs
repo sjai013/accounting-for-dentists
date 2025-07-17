@@ -33,6 +33,8 @@ builder.Services.AddAuthentication(options =>
     oidcOptions.Scope.Add("email");
     //Configure series of OIDC options like flow, authority, etc 
     oidcOptions.Authority = "https://login.microsoftonline.com/common/v2.0/";
+
+    // These are stored as user secrets (dotnet user secrets)
     oidcOptions.ClientId = builder.Configuration["Authentication:Microsoft:ClientId"] ?? "";
     oidcOptions.ClientSecret = builder.Configuration["Authentication:Microsoft:ClientSecret"] ?? "";
     oidcOptions.ResponseType = OpenIdConnectResponseType.Code;
