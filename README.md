@@ -27,9 +27,9 @@ The web app allows dentists to record income and expenses and view detailed repo
 ### Docker
 The application can be run in a docker container using the sample `docker-compose.yml` file.
 
-    * Modify `docker-compose.yml` with the connection settings for your environment.
-    * Launch the image by running `docker compose up -d`
-    * Access the website in a browser at `https://localhost:8080` (assuming default port) 
+* Modify `docker-compose.yml` with the connection settings for your environment.
+* Launch the image by running `docker compose up -d`
+* Access the website in a browser at `https://localhost:8080` (assuming default port) 
 
 ## Help
 
