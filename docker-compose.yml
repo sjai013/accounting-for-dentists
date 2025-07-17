@@ -3,7 +3,7 @@ services:
     image: accounting-for-dentists
     build: .
     ports:
-      - "9000:8080"
+      - "8080:8080"
     environment:
       - Authentication:Microsoft:ClientSecret={CLIENT_SECRET}
       - Authentication:Microsoft:ClientId={CLIENT_ID}
