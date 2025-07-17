@@ -1,0 +1,37 @@
+@typeparam TElement
+
+<div class="btn-group" role="group" aria-label="button-group">
+    @foreach (TElement element in Items)
+    {
+        <button type="button" class="btn @(element!.Equals(Selected) ? "btn-dark" : "btn-outline-dark")" @onclick="(async () => await
+                                                                                                                     UpdateSelectedItem(element))">@(TextDelegate?.Invoke(element))</button>
+        }
+</div>
+
+@code {
+    [Parameter]
+    public List<TElement> Items { get; set; } = [];
+
+    [Parameter]
+    public required Func<TElement, string> TextDelegate { get; set; }
+
+    [Parameter]
+    public TElement? Selected { get; set; }
+
+    private async Task UpdateSelectedItem(TElement? element)
+    {
+        if (element?.Equals(Selected) ?? false)
+        {
+            Selected = default;
+        }
+        else
+        {
+            Selected = element;
+        }
+        await SelectedChanged.InvokeAsync(Selected);
+    }
+
+    [Parameter]
+    public EventCallback<TElement?> SelectedChanged { get; set; }
+
+}

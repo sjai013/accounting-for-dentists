@@ -1,0 +1,32 @@
+@page "/Expenses"
+@using AccountingForDentists.Models
+@rendermode InteractiveServer
+
+<h1 class="display-6">Expenses</h1>
+<table class="table">
+    <thead>
+        <th scope="col">Date</th>
+        <th scope="col">Business</th>
+        <th scope="col">Description</th>
+        <th scope="col">Amount</th>
+        <th scope="col">GST</th>
+        <th scope="col">Total</th>
+        <th scope="col"></th>
+    </thead>
+    <tbody>
+        @foreach (ExpensesEntity item in ExpenseEntities)
+        {
+            <tr>
+                <td class="align-content-center">@item.DateReference.Date.ToString("dd/MM/yyyy")</td>
+                <td class="align-content-center">@item.BusinessName</td>
+                <td class="align-content-center">@item.Description</td>
+                <td class="align-content-center">@item.Amount.ToString("0.00")</td>
+                <td class="align-content-center">@item.GST.ToString("0.00")</td>
+                <td class="align-content-center">@item.Total.ToString("0.00")</td>
+                <td class="align-content-center"><button class="btn" @onclick="() => DeleteExpense(item)"><i
+                            class="bi bi-x-lg"></i></button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

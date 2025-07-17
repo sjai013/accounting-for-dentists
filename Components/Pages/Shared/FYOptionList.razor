@@ -1,0 +1,28 @@
+<OptionList TElement="int" Items="FYList" @bind-Selected:get="SelectedFY" @bind-Selected:set="UpdateSelectedFY" />
+@code {
+    List<OptionList<int>.Option> FYList { get; set; } = [];
+
+    [Parameter]
+    public int SelectedFY { get; set; } = default;
+
+    [Parameter]
+    public EventCallback<int> SelectedFYChanged { get; set; }
+
+    protected override void OnInitialized()
+    {
+        const int numberOfFY = 10;
+        var maxFY = DateTime.Now.AddMonths(6).Year;
+        var minFY = maxFY - 10;
+        FYList = new List<OptionList<int>.Option>(numberOfFY);
+        for (int i = minFY; i <= maxFY; i++)
+        {
+            FYList.Add(new() { Label = i.ToString(), Value = i });
+        }
+    }
+
+    public async Task UpdateSelectedFY(int FY)
+    {
+        SelectedFY = FY;
+        await SelectedFYChanged.InvokeAsync(SelectedFY);
+    }
+}

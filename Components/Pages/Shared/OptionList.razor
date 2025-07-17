@@ -1,0 +1,44 @@
+@typeparam TElement
+<select class="ps-2" @onchange="OnSelectChange">
+    @for (var i = 0; i < Items.Count; i++)
+    {
+        Option element = Items[i];
+        <option selected="@(element.Value?.Equals(Selected))" value=@i>@(element.Label)</option>
+    }
+</select>
+
+@code {
+    [Parameter]
+    public List<Option> Items { get; set; } = [];
+
+    [Parameter]
+    public required Func<TElement?, string> TextDelegate { get; set; }
+
+    [Parameter]
+    public TElement? Selected { get; set; }
+
+    [Parameter]
+    public EventCallback<TElement?> SelectedChanged { get; set; }
+    private async Task OnSelectChange(ChangeEventArgs args)
+    {
+        if (!int.TryParse((string?)args.Value, out var index)) return;
+        if (index < 0 || index > Items.Count - 1) return;
+        Option element = Items[index];
+
+        if (element.Value is null)
+        {
+            Selected = default;
+        }
+        else
+        {
+            Selected = element.Value;
+        }
+        await SelectedChanged.InvokeAsync(Selected);
+    }
+
+    public record Option
+    {
+        public string Label { get; set; } = string.Empty;
+        public TElement? Value { get; set; }
+    }
+}

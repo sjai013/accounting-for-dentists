@@ -1,0 +1,52 @@
+@page "/BAS"
+@using AccountingForDentists.Components.Pages.Shared
+@rendermode InteractiveServer
+<div class="h3">
+    FY
+    <FYOptionList @bind-SelectedFY:get="FY" @bind-SelectedFY:set="ChangeFY" />
+</div>
+<hr />
+<h1 class="display-6">FY@(FY - 2000) BAS</h1>
+<div class="table-responsive">
+    <table class="table table-sm table-striped-columns table-striped">
+        <thead>
+            <tr>
+                <th class="text-center" scope="col">Month</th>
+                <th class="text-end" scope="col">Total Sales (G1)</th>
+                <th class="text-end" scope="col">GST-Free Sales(G3)</th>
+                <th class="text-end" scope="col">GST on Sales (1A)</th>
+                <th class="text-end" scope="col">Total Purchases</th>
+                <th class="text-end" scope="col">GST on Purchases (1B)</th>
+                <th class="text-end" scope="col">GST Claim</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in MonthlyBAS.OrderByDescending(x => x.Key.Year).ThenByDescending(x => x.Key.Month))
+            {
+                <tr>
+                    <td class="ps-2 pe-2 text-center text-nowrap">@(new DateTime(item.Key.Year, item.Key.Month,
+                                            1).ToString("yyyy-MM"))</td>
+                    <td class="ps-2 pe-2 text-end">$@((item.Value.Sales).ToString("N0"))</td>
+                    <td class="ps-2 pe-2 text-end">$@item.Value.GSTFreeSales.ToString("N0")</td>
+                    <td class="ps-2 pe-2 text-end">$@item.Value.SalesGST.ToString("N0")</td>
+                    <td class="ps-2 pe-2 text-end">$@item.Value.Expenses.ToString("N0")</td>
+                    <td class="ps-2 pe-2 text-end">$@item.Value.ExpenseGST.ToString("N0")</td>
+                    <td class="ps-2 pe-2 text-end">$@((item.Value.ExpenseGST - item.Value.SalesGST).ToString("N0"))</td>
+                </tr>
+            }
+        </tbody>
+        <tfoot class="table-group-divider fw-bold">
+            <tr>
+                <th scope="row">Totals</th>
+                <td class="ps-2 pe-2 text-end">$@MonthlyBAS.Sum(x => x.Value.Sales).ToString("N0")</td>
+                <td class="ps-2 pe-2 text-end">$@MonthlyBAS.Sum(x => x.Value.GSTFreeSales).ToString("N0")</td>
+                <td class="ps-2 pe-2 text-end">$@MonthlyBAS.Sum(x => x.Value.SalesGST).ToString("N0")</td>
+                <td class="ps-2 pe-2 text-end">$@MonthlyBAS.Sum(x => x.Value.Expenses).ToString("N0")</td>
+                <td class="ps-2 pe-2 text-end">$@MonthlyBAS.Sum(x => x.Value.ExpenseGST).ToString("N0")</td>
+                <td class="ps-2 pe-2 text-end">$@(MonthlyBAS.Sum(x => x.Value.ExpenseGST -
+                                        x.Value.SalesGST).ToString("N0"))
+                </td>
+            </tr>
+        </tfoot>
+    </table>
+</div>
