@@ -4,15 +4,24 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AccountingForDentists.Infrastructure;
 
-public class AccountingContext(DbContextOptions options, TenantProvider tenantProvider) : DbContext(options)
+public class AccountingContext : DbContext
 {
+    private readonly DbContextOptions options;
     public DbSet<SalesEntity> Sales { get; set; }
     public DbSet<ExpensesEntity> Expenses { get; set; }
     public DbSet<ContractIncomeEntity> ContractIncome { get; set; }
     public DbSet<DateContainerEntity> DateReferences { get; set; }
     public DbSet<BusinessEntity> Businesses { get; set; }
     public DbSet<AttachmentEntity> Attachments { get; set; }
+    private Guid tenantId;
+    private Guid userObjectId;
 
+    public AccountingContext(DbContextOptions options, TenantProvider tenantProvider) : base(options)
+    {
+        this.options = options;
+        this.tenantId = tenantProvider.GetTenantId();
+        this.userObjectId = tenantProvider.GetUserObjectId();
+    }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         SetQueryFilters(modelBuilder);
@@ -22,8 +31,6 @@ public class AccountingContext(DbContextOptions options, TenantProvider tenantPr
 
     private void SetQueryFilters(ModelBuilder modelBuilder)
     {
-        var tenantId = tenantProvider.GetTenantId();
-        var userObjectId = tenantProvider.GetUserObjectId();
 
         modelBuilder.Entity<SalesEntity>()
         .HasQueryFilter(x => x.TenantId == tenantId && x.UserId == userObjectId);
@@ -53,7 +60,7 @@ public class AccountingContext(DbContextOptions options, TenantProvider tenantPr
         .HasKey(x => new { x.ExpensesId });
 
         modelBuilder.Entity<BusinessEntity>()
-         .HasKey(x => new { x.Name });
+         .HasKey(x => new { x.TenantId, x.UserId, x.Name });
 
         modelBuilder.Entity<ContractIncomeEntity>()
          .HasKey(x => new { x.ContractualAgreementId });
