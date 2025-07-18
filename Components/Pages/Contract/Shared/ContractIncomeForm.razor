@@ -1,3 +1,6 @@
+@using System.Security.Cryptography
+@inject IJSRuntime JSRuntime
+
 <EditForm id="contract-income-form" Model=@Model OnSubmit="Submit" class="d-flex flex-column gap-3">
     <div class="d-flex flex-xl-row flex-column gap-2">
         <div class="border border-1 p-3 pt-1 rounded flex-grow-1">
@@ -103,8 +106,17 @@
         <div class="d-flex flex-row gap-2 border border-dark rounded p-2">
             <button type="button" @onclick="UnloadInvoiceFile" class="btn btn-sm btn-outline-danger"><i
                     class="bi bi-x-lg"></i></button>
+
+
             <div class="align-content-center">@((Model.File.Bytes.Length / 1024.0 / 1024.0).ToString("0.0")) MB</div>
-            <div class="align-content-center text-truncate">@Model.File.Name</div>
+            @if (Model.File.AttachmentId is not null)
+            {
+                <button type="button" @onclick="DownloadInvoiceFile" class="btn btn-link">@Model.File.Name</button>
+            }
+            else
+            {
+                <div class="align-content-center text-truncate">@Model.File.Name</div>
+            }
         </div>
     }
 
@@ -136,3 +148,35 @@
     <button @onclick="Cancel" style="flex-basis: 50px;" class="btn btn-outline-danger btn-block"
         form="contract-income-form" type="submit">Cancel</button>
 </div>
+
+@code {
+    private async Task LoadInvoiceFile(Microsoft.AspNetCore.Components.Forms.InputFileChangeEventArgs args)
+    {
+        InvoiceFileInputId = Guid.NewGuid().ToString();
+
+        using var stream = args.File.OpenReadStream(maxFileSize);
+        using var memoryStream = new MemoryStream();
+        using var md5 = MD5.Create();
+        await stream.CopyToAsync(memoryStream);
+        string md5hash = Convert.ToHexStringLower(md5.ComputeHash(memoryStream));
+        Model.File = new()
+        {
+            Bytes = memoryStream.ToArray(),
+            Name = args.File.Name,
+            MD5Hash = md5hash,
+            AttachmentId = null
+        };
+
+    }
+    private void UnloadInvoiceFile(Microsoft.AspNetCore.Components.Web.MouseEventArgs args)
+    {
+        Model.File = null;
+    }
+
+
+    private async Task DownloadInvoiceFile(Microsoft.AspNetCore.Components.Web.MouseEventArgs args)
+    {
+        if (Model.File is null) return;
+        await JSRuntime.InvokeVoidAsync("open", $"/portal/download/{Model.File.AttachmentId}", "");
+    }
+}

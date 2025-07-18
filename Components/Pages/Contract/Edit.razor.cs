@@ -11,7 +11,6 @@ public partial class Edit(IDbContextFactory<AccountingContext> contextFactory, N
 {
     [Parameter]
     public required string EntityGuidString { get; set; }
-    ContractIncomeEntity? entity { get; set; }
     ContractViewModel InitialModel { get; set; } = new();
 
     [SupplyParameterFromQuery]
@@ -41,7 +40,8 @@ public partial class Edit(IDbContextFactory<AccountingContext> contextFactory, N
                     File = x.Attachment != null ? new()
                     {
                         Bytes = x.Attachment.Bytes,
-                        Name = x.Attachment.Filename
+                        Name = x.Attachment.Filename,
+                        AttachmentId = x.Attachment.AttachmentId
                     } : null
                 })
                 .SingleOrDefaultAsync();
@@ -51,8 +51,21 @@ public partial class Edit(IDbContextFactory<AccountingContext> contextFactory, N
     }
     private async Task Submit(ContractViewModel args)
     {
-        if (entity is null) return;
+        if (!Guid.TryParse(EntityGuidString, out var entityGuid))
+        {
+            return;
+        }
+
         using var context = await contextFactory.CreateDbContextAsync();
+        var entity = await context.ContractIncome.Where(x => x.ContractualAgreementId == entityGuid)
+        .Include(x => x.SalesEntity)
+        .Include(x => x.ExpensesEntity)
+        .Include(x => x.InvoiceDateReference)
+        .Include(x => x.Attachment)
+        .SingleOrDefaultAsync();
+
+        if (entity is null) return;
+
         entity.BusinessName = args.ClinicName;
         entity.InvoiceDateReference.Date = DateOnly.FromDateTime(args.InvoiceDate);
         if (entity.SalesEntity is not null)
@@ -75,9 +88,23 @@ public partial class Edit(IDbContextFactory<AccountingContext> contextFactory, N
         {
             entity.Attachment = null;
         }
+        else if (args.File.AttachmentId is null)
+        {
+            AttachmentEntity attachment = new()
+            {
+                AttachmentId = Guid.CreateVersion7(),
+                Bytes = args.File.Bytes,
+                Filename = args.File.Name,
+                MD5Hash = args.File.MD5Hash,
+                SizeBytes = args.File.Bytes.Length,
+                TenantId = entity.TenantId,
+                UserId = entity.UserId
+            };
+            entity.Attachment = attachment;
+            context.Attachments.Add(attachment);
 
-        context.Entry(entity).State = EntityState.Modified;
-        context.Entry(entity.InvoiceDateReference).State = EntityState.Modified;
+        }
+
 
         await context.SaveChangesAsync();
         NavigateBack();

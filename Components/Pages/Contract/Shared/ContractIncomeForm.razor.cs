@@ -1,7 +1,7 @@
-using System.Security.Cryptography;
 using AccountingForDentists.Infrastructure;
 using Microsoft.AspNetCore.Components;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.JSInterop;
 
 namespace AccountingForDentists.Components.Pages.Contract.Shared;
 
@@ -45,28 +45,6 @@ public partial class ContractIncomeForm(IDbContextFactory<AccountingContext> con
     {
         await OnCancel.InvokeAsync();
     }
-
-    private async Task LoadInvoiceFile(Microsoft.AspNetCore.Components.Forms.InputFileChangeEventArgs args)
-    {
-        InvoiceFileInputId = Guid.NewGuid().ToString();
-
-        using var stream = args.File.OpenReadStream(maxFileSize);
-        using var memoryStream = new MemoryStream();
-        using var md5 = MD5.Create();
-        await stream.CopyToAsync(memoryStream);
-        string md5hash = Convert.ToHexStringLower(md5.ComputeHash(memoryStream));
-        Model.File = new()
-        {
-            Bytes = memoryStream.ToArray(),
-            Name = args.File.Name,
-            MD5Hash = md5hash
-        };
-
-    }
-    private void UnloadInvoiceFile(Microsoft.AspNetCore.Components.Web.MouseEventArgs args)
-    {
-        Model.File = null;
-    }
 }
 
 public class ContractViewModel
@@ -84,7 +62,8 @@ public class ContractViewModel
 
     public class FileModel
     {
-        public byte[] Bytes = [];
+        public required Guid? AttachmentId { get; set; }
+        public byte[] Bytes { get; set; } = [];
         public string Name = string.Empty;
         public string MD5Hash = string.Empty;
     }
