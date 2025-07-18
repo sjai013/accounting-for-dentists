@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 
@@ -17,6 +18,13 @@ builder.Services.AddRazorComponents()
 
 builder.Services.AddDbContextFactory<AccountingContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("AccountingForDentists")!), ServiceLifetime.Scoped);
+
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+    options.KnownNetworks.Clear();
+    options.KnownProxies.Clear();
+});
 
 builder.Services.AddScoped<TenantProvider>();
 
@@ -48,6 +56,7 @@ builder.Services.AddAuthorization();
 builder.Services.AddHttpContextAccessor();
 var app = builder.Build();
 
+app.UseForwardedHeaders();
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

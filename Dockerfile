@@ -8,7 +8,7 @@ WORKDIR /src
 COPY ["accounting-for-dentists.csproj", "."]
 COPY . .
 RUN dotnet restore "accounting-for-dentists.csproj"
-RUN dotnet build -v d "accounting-for-dentists.csproj" -c Release -o /app/build
+RUN dotnet build "accounting-for-dentists.csproj" -c Release -o /app/build
 
 FROM build AS publish
 RUN dotnet publish "accounting-for-dentists.csproj" -c Release -o /app/publish
