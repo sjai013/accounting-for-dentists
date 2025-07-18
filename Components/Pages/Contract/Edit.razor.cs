@@ -3,6 +3,7 @@ using AccountingForDentists.Infrastructure;
 using AccountingForDentists.Models;
 using Microsoft.AspNetCore.Components;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace AccountingForDentists.Components.Pages.Contract;
 
@@ -23,25 +24,30 @@ public partial class Edit(IDbContextFactory<AccountingContext> contextFactory, N
         }
 
         using var context = await contextFactory.CreateDbContextAsync();
-        entity = await context.ContractIncome.Where(x => x.ContractualAgreementId == entityGuid)
+        var model = await context.ContractIncome
+        .Where(x => x.ContractualAgreementId == entityGuid)
                 .Include(x => x.SalesEntity)
                 .Include(x => x.ExpensesEntity)
                 .Include(x => x.InvoiceDateReference)
+                .Include(x => x.Attachment)
+                .Select(x => new ContractViewModel()
+                {
+                    ClinicName = x.BusinessName,
+                    InvoiceDate = x.InvoiceDateReference.Date.ToDateTime(new()),
+                    TotalExpensesAmount = x.ExpensesEntity == null ? 0m : x.ExpensesEntity.Amount,
+                    TotalExpensesGSTAmount = x.ExpensesEntity == null ? 0m : x.ExpensesEntity.GST,
+                    TotalSalesAmount = x.SalesEntity == null ? 0m : x.SalesEntity.Amount,
+                    TotalSalesGSTAmount = x.SalesEntity == null ? 0m : x.SalesEntity.GST,
+                    File = x.Attachment != null ? new()
+                    {
+                        Bytes = x.Attachment.Bytes,
+                        Name = x.Attachment.Filename
+                    } : null
+                })
                 .SingleOrDefaultAsync();
 
-        if (entity is null) return;
-
-        InitialModel = new()
-        {
-            ClinicName = entity.BusinessName,
-            InvoiceDate = entity.InvoiceDateReference.Date.ToDateTime(new()),
-            TotalExpensesAmount = entity.ExpensesEntity?.Amount ?? 0,
-            TotalExpensesGSTAmount = entity.ExpensesEntity?.GST ?? 0,
-            TotalSalesAmount = entity.SalesEntity?.Amount ?? 0,
-            TotalSalesGSTAmount = entity.SalesEntity?.GST ?? 0,
-        };
-
-
+        if (model is null) return;
+        InitialModel = model;
     }
     private async Task Submit(ContractViewModel args)
     {
@@ -63,6 +69,11 @@ public partial class Edit(IDbContextFactory<AccountingContext> contextFactory, N
             entity.ExpensesEntity.GST = args.TotalExpensesGSTAmount;
             entity.ExpensesEntity.BusinessName = args.ClinicName;
             context.Entry(entity.ExpensesEntity).State = EntityState.Modified;
+        }
+
+        if (args.File is null)
+        {
+            entity.Attachment = null;
         }
 
         context.Entry(entity).State = EntityState.Modified;

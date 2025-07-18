@@ -90,6 +90,23 @@
             </div>
         </div>
     </div>
+    @if (Model.File is null)
+    {
+        <div class="mb-3">
+            <label for="invoice" class="form-label">Invoice (5MB max)</label>
+            <InputFile accept=".pdf" @key=@InvoiceFileInputId OnChange="LoadInvoiceFile" class="form-control"
+                id="invoice" />
+        </div>
+    }
+    else
+    {
+        <div class="d-flex flex-row gap-2 border border-dark rounded p-2">
+            <button type="button" @onclick="UnloadInvoiceFile" class="btn btn-sm btn-outline-danger"><i
+                    class="bi bi-x-lg"></i></button>
+            <div class="align-content-center">@((Model.File.Bytes.Length / 1024.0 / 1024.0).ToString("0.0")) MB</div>
+            <div class="align-content-center text-truncate">@Model.File.Name</div>
+        </div>
+    }
 
 </EditForm>
 
