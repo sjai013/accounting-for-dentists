@@ -1,12 +1,13 @@
-using System.Threading.Tasks;
 using AccountingForDentists.Infrastructure;
 using Microsoft.AspNetCore.Components;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.JSInterop;
 
 namespace AccountingForDentists.Components.Pages.Contract.Shared;
 
 public partial class ContractIncomeForm(IDbContextFactory<AccountingContext> contextFactory)
 {
+    const int maxFileSize = 5000000;
     [SupplyParameterFromForm]
     public ContractViewModel Model { get; set; } = new();
 
@@ -15,12 +16,13 @@ public partial class ContractIncomeForm(IDbContextFactory<AccountingContext> con
 
     string[] RegisteredBusinessNames { get; set; } = [];
 
-
     [Parameter]
     public required EventCallback<ContractViewModel> OnSubmit { get; set; }
 
     [Parameter]
     public required EventCallback OnCancel { get; set; }
+
+    private string InvoiceFileInputId { get; set; } = Guid.NewGuid().ToString();
 
     protected override async Task OnInitializedAsync()
     {
@@ -56,4 +58,13 @@ public class ContractViewModel
     public decimal TotalIncome { get => IncomeAmount + IncomeGST; }
     public DateTime InvoiceDate { get; set; } = DateTime.Today;
     public string ClinicName { get; set; } = string.Empty;
+    public FileModel? File { get; set; }
+
+    public class FileModel
+    {
+        public required Guid? AttachmentId { get; set; }
+        public byte[] Bytes { get; set; } = [];
+        public string Name = string.Empty;
+        public string MD5Hash = string.Empty;
+    }
 }

@@ -12,6 +12,19 @@ using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddRazorPages(options =>
+{
+    // Add a route prefix so all Razor Pages are under /portal
+    options.Conventions.AddFolderRouteModelConvention("/", model =>
+    {
+        foreach (var selector in model.Selectors)
+        {
+            selector.AttributeRouteModel.Template =
+                "portal/" + selector.AttributeRouteModel.Template;
+        }
+    });
+});
+
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
@@ -67,6 +80,7 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseRouting();
 
 app.UseAuthentication();
 app.UseAuthorization();
@@ -75,6 +89,9 @@ app.UseAntiforgery();
 app.MapStaticAssets();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
+
+app.MapRazorPages()
+.WithStaticAssets();
 
 app.MapGet("/account/logout", async context =>
 {

@@ -16,6 +16,21 @@ public partial class Add(IDbContextFactory<AccountingContext> contextFactory, Te
     public async Task Submit(ContractViewModel Model)
     {
         using var context = await contextFactory.CreateDbContextAsync();
+        AttachmentEntity? attachment = null;
+        if (Model.File is not null && Model.File.Bytes.Length > 0)
+        {
+            attachment = new()
+            {
+                AttachmentId = Guid.CreateVersion7(),
+                TenantId = tenantProvider.GetTenantId(),
+                UserId = tenantProvider.GetUserObjectId(),
+                Bytes = Model.File.Bytes,
+                SizeBytes = Model.File.Bytes.Length,
+                Filename = Model.File.Name,
+                MD5Hash = Model.File.MD5Hash
+            };
+        }
+
         DateContainerEntity dateReference = new()
         {
             TenantId = tenantProvider.GetTenantId(),
@@ -33,6 +48,7 @@ public partial class Add(IDbContextFactory<AccountingContext> contextFactory, Te
             DateReference = dateReference,
             BusinessName = Model.ClinicName,
             Description = "Services and Facilities Agreement Sales",
+            Attachment = attachment
         };
 
         ExpensesEntity expensesEntity = new()
@@ -45,6 +61,7 @@ public partial class Add(IDbContextFactory<AccountingContext> contextFactory, Te
             DateReference = dateReference,
             BusinessName = Model.ClinicName,
             Description = "Services and Facilities Agreement Expenses",
+            Attachment = attachment
         };
 
         ContractIncomeEntity contractIncomeEntity = new()
@@ -56,12 +73,14 @@ public partial class Add(IDbContextFactory<AccountingContext> contextFactory, Te
             InvoiceDateReference = dateReference,
             ExpensesEntity = expensesEntity,
             SalesEntity = salesEntity,
+            Attachment = attachment
         };
         context.ContractIncome.Add(contractIncomeEntity);
-
         context.Sales.Add(salesEntity);
         context.Expenses.Add(expensesEntity);
         context.DateReferences.Add(dateReference);
+
+        if (attachment is not null) context.Attachments.Add(attachment);
 
         await context.SaveChangesAsync();
         NavigateBack();
