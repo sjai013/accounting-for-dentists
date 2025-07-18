@@ -12,6 +12,11 @@ The web app allows dentists to record income and expenses and view detailed repo
 
 * .NET 9.0
 
+### Building Docker Image
+* Build the docker image by running
+```
+ docker build . -t ghcr.io/sjai013/accounting-for-dentists:{VERSION} --platform linux/amd64
+```
 ### Installing
 
 * Build the application using `dotnet build`
