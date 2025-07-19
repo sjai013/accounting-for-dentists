@@ -1,0 +1,23 @@
+<input value="@Value" @onchange="OnValueChange" class="@_class" list="@datalistId" id="@_id"
+    placeholder="Search for clinic...">
+<datalist id="@datalistId">
+    @ChildContent
+</datalist>
+
+@code {
+    [Parameter]
+    public string Value { get; set; } = null!;
+
+    [Parameter]
+    public EventCallback<string> ValueChanged { get; set; }
+
+    [Parameter]
+    public RenderFragment ChildContent { get; set; } = null!;
+
+
+    [Parameter(CaptureUnmatchedValues = true)]
+    public Dictionary<string, object> Attributes { get; set; } = [];
+    private string _class = string.Empty;
+    private string _id = string.Empty;
+    private string datalistId { get; set; } = string.Empty;
+}

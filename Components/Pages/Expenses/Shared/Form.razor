@@ -1,0 +1,69 @@
+@using AccountingForDentists.Components.Pages.Shared.InputDatalist
+@using AccountingForDentists.Components.Pages.Shared.InputFile
+
+<EditForm id="expenses-form" Model=@Model OnSubmit="Submit" class="d-flex flex-column gap-3">
+    <div class="d-flex flex-xl-row flex-column gap-2">
+        <div class="border border-1 p-3 pt-1 rounded flex-grow-1">
+            <h1 class="display-6 border-bottom d-flex flex-row justify-content-between">
+                <div>Details </div>
+            </h1>
+            <div class="d-flex gap-2 flex-xl-row flex-column gap-2">
+                <div class="">
+                    <label for="Model.InvoiceDate">Invoice Date:</label>
+                    <InputDate id="Model.InvoiceDate" class="form-control fs-3" @bind-Value="Model!.InvoiceDate" />
+                </div>
+                <div class="flex-grow-1">
+                    <label for="business_name">Entity:</label>
+                    <InputDatalist @bind-value="@Model.BusinessName" id="business_name" class="form-control fs-3">
+                        @foreach (string name in RegisteredBusinessNames)
+                        {
+                            <DatalistOption Value="@name"></DatalistOption>
+                        }
+                    </InputDatalist>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="border border-1 p-3 pt-1 rounded">
+        <h1 class="display-6 border-bottom d-flex flex-row justify-content-between">
+            <div>Expenses</div>
+            <div>$ @(
+                                (Model.Total).ToString("0.00")
+                                )</div>
+        </h1>
+        <div class="d-flex flex-row gap-2">
+            <div class="flex-grow-1">
+                <label for="Model.ServiceFee">Expenses:</label>
+                <div class="fs-3 input-group">
+                    <InputNumber class="form-control ps-5 fs-3" @bind-Value="Model!.Amount" />
+                    <span style="z-index: 3;" class="input-group-prepend">
+                        <div class=" ms-4 position-absolute top-50 start-0 translate-middle ">
+                            <span class="text-muted ">$</span>
+                        </div>
+                    </span>
+                </div>
+            </div>
+            <div class="flex-grow-1">
+                <label for="Model.ServiceFeeGST">GST:</label>
+                <div class="fs-3 input-group">
+                    <InputNumber class="form-control ps-5 fs-3" @bind-Value="Model!.GST" />
+                    <span style="z-index: 3;" class="input-group-prepend">
+                        <div class=" ms-4 position-absolute top-50 start-0 translate-middle ">
+                            <span class="text-muted ">$</span>
+                        </div>
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <FileSelector IsFileUploaded="Model.AttachmentId is not null" Value="Model.File"
+        OnFileDownloadRequest="FileDownload" OnFileRemoved="() => Model.File = null" OnFileSelected="SelectFile">
+    </FileSelector>
+</EditForm>
+
+<div class="d-flex flex-row gap-2">
+    <button style="flex-basis: 100px;" class="flex-grow-1 btn btn-primary btn-block" form="expenses-form"
+        type="submit">Save</button>
+    <button @onclick="Cancel" style="flex-basis: 50px;" class="btn btn-outline-danger btn-block"
+        form="contract-income-form" type="button">Cancel</button>
+</div>
