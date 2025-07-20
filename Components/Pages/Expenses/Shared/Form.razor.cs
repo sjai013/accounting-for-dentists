@@ -15,9 +15,10 @@ public partial class Form(IDbContextFactory<AccountingContext> contextFactory, I
     public ExpensesFormViewModel? InitialModel { get; set; }
     public ExpensesFormViewModel Model { get; set; } = new();
 
+    public FileSelectedViewModel? SelectedFile { get; set; }
 
     [Parameter]
-    public required EventCallback<ExpensesFormViewModel> OnSubmit { get; set; }
+    public required EventCallback<ExpensesFormSubmitViewModel> OnSubmit { get; set; }
 
     [Parameter]
     public required EventCallback OnCancel { get; set; }
@@ -30,21 +31,33 @@ public partial class Form(IDbContextFactory<AccountingContext> contextFactory, I
 
     protected override void OnParametersSet()
     {
-        Model = InitialModel ?? Model;
+        Model = InitialModel ?? new() { };
     }
     private Task Submit(Microsoft.AspNetCore.Components.Forms.EditContext args)
     {
-        return OnSubmit.InvokeAsync(Model);
+        return OnSubmit.InvokeAsync(new()
+        {
+            Amount = Model.Amount,
+            AttachmentId = Model.AttachmentId,
+            BusinessName = Model.BusinessName,
+            Description = Model.Description,
+            File = SelectedFile is not null ? new()
+            {
+                Bytes = SelectedFile.Bytes,
+                Filename = SelectedFile.Filename
+            } : null,
+            GST = Model.GST,
+            InvoiceDate = Model.InvoiceDate
+        });
     }
     private async Task FileDownload(FileViewModel args)
     {
         if (Model.File is null) return;
-        Model.AttachmentId = null;
         await JSRuntime.InvokeVoidAsync("open", $"/portal/download/{Model.AttachmentId}", "");
     }
-    private Task SelectFile(FileViewModel args)
+    private Task SelectFile(FileSelectedViewModel args)
     {
-        Model.File = args;
+        SelectedFile = args;
         Model.AttachmentId = null;
         return Task.CompletedTask;
     }
@@ -64,4 +77,16 @@ public class ExpensesFormViewModel
     public string BusinessName { get; set; } = string.Empty;
     public Guid? AttachmentId { get; set; }
     public FileViewModel? File { get; set; }
+}
+
+public class ExpensesFormSubmitViewModel
+{
+    public DateOnly InvoiceDate { get; set; } = DateOnly.FromDateTime(DateTime.Today);
+    public decimal Amount { get; set; }
+    public decimal GST { get; set; }
+    public decimal Total => Amount + GST;
+    public string Description { get; set; } = string.Empty;
+    public string BusinessName { get; set; } = string.Empty;
+    public Guid? AttachmentId { get; set; }
+    public FileSelectedViewModel? File { get; set; }
 }

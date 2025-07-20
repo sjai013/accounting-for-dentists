@@ -5,8 +5,6 @@ namespace AccountingForDentists.Models
     public record ExpensesEntity
     {
 
-        public required Guid TenantId { get; set; }
-        public required Guid UserId { get; set; }
         public required Guid ExpensesId { get; set; }
         public required DateContainerEntity DateReference { get; set; }
 

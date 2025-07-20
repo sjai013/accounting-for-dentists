@@ -21,11 +21,11 @@
     [SupplyParameterFromForm]
     private BusinessEntityModel? Model { get; set; }
 
-    protected override void OnInitialized() => Model ??= new();
+    protected override void OnInitialized() => Model ??= new() { BusinessName = string.Empty };
 
     public class BusinessEntityModel
     {
-        public string BusinessName { get; set; }
+        public required string BusinessName { get; set; }
     }
 
 }

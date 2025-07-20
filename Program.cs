@@ -19,7 +19,7 @@ builder.Services.AddRazorPages(options =>
     {
         foreach (var selector in model.Selectors)
         {
-            selector.AttributeRouteModel.Template =
+            selector.AttributeRouteModel!.Template =
                 "portal/" + selector.AttributeRouteModel.Template;
         }
     });
@@ -29,8 +29,25 @@ builder.Services.AddRazorPages(options =>
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
-builder.Services.AddDbContextFactory<AccountingContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("AccountingForDentists")!), ServiceLifetime.Scoped);
+builder.Services.AddDbContextFactory<AccountingContext>((sp, options) =>
+{
+    var tenantProvider = sp.GetRequiredService<TenantProvider>();
+    Guid tenantId = tenantProvider.GetTenantId();
+    Guid userId = tenantProvider.GetUserObjectId();
+    string sub = tenantProvider.GetSubject();
+    if (tenantId != default && userId != default)
+    {
+        tenantProvider.InitialiseTenant();
+        string dbPath = $"{tenantProvider.DatabasePath()}";
+        options.UseSqlite($"Data Source={dbPath};Password={sub}");
+    }
+    else
+    {
+        string dbPath = $"lost.db";
+        options.UseSqlite($"Data Source={dbPath}");
+    }
+}, ServiceLifetime.Scoped);
+
 
 builder.Services.Configure<ForwardedHeadersOptions>(options =>
 {
@@ -102,9 +119,10 @@ app.MapGet("/account/logout", async context =>
 
 });
 
-app.MapGet("/account/login", [Authorize] async (AccountingContext context) =>
+app.MapGet("/account/login", [Authorize] async (IDbContextFactory<AccountingContext> contextFactory) =>
 {
-    await context.Database.EnsureCreatedAsync();
+    using var context = await contextFactory.CreateDbContextAsync();
+    await context.Database.MigrateAsync();
     return Results.Redirect("/");
 });
 

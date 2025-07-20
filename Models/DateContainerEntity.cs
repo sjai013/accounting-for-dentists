@@ -7,8 +7,6 @@ namespace AccountingForDentists.Models;
 /// </summary>
 public record DateContainerEntity
 {
-    public required Guid TenantId { get; set; }
-    public required Guid UserId { get; set; }
     public required Guid DateContainerId { get; set; }
     public DateOnly Date { get; set; }
 }
