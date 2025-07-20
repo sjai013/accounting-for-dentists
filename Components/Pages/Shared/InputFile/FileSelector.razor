@@ -1,0 +1,26 @@
+<div class="mb-3">
+
+@if (Value is null)
+{
+        <label for="invoice" class="form-label">Invoice (5MB max)</label>
+        <InputFile accept=".pdf" @key=@FileInputKey OnChange="FileSelected" class="form-control" id="@FormId" />
+}
+else
+{
+    <div class="d-flex flex-row gap-2 border border-dark rounded p-2">
+        <button type="button" @onclick="FileRemoved" class="btn btn-sm btn-outline-danger"><i
+                class="bi bi-x-lg"></i></button>
+
+
+        <div class="align-content-center">@((Value.Bytes.Length / 1024.0 / 1024.0).ToString("0.0")) MB</div>
+        @if (IsFileUploaded)
+        {
+            <button type="button" @onclick="FileDownload" class="btn btn-link">@Value.Filename</button>
+        }
+        else
+        {
+            <div class="align-content-center text-truncate">@Value.Filename</div>
+        }
+    </div>
+}
+</div>
