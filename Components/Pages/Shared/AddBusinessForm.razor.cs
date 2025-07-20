@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AccountingForDentists.Components.Pages.Shared;
 
-public partial class AddBusinessForm(IDbContextFactory<AccountingContext> contextFactory, TenantProvider tenantProvider)
+public partial class AddBusinessForm(IDbContextFactory<AccountingContext> contextFactory)
 {
     [Parameter]
     public Action<BusinessEntity>? OnSaveSuccessful { get; set; } = null;
@@ -16,8 +16,6 @@ public partial class AddBusinessForm(IDbContextFactory<AccountingContext> contex
 
         var businessEntity = new BusinessEntity()
         {
-            TenantId = tenantProvider.GetTenantId(),
-            UserId = tenantProvider.GetUserObjectId(),
             Name = Model.BusinessName,
         };
 
@@ -35,7 +33,7 @@ public partial class AddBusinessForm(IDbContextFactory<AccountingContext> contex
         }
         finally
         {
-            Model = new();
+            Model = new() { BusinessName = string.Empty };
         }
     }
 }

@@ -3,7 +3,6 @@ using System;
 using AccountingForDentists.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -16,60 +15,36 @@ namespace AccountingForDentists.Migrations
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.7")
-                .HasAnnotation("Relational:MaxIdentifierLength", 128);
-
-            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+            modelBuilder.HasAnnotation("ProductVersion", "9.0.7");
 
             modelBuilder.Entity("AccountingForDentists.Models.AttachmentEntity", b =>
                 {
                     b.Property<Guid>("AttachmentId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("TEXT");
 
-                    b.Property<byte[]>("Bytes")
+                    b.Property<string>("CustomerFilename")
                         .IsRequired()
-                        .HasColumnType("varbinary(max)");
-
-                    b.Property<string>("Filename")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("MD5Hash")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("TEXT");
 
                     b.Property<int>("SizeBytes")
-                        .HasColumnType("int");
-
-                    b.Property<Guid>("TenantId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("AttachmentId");
-
-                    b.HasIndex("TenantId", "UserId");
 
                     b.ToTable("Attachments");
                 });
 
             modelBuilder.Entity("AccountingForDentists.Models.BusinessEntity", b =>
                 {
-                    b.Property<Guid>("TenantId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<string>("Name")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("TEXT");
 
-                    b.HasKey("TenantId", "UserId", "Name");
-
-                    b.HasIndex("TenantId", "UserId");
+                    b.HasKey("Name");
 
                     b.ToTable("Businesses");
                 });
@@ -78,29 +53,23 @@ namespace AccountingForDentists.Migrations
                 {
                     b.Property<Guid>("ContractualAgreementId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("TEXT");
 
                     b.Property<Guid?>("AttachmentId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("BusinessName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("TEXT");
 
                     b.Property<Guid?>("ExpensesEntityExpensesId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("TEXT");
 
                     b.Property<Guid>("InvoiceDateReferenceDateContainerId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("TEXT");
 
                     b.Property<Guid?>("SalesEntitySalesId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("TenantId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("TEXT");
 
                     b.HasKey("ContractualAgreementId");
 
@@ -112,8 +81,6 @@ namespace AccountingForDentists.Migrations
 
                     b.HasIndex("SalesEntitySalesId");
 
-                    b.HasIndex("TenantId", "UserId");
-
                     b.ToTable("ContractIncome");
                 });
 
@@ -121,20 +88,12 @@ namespace AccountingForDentists.Migrations
                 {
                     b.Property<Guid>("DateContainerId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("TEXT");
 
                     b.Property<DateOnly>("Date")
-                        .HasColumnType("date");
-
-                    b.Property<Guid>("TenantId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("TEXT");
 
                     b.HasKey("DateContainerId");
-
-                    b.HasIndex("TenantId", "UserId");
 
                     b.ToTable("DateReferences");
                 });
@@ -143,41 +102,33 @@ namespace AccountingForDentists.Migrations
                 {
                     b.Property<Guid>("ExpensesId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("TEXT");
 
                     b.Property<decimal>("Amount")
                         .HasColumnType("decimal(9,2)");
 
                     b.Property<Guid?>("AttachmentId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("BusinessName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("TEXT");
 
                     b.Property<Guid>("DateReferenceDateContainerId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Description")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("TEXT");
 
                     b.Property<decimal>("GST")
                         .HasColumnType("decimal(9,2)");
-
-                    b.Property<Guid>("TenantId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("ExpensesId");
 
                     b.HasIndex("AttachmentId");
 
                     b.HasIndex("DateReferenceDateContainerId");
-
-                    b.HasIndex("TenantId", "UserId");
 
                     b.ToTable("Expenses");
                 });
@@ -186,41 +137,33 @@ namespace AccountingForDentists.Migrations
                 {
                     b.Property<Guid>("SalesId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("TEXT");
 
                     b.Property<decimal>("Amount")
                         .HasColumnType("decimal(9,2)");
 
                     b.Property<Guid?>("AttachmentId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("BusinessName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("TEXT");
 
                     b.Property<Guid>("DateReferenceDateContainerId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Description")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("TEXT");
 
                     b.Property<decimal>("GST")
                         .HasColumnType("decimal(9,2)");
-
-                    b.Property<Guid>("TenantId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("SalesId");
 
                     b.HasIndex("AttachmentId");
 
                     b.HasIndex("DateReferenceDateContainerId");
-
-                    b.HasIndex("UserId", "TenantId");
 
                     b.ToTable("Sales");
                 });

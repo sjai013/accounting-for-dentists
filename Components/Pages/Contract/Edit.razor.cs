@@ -1,3 +1,4 @@
+using System.Security.Cryptography;
 using AccountingForDentists.Components.Pages.Contract.Shared;
 using AccountingForDentists.Infrastructure;
 using AccountingForDentists.Models;
@@ -7,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace AccountingForDentists.Components.Pages.Contract;
 
-public partial class Edit(IDbContextFactory<AccountingContext> contextFactory, NavigationManager navigationManager)
+public partial class Edit(IDbContextFactory<AccountingContext> contextFactory, TenantProvider tenantProvider, NavigationManager navigationManager)
 {
     [Parameter]
     public required string EntityGuidString { get; set; }
@@ -15,6 +16,8 @@ public partial class Edit(IDbContextFactory<AccountingContext> contextFactory, N
 
     [SupplyParameterFromQuery]
     public string? ReturnUri { get; set; } = string.Empty;
+
+    public string? Error { get; set; }
     protected override async Task OnParametersSetAsync()
     {
         if (!Guid.TryParse(EntityGuidString, out var entityGuid))
@@ -37,11 +40,11 @@ public partial class Edit(IDbContextFactory<AccountingContext> contextFactory, N
                     TotalExpensesGSTAmount = x.ExpensesEntity == null ? 0m : x.ExpensesEntity.GST,
                     TotalSalesAmount = x.SalesEntity == null ? 0m : x.SalesEntity.Amount,
                     TotalSalesGSTAmount = x.SalesEntity == null ? 0m : x.SalesEntity.GST,
+                    AttachmentId = x.Attachment != null ? x.Attachment.AttachmentId : null,
                     File = x.Attachment != null ? new()
                     {
-                        Bytes = x.Attachment.Bytes,
-                        Name = x.Attachment.Filename,
-                        AttachmentId = x.Attachment.AttachmentId
+                        Filename = x.Attachment.CustomerFilename,
+                        Size = x.Attachment.SizeBytes
                     } : null
                 })
                 .SingleOrDefaultAsync();
@@ -49,7 +52,7 @@ public partial class Edit(IDbContextFactory<AccountingContext> contextFactory, N
         if (model is null) return;
         InitialModel = model;
     }
-    private async Task Submit(ContractViewModel args)
+    private async Task Submit(ContractSubmitViewModel args)
     {
         if (!Guid.TryParse(EntityGuidString, out var entityGuid))
         {
@@ -65,49 +68,60 @@ public partial class Edit(IDbContextFactory<AccountingContext> contextFactory, N
         .SingleOrDefaultAsync();
 
         if (entity is null) return;
+        try
+        {
 
-        entity.BusinessName = args.ClinicName;
-        entity.InvoiceDateReference.Date = DateOnly.FromDateTime(args.InvoiceDate);
-        if (entity.SalesEntity is not null)
-        {
-            entity.SalesEntity.Amount = args.TotalSalesAmount;
-            entity.SalesEntity.GST = args.TotalSalesGSTAmount;
-            entity.SalesEntity.BusinessName = args.ClinicName;
-            context.Entry(entity.SalesEntity).State = EntityState.Modified;
-        }
-
-        if (entity.ExpensesEntity is not null)
-        {
-            entity.ExpensesEntity.Amount = args.TotalExpensesAmount;
-            entity.ExpensesEntity.GST = args.TotalExpensesGSTAmount;
-            entity.ExpensesEntity.BusinessName = args.ClinicName;
-            context.Entry(entity.ExpensesEntity).State = EntityState.Modified;
-        }
-
-        if (args.File is null)
-        {
-            entity.Attachment = null;
-        }
-        else if (args.File.AttachmentId is null)
-        {
-            AttachmentEntity attachment = new()
+            using var transaction = await context.Database.BeginTransactionAsync();
+            if (args.File is null)
             {
-                AttachmentId = Guid.CreateVersion7(),
-                Bytes = args.File.Bytes,
-                Filename = args.File.Name,
-                MD5Hash = args.File.MD5Hash,
-                SizeBytes = args.File.Bytes.Length,
-                TenantId = entity.TenantId,
-                UserId = entity.UserId
-            };
-            entity.Attachment = attachment;
-            context.Attachments.Add(attachment);
+                entity.Attachment = null;
+            }
+            else if (args.AttachmentId is null)
+            {
+                string md5hash = Convert.ToHexStringLower(MD5.HashData(args.File.Bytes));
+
+                AttachmentEntity attachment = new()
+                {
+                    AttachmentId = Guid.CreateVersion7(),
+                    CustomerFilename = args.File.Filename,
+                    MD5Hash = md5hash,
+                    SizeBytes = args.File.Bytes.Length,
+                };
+                entity.Attachment = attachment;
+                context.Attachments.Add(attachment);
+
+                var attachmentPath = attachment.GetPath(tenantProvider.AttachmentsDirectory());
+                using var fs = new FileStream(attachmentPath, FileMode.Create, FileAccess.Write);
+                fs.Write(args.File.Bytes);
+            }
+
+            entity.BusinessName = args.ClinicName;
+            entity.InvoiceDateReference.Date = DateOnly.FromDateTime(args.InvoiceDate);
+            if (entity.SalesEntity is not null)
+            {
+                entity.SalesEntity.Amount = args.TotalSalesAmount;
+                entity.SalesEntity.GST = args.TotalSalesGSTAmount;
+                entity.SalesEntity.BusinessName = args.ClinicName;
+                context.Entry(entity.SalesEntity).State = EntityState.Modified;
+            }
+
+            if (entity.ExpensesEntity is not null)
+            {
+                entity.ExpensesEntity.Amount = args.TotalExpensesAmount;
+                entity.ExpensesEntity.GST = args.TotalExpensesGSTAmount;
+                entity.ExpensesEntity.BusinessName = args.ClinicName;
+                context.Entry(entity.ExpensesEntity).State = EntityState.Modified;
+            }
+
+            await context.SaveChangesAsync();
+            await transaction.CommitAsync();
+            NavigateBack();
+        }
+        catch (Exception e)
+        {
+            Error = e.Message;
 
         }
-
-
-        await context.SaveChangesAsync();
-        NavigateBack();
 
     }
 

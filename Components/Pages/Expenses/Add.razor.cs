@@ -1,4 +1,5 @@
 using System.Security.Cryptography;
+using AccountingForDentists.Components.Pages.Expenses.Shared;
 using AccountingForDentists.Infrastructure;
 using AccountingForDentists.Models;
 using Microsoft.AspNetCore.Components;
@@ -11,60 +12,60 @@ public partial class Add(IDbContextFactory<AccountingContext> contextFactory, Te
     [SupplyParameterFromQuery]
     public string? ReturnUri { get; set; } = string.Empty;
 
-    private async Task Submit(Shared.ExpensesFormViewModel Model)
+    public string? Error { get; set; }
+
+    private async Task Submit(ExpensesFormSubmitViewModel Model)
     {
         if (Model is null) return;
-        var entityGuid = Guid.CreateVersion7();
-
         using var context = await contextFactory.CreateDbContextAsync();
-        Guid tenantId = tenantProvider.GetTenantId();
-        Guid userId = tenantProvider.GetUserObjectId();
-
-        DateContainerEntity dateReference = new()
+        try
         {
-            DateContainerId = Guid.CreateVersion7(),
-            TenantId = tenantId,
-            UserId = userId,
-            Date = Model.InvoiceDate
-        };
-        context.DateReferences.Add(dateReference);
+            using var transaction = await context.Database.BeginTransactionAsync();
 
-        AttachmentEntity? attachment = null;
-        if (Model.File is not null && Model.File.Bytes.Length > 0)
-        {
-            string md5hash = Convert.ToHexStringLower(MD5.HashData(Model.File.Bytes));
-
-            attachment = new()
+            DateContainerEntity dateReference = new()
             {
-                AttachmentId = Guid.CreateVersion7(),
-                TenantId = tenantProvider.GetTenantId(),
-                UserId = tenantProvider.GetUserObjectId(),
-                Bytes = Model.File.Bytes,
-                SizeBytes = Model.File.Bytes.Length,
-                Filename = Model.File.Filename,
-                MD5Hash = md5hash
+                DateContainerId = Guid.CreateVersion7(),
+                Date = Model.InvoiceDate
             };
+            context.DateReferences.Add(dateReference);
 
-            context.Attachments.Add(attachment);
+            AttachmentEntity? attachment = null;
+            if (Model.File is not null && Model.File.Bytes.Length > 0)
+            {
+                string md5hash = Convert.ToHexStringLower(MD5.HashData(Model.File.Bytes));
 
+                attachment = new()
+                {
+                    AttachmentId = Guid.CreateVersion7(),
+                    SizeBytes = Model.File.Bytes.Length,
+                    CustomerFilename = Model.File.Filename,
+                    MD5Hash = md5hash
+                };
+                context.Attachments.Add(attachment);
+                var attachmentPath = attachment.GetPath(tenantProvider.AttachmentsDirectory());
+                using var fs = new FileStream(attachmentPath, FileMode.Create, FileAccess.Write);
+                fs.Write(Model.File.Bytes);
+            }
+
+            ExpensesEntity entity = new()
+            {
+                ExpensesId = Guid.CreateVersion7(),
+                DateReference = dateReference,
+                Amount = Model.Amount,
+                GST = Model.GST,
+                BusinessName = Model.BusinessName,
+                Description = Model.Description,
+                Attachment = attachment
+            };
+            context.Expenses.Add(entity);
+            await context.SaveChangesAsync();
+            await transaction.CommitAsync();
+            NavigateBack();
         }
-
-        ExpensesEntity entity = new()
+        catch (Exception e)
         {
-            ExpensesId = Guid.CreateVersion7(),
-            TenantId = tenantId,
-            UserId = userId,
-            DateReference = dateReference,
-            Amount = Model.Amount,
-            GST = Model.GST,
-            BusinessName = Model.BusinessName,
-            Description = Model.Description,
-            Attachment = attachment
-        };
-        context.Expenses.Add(entity);
-
-        await context.SaveChangesAsync();
-        NavigateBack();
+            Error = e.Message;
+        }
     }
 
     private Task Cancel()

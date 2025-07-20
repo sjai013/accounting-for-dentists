@@ -1,3 +1,4 @@
+using System.Security.Cryptography;
 using AccountingForDentists.Components.Pages.Contract.Shared;
 using AccountingForDentists.Infrastructure;
 using AccountingForDentists.Models;
@@ -13,77 +14,85 @@ public partial class Add(IDbContextFactory<AccountingContext> contextFactory, Te
     [SupplyParameterFromQuery]
     public string? ReturnUri { get; set; } = string.Empty;
 
-    public async Task Submit(ContractViewModel Model)
+    public string? Error { get; set; }
+
+    public async Task Submit(ContractSubmitViewModel Model)
     {
         using var context = await contextFactory.CreateDbContextAsync();
-        AttachmentEntity? attachment = null;
-        if (Model.File is not null && Model.File.Bytes.Length > 0)
+        try
         {
-            attachment = new()
+
+            using var transaction = await context.Database.BeginTransactionAsync();
+            AttachmentEntity? attachment = null;
+            if (Model.File is not null && Model.File.Bytes.Length > 0)
             {
-                AttachmentId = Guid.CreateVersion7(),
-                TenantId = tenantProvider.GetTenantId(),
-                UserId = tenantProvider.GetUserObjectId(),
-                Bytes = Model.File.Bytes,
-                SizeBytes = Model.File.Bytes.Length,
-                Filename = Model.File.Name,
-                MD5Hash = Model.File.MD5Hash
+                string md5hash = Convert.ToHexStringLower(MD5.HashData(Model.File.Bytes));
+
+                attachment = new()
+                {
+                    AttachmentId = Guid.CreateVersion7(),
+                    SizeBytes = Model.File.Bytes.Length,
+                    CustomerFilename = Model.File.Filename,
+                    MD5Hash = md5hash
+                };
+
+                context.Attachments.Add(attachment);
+
+                var attachmentPath = attachment.GetPath(tenantProvider.AttachmentsDirectory());
+                using var fs = new FileStream(attachmentPath, FileMode.Create, FileAccess.Write);
+                fs.Write(Model.File.Bytes);
+            }
+
+            DateContainerEntity dateReference = new()
+            {
+                DateContainerId = Guid.CreateVersion7(),
+                Date = DateOnly.FromDateTime(Model.InvoiceDate)
             };
+            context.DateReferences.Add(dateReference);
+
+            SalesEntity salesEntity = new()
+            {
+                SalesId = Guid.CreateVersion7(),
+                Amount = Model.TotalSalesAmount,
+                GST = Model.TotalSalesGSTAmount,
+                DateReference = dateReference,
+                BusinessName = Model.ClinicName,
+                Description = "Services and Facilities Agreement Sales",
+                Attachment = attachment
+            };
+            context.Sales.Add(salesEntity);
+
+            ExpensesEntity expensesEntity = new()
+            {
+                ExpensesId = Guid.CreateVersion7(),
+                Amount = Model.TotalExpensesAmount,
+                GST = Model.TotalExpensesGSTAmount,
+                DateReference = dateReference,
+                BusinessName = Model.ClinicName,
+                Description = "Services and Facilities Agreement Expenses",
+                Attachment = attachment
+            };
+            context.Expenses.Add(expensesEntity);
+
+            ContractIncomeEntity contractIncomeEntity = new()
+            {
+                ContractualAgreementId = Guid.CreateVersion7(),
+                BusinessName = Model.ClinicName,
+                InvoiceDateReference = dateReference,
+                ExpensesEntity = expensesEntity,
+                SalesEntity = salesEntity,
+                Attachment = attachment
+            };
+            context.ContractIncome.Add(contractIncomeEntity);
+
+            await context.SaveChangesAsync();
+            await transaction.CommitAsync();
+            NavigateBack();
         }
-
-        DateContainerEntity dateReference = new()
+        catch (Exception e)
         {
-            TenantId = tenantProvider.GetTenantId(),
-            UserId = tenantProvider.GetUserObjectId(),
-            DateContainerId = Guid.CreateVersion7(),
-            Date = DateOnly.FromDateTime(Model.InvoiceDate)
-        };
-        SalesEntity salesEntity = new()
-        {
-            TenantId = tenantProvider.GetTenantId(),
-            UserId = tenantProvider.GetUserObjectId(),
-            SalesId = Guid.CreateVersion7(),
-            Amount = Model.TotalSalesAmount,
-            GST = Model.TotalSalesGSTAmount,
-            DateReference = dateReference,
-            BusinessName = Model.ClinicName,
-            Description = "Services and Facilities Agreement Sales",
-            Attachment = attachment
-        };
-
-        ExpensesEntity expensesEntity = new()
-        {
-            TenantId = tenantProvider.GetTenantId(),
-            UserId = tenantProvider.GetUserObjectId(),
-            ExpensesId = Guid.CreateVersion7(),
-            Amount = Model.TotalExpensesAmount,
-            GST = Model.TotalExpensesGSTAmount,
-            DateReference = dateReference,
-            BusinessName = Model.ClinicName,
-            Description = "Services and Facilities Agreement Expenses",
-            Attachment = attachment
-        };
-
-        ContractIncomeEntity contractIncomeEntity = new()
-        {
-            TenantId = tenantProvider.GetTenantId(),
-            UserId = tenantProvider.GetUserObjectId(),
-            ContractualAgreementId = Guid.CreateVersion7(),
-            BusinessName = Model.ClinicName,
-            InvoiceDateReference = dateReference,
-            ExpensesEntity = expensesEntity,
-            SalesEntity = salesEntity,
-            Attachment = attachment
-        };
-        context.ContractIncome.Add(contractIncomeEntity);
-        context.Sales.Add(salesEntity);
-        context.Expenses.Add(expensesEntity);
-        context.DateReferences.Add(dateReference);
-
-        if (attachment is not null) context.Attachments.Add(attachment);
-
-        await context.SaveChangesAsync();
-        NavigateBack();
+            Error = e.Message;
+        }
     }
 
     public void NavigateBack()

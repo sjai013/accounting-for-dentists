@@ -22,8 +22,9 @@ The web app allows dentists to record income and expenses and view detailed repo
 * Build the application using `dotnet build`
 * Configure the following environment variables:  
     `Authentication:Microsoft:ClientSecret` - Client secret for Microsoft OpenID SSO
-    `Authentication:Microsoft:ClientId` - Client ID for Microsoft OpenID SSO
-    `ConnectionStrings__AccountingForDentists` - Connection string for the AccountingForDentists database.
+    `Authentication:Microsoft:ClientId` - Client ID for Microsoft OpenID SSO.
+
+Tenant data (database, uploaded files) are stored in the `tenants` directory, with a separate database for each user using the `Tenand ID (tid)` and `User Object ID (oid)` returned by the login provider.  Each user's database is password-protected using the `sub` token provided by the login provider.
 
 ### Executing program
 
@@ -46,8 +47,13 @@ Sahil Jain
 
 ## Version History
 
-* 1.0.0-alpha.0
-    * First development version.  Allows entering income and viewing BAS.
+* 0.2.0
+    * Form for entering net income (combination of sales and expenses) and viewing BAS.
+    * Form for entering expenses
+    * View income, sales, expenses
+    * Upload attachments for income or expense
+    * Highly secure multi-tenant SQLite database - database decryption requires token from login provider
+
 
 ## License
 
@@ -55,4 +61,4 @@ This project is licensed under the MIT License - see the LICENSE.md file for det
 
 ## Acknowledgments
 
-Developed for my wife to help he with her taxes.
+Developed for my wife to help her with her taxation and reporting requirements.

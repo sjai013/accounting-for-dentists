@@ -21,7 +21,7 @@ public partial class FileSelector
     private string FileInputKey { get; set; } = Guid.NewGuid().ToString();
 
     [Parameter]
-    public EventCallback<FileViewModel> OnFileSelected { get; set; }
+    public EventCallback<FileSelectedViewModel> OnFileSelected { get; set; }
 
     [Parameter]
     public EventCallback OnFileRemoved { get; set; }
@@ -45,10 +45,10 @@ public partial class FileSelector
         using var stream = args.File.OpenReadStream(maxFileSize);
         using var memoryStream = new MemoryStream();
         await stream.CopyToAsync(memoryStream);
-        FileViewModel model = new()
+        FileSelectedViewModel model = new()
         {
             Bytes = memoryStream.ToArray(),
-            Filename = args.File.Name
+            Filename = args.File.Name,
         };
 
         await OnFileSelected.InvokeAsync(model);
@@ -65,6 +65,12 @@ public partial class FileSelector
 }
 
 public class FileViewModel
+{
+    public required string Filename { get; set; }
+    public required int Size { get; set; }
+}
+
+public class FileSelectedViewModel
 {
     public required string Filename { get; set; }
     public required byte[] Bytes { get; set; }

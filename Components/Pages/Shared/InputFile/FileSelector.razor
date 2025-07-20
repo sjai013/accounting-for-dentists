@@ -12,7 +12,7 @@ else
                 class="bi bi-x-lg"></i></button>
 
 
-        <div class="align-content-center">@((Value.Bytes.Length / 1024.0 / 1024.0).ToString("0.0")) MB</div>
+        <div class="align-content-center">@((Value.Size / 1024.0 / 1024.0).ToString("0.0")) MB</div>
         @if (IsFileUploaded)
         {
             <button type="button" @onclick="FileDownload" class="btn btn-link">@Value.Filename</button>

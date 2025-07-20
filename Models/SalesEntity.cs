@@ -4,8 +4,6 @@ namespace AccountingForDentists.Models
 {
     public record SalesEntity
     {
-        public required Guid TenantId { get; set; }
-        public required Guid UserId { get; set; }
         public required Guid SalesId { get; set; }
         public required DateContainerEntity DateReference { get; set; }
 

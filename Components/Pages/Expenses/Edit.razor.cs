@@ -7,13 +7,15 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AccountingForDentists.Components.Pages.Expenses;
 
-public partial class Edit(IDbContextFactory<AccountingContext> contextFactory, NavigationManager navigationManager)
+public partial class Edit(IDbContextFactory<AccountingContext> contextFactory, TenantProvider tenantProvider, NavigationManager navigationManager)
 {
     [Parameter]
     public required string EntityGuidString { get; set; }
 
     [SupplyParameterFromQuery]
     public string? ReturnUri { get; set; } = string.Empty;
+
+    public string? Error { get; set; }
 
     ExpensesFormViewModel? Initial;
 
@@ -40,16 +42,17 @@ public partial class Edit(IDbContextFactory<AccountingContext> contextFactory, N
                AttachmentId = x.Attachment != null ? x.Attachment.AttachmentId : null,
                File = x.Attachment == null ? null : new()
                {
-                   Bytes = x.Attachment.Bytes,
-                   Filename = x.Attachment.Filename
+                   Filename = x.Attachment.CustomerFilename,
+                   Size = x.Attachment.SizeBytes
                }
            })
            .SingleOrDefaultAsync();
 
     }
 
-    private async Task Submit(ExpensesFormViewModel args)
+    private async Task Submit(ExpensesFormSubmitViewModel args)
     {
+        Error = null;
         if (args is null) return;
         if (!Guid.TryParse(EntityGuidString, out var entityGuid))
         {
@@ -65,38 +68,49 @@ public partial class Edit(IDbContextFactory<AccountingContext> contextFactory, N
 
         if (entity is null) return;
 
-        entity.BusinessName = args.BusinessName;
-        entity.DateReference.Date = args.InvoiceDate;
-        entity.Description = args.Description;
-        entity.Amount = args.Amount;
-        entity.GST = args.GST;
-        entity.BusinessName = args.BusinessName;
-        context.Entry(entity).State = EntityState.Modified;
+        using var transaction = await context.Database.BeginTransactionAsync();
 
-        if (args.File is null)
+        try
         {
-            entity.Attachment = null;
-        }
-        else if (args.AttachmentId is null)
-        {
-            string md5hash = Convert.ToHexStringLower(MD5.HashData(args.File.Bytes));
+            entity.BusinessName = args.BusinessName;
+            entity.DateReference.Date = args.InvoiceDate;
+            entity.Description = args.Description;
+            entity.Amount = args.Amount;
+            entity.GST = args.GST;
+            entity.BusinessName = args.BusinessName;
+            context.Entry(entity).State = EntityState.Modified;
 
-            AttachmentEntity attachment = new()
+            if (args.File is null)
             {
-                AttachmentId = Guid.CreateVersion7(),
-                Bytes = args.File.Bytes,
-                Filename = args.File.Filename,
-                MD5Hash = md5hash,
-                SizeBytes = args.File.Bytes.Length,
-                TenantId = entity.TenantId,
-                UserId = entity.UserId
-            };
-            entity.Attachment = attachment;
-            context.Attachments.Add(attachment);
+                entity.Attachment = null;
+            }
+            else if (args.AttachmentId is null)
+            {
+                string md5hash = Convert.ToHexStringLower(MD5.HashData(args.File.Bytes));
 
+                AttachmentEntity attachment = new()
+                {
+                    AttachmentId = Guid.CreateVersion7(),
+                    CustomerFilename = args.File.Filename,
+                    MD5Hash = md5hash,
+                    SizeBytes = args.File.Bytes.Length,
+                };
+                entity.Attachment = attachment;
+                context.Attachments.Add(attachment);
+
+                var attachmentPath = attachment.GetPath(tenantProvider.AttachmentsDirectory());
+                using var fs = new FileStream(attachmentPath, FileMode.Create, FileAccess.Write);
+                fs.Write(args.File.Bytes);
+            }
+
+            await context.SaveChangesAsync();
+            await transaction.CommitAsync();
+            NavigateBack();
         }
-        await context.SaveChangesAsync();
-        NavigateBack();
+        catch (Exception e)
+        {
+            Error = e.Message;
+        }
     }
 
     private void NavigateBack()
