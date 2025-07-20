@@ -56,7 +56,7 @@ public partial class Form(IDbContextFactory<AccountingContext> contextFactory, I
 
 public class ExpensesFormViewModel
 {
-    public DateOnly InvoiceDate { get; set; }
+    public DateOnly InvoiceDate { get; set; } = DateOnly.FromDateTime(DateTime.Today);
     public decimal Amount { get; set; }
     public decimal GST { get; set; }
     public decimal Total => Amount + GST;

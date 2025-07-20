@@ -3,7 +3,7 @@
 
 <EditForm id="expenses-form" Model=@Model OnSubmit="Submit" class="d-flex flex-column gap-3">
     <div class="d-flex flex-xl-row flex-column gap-2">
-        <div class="border border-1 p-3 pt-1 rounded flex-grow-1">
+        <div class="border border-1 p-3 pt-1 rounded flex-grow-1 d-flex flex-column gap-2">
             <h1 class="display-6 border-bottom d-flex flex-row justify-content-between">
                 <div>Details </div>
             </h1>
@@ -22,6 +22,11 @@
                     </InputDatalist>
                 </div>
             </div>
+            <div>
+                <label for="description">Description:</label>
+                <InputText class="form-control fs-3" @bind-value="Model.Description" />
+            </div>
+
         </div>
     </div>
     <div class="border border-1 p-3 pt-1 rounded">

@@ -67,7 +67,7 @@ public partial class Edit(IDbContextFactory<AccountingContext> contextFactory, N
 
         entity.BusinessName = args.BusinessName;
         entity.DateReference.Date = args.InvoiceDate;
-
+        entity.Description = args.Description;
         entity.Amount = args.Amount;
         entity.GST = args.GST;
         entity.BusinessName = args.BusinessName;
@@ -95,11 +95,8 @@ public partial class Edit(IDbContextFactory<AccountingContext> contextFactory, N
             context.Attachments.Add(attachment);
 
         }
-
-
         await context.SaveChangesAsync();
         NavigateBack();
-
     }
 
     private void NavigateBack()

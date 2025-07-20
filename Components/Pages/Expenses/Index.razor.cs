@@ -40,4 +40,17 @@ public partial class Index(IDbContextFactory<AccountingContext> contextFactory, 
 
         return Task.CompletedTask;
     }
+    private Task AddExpense(Microsoft.AspNetCore.Components.Web.MouseEventArgs args)
+    {
+        string currentBaseUri = navigationManager.ToAbsoluteUri(navigationManager.Uri).GetLeftPart(UriPartial.Path);
+        string addUriString = $"{currentBaseUri}/Add";
+        Dictionary<string, string?> param = new() {
+            {"returnUri", navigationManager.Uri}
+        };
+
+        Uri addUri = new(QueryHelpers.AddQueryString(addUriString, param));
+        navigationManager.NavigateTo(addUri.ToString(), forceLoad: true);
+        return Task.CompletedTask;
+    }
+
 }
