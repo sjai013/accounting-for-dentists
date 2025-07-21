@@ -64,12 +64,24 @@ public partial class Form(IDbContextFactory<AccountingContext> contextFactory)
     {
         SelectedFile = args;
         Model.AttachmentId = null;
+        Model.File = new()
+        {
+            Filename = SelectedFile.Filename,
+            Size = SelectedFile.Bytes.Length
+        };
         return Task.CompletedTask;
     }
     private async Task FileDownload(FileViewModel args)
     {
         if (Model.File is null) return;
         await JSRuntime.InvokeVoidAsync("open", $"/portal/download/{Model.AttachmentId}", "");
+    }
+    private Task RemoveFile()
+    {
+        Model.AttachmentId = null;
+        Model.File = null;
+        SelectedFile = null;
+        return Task.CompletedTask;
     }
 }
 
@@ -82,7 +94,7 @@ public class ContractViewModel
     public decimal IncomeAmount { get => (TotalSalesAmount + TotalSalesGSTAmount) - (TotalExpensesAmount + TotalExpensesGSTAmount); }
     public decimal IncomeGST { get => TotalExpensesGSTAmount - TotalSalesGSTAmount; }
     public decimal TotalIncome { get => IncomeAmount + IncomeGST; }
-    public DateTime InvoiceDate { get; set; } = DateTime.Today;
+    public DateOnly InvoiceDate { get; set; } = DateOnly.FromDateTime(DateTime.Today);
     public string ClinicName { get; set; } = string.Empty;
     public Guid? AttachmentId { get; set; }
     public FileViewModel? File { get; set; }
@@ -97,7 +109,7 @@ public class ContractSubmitViewModel
     public decimal IncomeAmount { get => (TotalSalesAmount + TotalSalesGSTAmount) - (TotalExpensesAmount + TotalExpensesGSTAmount); }
     public decimal IncomeGST { get => TotalExpensesGSTAmount - TotalSalesGSTAmount; }
     public decimal TotalIncome { get => IncomeAmount + IncomeGST; }
-    public DateTime InvoiceDate { get; set; } = DateTime.Today;
+    public DateOnly InvoiceDate { get; set; } = DateOnly.FromDateTime(DateTime.Today);
     public string ClinicName { get; set; } = string.Empty;
     public Guid? AttachmentId { get; set; }
     public FileSelectedViewModel? File { get; set; }
