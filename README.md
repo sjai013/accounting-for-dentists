@@ -24,7 +24,7 @@ The web app allows dentists to record income and expenses and view detailed repo
     `Authentication:Microsoft:ClientSecret` - Client secret for Microsoft OpenID SSO
     `Authentication:Microsoft:ClientId` - Client ID for Microsoft OpenID SSO.
 
-Tenant data (database, uploaded files) are stored in the `tenants` directory, with a separate database for each user using the `Tenand ID (tid)` and `User Object ID (oid)` returned by the login provider.  Each user's database is password-protected using the `sub` token provided by the login provider.
+Tenant data (database, uploaded files) are stored in the `tenants` directory, with a separate database for each user using the `Tenand ID (tid)` and `User Object ID (oid)` returned by the login provider.  Each user's database is password-protected using the `sub` claim provided by the login provider.
 
 ### Executing program
 

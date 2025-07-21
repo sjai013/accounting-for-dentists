@@ -35,7 +35,7 @@ public partial class Edit(IDbContextFactory<AccountingContext> contextFactory, T
                 .Select(x => new ContractViewModel()
                 {
                     ClinicName = x.BusinessName,
-                    InvoiceDate = x.InvoiceDateReference.Date.ToDateTime(new()),
+                    InvoiceDate = x.InvoiceDateReference.Date,
                     TotalExpensesAmount = x.ExpensesEntity == null ? 0m : x.ExpensesEntity.Amount,
                     TotalExpensesGSTAmount = x.ExpensesEntity == null ? 0m : x.ExpensesEntity.GST,
                     TotalSalesAmount = x.SalesEntity == null ? 0m : x.SalesEntity.Amount,
@@ -52,7 +52,7 @@ public partial class Edit(IDbContextFactory<AccountingContext> contextFactory, T
         if (model is null) return;
         InitialModel = model;
     }
-    private async Task Submit(ContractSubmitViewModel args)
+    private async Task Submit(ContractSubmitViewModel model)
     {
         if (!Guid.TryParse(EntityGuidString, out var entityGuid))
         {
@@ -68,50 +68,12 @@ public partial class Edit(IDbContextFactory<AccountingContext> contextFactory, T
         .SingleOrDefaultAsync();
 
         if (entity is null) return;
+        context.ContractIncome.Update(entity);
         try
         {
-
             using var transaction = await context.Database.BeginTransactionAsync();
-            if (args.File is null)
-            {
-                entity.Attachment = null;
-            }
-            else if (args.AttachmentId is null)
-            {
-                string md5hash = Convert.ToHexStringLower(MD5.HashData(args.File.Bytes));
 
-                AttachmentEntity attachment = new()
-                {
-                    AttachmentId = Guid.CreateVersion7(),
-                    CustomerFilename = args.File.Filename,
-                    MD5Hash = md5hash,
-                    SizeBytes = args.File.Bytes.Length,
-                };
-                entity.Attachment = attachment;
-                context.Attachments.Add(attachment);
-
-                var attachmentPath = attachment.GetPath(tenantProvider.AttachmentsDirectory());
-                using var fs = new FileStream(attachmentPath, FileMode.Create, FileAccess.Write);
-                fs.Write(args.File.Bytes);
-            }
-
-            entity.BusinessName = args.ClinicName;
-            entity.InvoiceDateReference.Date = DateOnly.FromDateTime(args.InvoiceDate);
-            if (entity.SalesEntity is not null)
-            {
-                entity.SalesEntity.Amount = args.TotalSalesAmount;
-                entity.SalesEntity.GST = args.TotalSalesGSTAmount;
-                entity.SalesEntity.BusinessName = args.ClinicName;
-                context.Entry(entity.SalesEntity).State = EntityState.Modified;
-            }
-
-            if (entity.ExpensesEntity is not null)
-            {
-                entity.ExpensesEntity.Amount = args.TotalExpensesAmount;
-                entity.ExpensesEntity.GST = args.TotalExpensesGSTAmount;
-                entity.ExpensesEntity.BusinessName = args.ClinicName;
-                context.Entry(entity.ExpensesEntity).State = EntityState.Modified;
-            }
+            HelperMethods.AddOrUpdate(context, model, ref entity);
 
             await context.SaveChangesAsync();
             await transaction.CommitAsync();

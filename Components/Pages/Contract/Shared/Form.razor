@@ -95,7 +95,7 @@
         </div>
     </div>
     <FileSelector IsFileUploaded="Model.AttachmentId is not null" Value="Model.File"
-        OnFileDownloadRequest="FileDownload" OnFileRemoved="() => SelectedFile = null" OnFileSelected="SelectFile">
+        OnFileDownloadRequest="FileDownload" OnFileRemoved="RemoveFile" OnFileSelected="SelectFile">
     </FileSelector>
 
 </EditForm>
