@@ -1,5 +1,5 @@
 @typeparam TElement
-<select class="ps-2" @onchange="OnSelectChange">
+<select class="@_class ps-2" @onchange="OnSelectChange">
     @for (var i = 0; i < Items.Count; i++)
     {
         Option element = Items[i];
@@ -14,11 +14,24 @@
     [Parameter]
     public required Func<TElement?, string> TextDelegate { get; set; }
 
+    [Parameter(CaptureUnmatchedValues = true)]
+    public Dictionary<string, object> Attributes { get; set; } = [];
+
     [Parameter]
     public TElement? Selected { get; set; }
 
     [Parameter]
     public EventCallback<TElement?> SelectedChanged { get; set; }
+
+    private string _class { get; set; } = string.Empty;
+
+    protected override void OnInitialized()
+    {
+        if (Attributes?.TryGetValue("class", out object? classObject) == true)
+        {
+            _class = classObject?.ToString() ?? "";
+        }
+    }
     private async Task OnSelectChange(ChangeEventArgs args)
     {
         if (!int.TryParse((string?)args.Value, out var index)) return;

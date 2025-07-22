@@ -1,12 +1,20 @@
 @page "/BAS"
 @using AccountingForDentists.Components.Pages.Shared
 @rendermode InteractiveServer
-<div class="h3">
-    FY
-    <FYOptionList @bind-SelectedFY:get="FY" @bind-SelectedFY:set="ChangeFY" />
-</div>
+<h1 class="fw-light fs-3">BAS</h1>
 <hr />
-<h1 class="display-6">FY@(FY - 2000) BAS</h1>
+<div class="container-fluid ps-0">
+    <div class="row gy-2">
+        <div class="col-md-4">
+            <div class="d-flex flex-row gap-2">
+                <div style="flex-basis:40px" class="flex-shrink-0 flex-grow-0 align-content-center">FY</div>
+                <FYOptionList class="flex-grow-1" @bind-SelectedFY:get="FY" @bind-SelectedFY:set="ChangeFY" />
+            </div>
+        </div>
+    </div>
+</div>
+
+<hr />
 <div class="table-responsive">
     <table class="table table-sm table-striped-columns table-striped">
         <thead>

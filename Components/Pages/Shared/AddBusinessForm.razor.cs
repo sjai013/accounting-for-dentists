@@ -27,7 +27,7 @@ public partial class AddBusinessForm(IDbContextFactory<AccountingContext> contex
             await context.SaveChangesAsync();
             OnSaveSuccessful?.Invoke(businessEntity);
         }
-        catch (Exception e)
+        catch
         {
 
         }

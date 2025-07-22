@@ -1,9 +1,9 @@
 @page "/Businesses"
 @using AccountingForDentists.Components.Pages.Shared
 @rendermode InteractiveServer
-
+<h1 class="fw-light fs-3">Businesses</h1>
+<hr />
 <AddBusinessForm OnSaveSuccessful="BusinessListUpdated"></AddBusinessForm>
-
 <hr />
 <ul class="list-group">
     @foreach (var item in BusinessEntities)

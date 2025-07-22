@@ -1,14 +1,11 @@
-using System.Security.Cryptography;
 using AccountingForDentists.Components.Pages.Contract.Shared;
 using AccountingForDentists.Infrastructure;
-using AccountingForDentists.Models;
 using Microsoft.AspNetCore.Components;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace AccountingForDentists.Components.Pages.Contract;
 
-public partial class Edit(IDbContextFactory<AccountingContext> contextFactory, TenantProvider tenantProvider, NavigationManager navigationManager)
+public partial class Edit(IDbContextFactory<AccountingContext> contextFactory, NavigationManager navigationManager)
 {
     [Parameter]
     public required string EntityGuidString { get; set; }

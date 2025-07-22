@@ -1,10 +1,9 @@
-using AccountingForDentists.Components.Pages.Expenses.Shared;
 using AccountingForDentists.Infrastructure;
 using AccountingForDentists.Models;
 using Microsoft.AspNetCore.Components;
 using Microsoft.EntityFrameworkCore;
 
-namespace AccountingForDentists.Components.Pages.Expenses;
+namespace AccountingForDentists.Components.Pages.Sales;
 
 public partial class Add(IDbContextFactory<AccountingContext> contextFactory, NavigationManager navigationManager)
 {
@@ -13,7 +12,7 @@ public partial class Add(IDbContextFactory<AccountingContext> contextFactory, Na
 
     public string? Error { get; set; }
 
-    private async Task Submit(ExpensesFormSubmitViewModel model)
+    private async Task Submit(Shared.SalesFormSubmitViewModel model)
     {
         if (model is null) return;
         using var context = await contextFactory.CreateDbContextAsync();
@@ -25,12 +24,12 @@ public partial class Add(IDbContextFactory<AccountingContext> contextFactory, Na
         };
         context.DateReferences.Add(dateReference);
 
-        ExpensesEntity entity = new()
+        SalesEntity entity = new()
         {
-            ExpensesId = Guid.CreateVersion7(),
+            SalesId = Guid.CreateVersion7(),
             DateReference = dateReference,
         };
-        context.Expenses.Add(entity);
+        context.Sales.Add(entity);
 
         try
         {

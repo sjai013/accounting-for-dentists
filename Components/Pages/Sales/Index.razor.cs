@@ -4,26 +4,26 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
 
-namespace AccountingForDentists.Components.Pages.Expenses;
+namespace AccountingForDentists.Components.Pages.Sales;
 
 public partial class Index(IDbContextFactory<AccountingContext> contextFactory, NavigationManager navigationManager)
 {
-    public List<ExpensesEntity> ExpenseEntities { get; set; } = [];
+    public List<SalesEntity> SaleEntities { get; set; } = [];
     public string? Error { get; set; }
     protected override async Task OnInitializedAsync()
     {
         using var context = await contextFactory.CreateDbContextAsync();
-        ExpenseEntities = await context.Expenses.Include(x => x.DateReference).OrderByDescending(x => x.DateReference.Date).ToListAsync();
+        SaleEntities = await context.Sales.Include(x => x.DateReference).OrderByDescending(x => x.DateReference.Date).ToListAsync();
     }
 
-    private async Task DeleteExpense(ExpensesEntity item)
+    private async Task DeleteSale(SalesEntity item)
     {
         try
         {
             using var context = await contextFactory.CreateDbContextAsync();
-            context.Expenses.Remove(item);
+            context.Sales.Remove(item);
             await context.SaveChangesAsync();
-            ExpenseEntities.Remove(item);
+            SaleEntities.Remove(item);
             this.StateHasChanged();
         }
         catch
@@ -33,10 +33,10 @@ public partial class Index(IDbContextFactory<AccountingContext> contextFactory, 
 
     }
 
-    private Task EditExpense(ExpensesEntity item)
+    private Task EditSale(SalesEntity item)
     {
         string currentBaseUri = navigationManager.ToAbsoluteUri(navigationManager.Uri).GetLeftPart(UriPartial.Path);
-        string baseEditUri = $"{currentBaseUri}/Edit/{item.ExpensesId}";
+        string baseEditUri = $"{currentBaseUri}/Edit/{item.SalesId}";
         Dictionary<string, string?> param = new() {
             {"returnUri", navigationManager.Uri}
         };

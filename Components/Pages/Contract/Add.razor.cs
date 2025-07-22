@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AccountingForDentists.Components.Pages.Contract;
 
-public partial class Add(IDbContextFactory<AccountingContext> contextFactory, TenantProvider tenantProvider, NavigationManager navigationManager)
+public partial class Add(IDbContextFactory<AccountingContext> contextFactory, NavigationManager navigationManager)
 {
     public string[] RegisteredBusinessNames { get; set; } = [];
 

@@ -1,10 +1,10 @@
-@page "/Expenses"
+@page "/Sales"
 @using AccountingForDentists.Components.Pages.Shared.InputDatalist
 @using AccountingForDentists.Models
 @rendermode InteractiveServer
 
 
-<h1 class="fw-light fs-3">Expenses</h1>
+<h1 class="fw-light fs-3">Sales</h1>
 <hr />
 @if (Error is not null)
 {
@@ -23,7 +23,7 @@
         <th scope="col"></th>
     </thead>
     <tbody>
-        @foreach (ExpensesEntity item in ExpenseEntities)
+        @foreach (SalesEntity item in SaleEntities)
         {
             <tr>
                 <td class="align-content-center">@item.DateReference.Date.ToString("dd/MM/yyyy")</td>
@@ -33,8 +33,8 @@
                 <td class="align-content-center">$@item.GST.ToString("0.00")</td>
                 <td class="align-content-center">$@item.Total.ToString("0.00")</td>
                 <td class="align-content-center">
-                    <button class="btn" @onclick="() => DeleteExpense(item)"><i class="bi bi-x-lg"></i></button>
-                    <button class="btn" @onclick="() => EditExpense(item)"><i class="bi bi-pencil"></i></button>
+                    <button class="btn" @onclick="() => DeleteSale(item)"><i class="bi bi-x-lg"></i></button>
+                    <button class="btn" @onclick="() => EditSale(item)"><i class="bi bi-pencil"></i></button>
                 </td>
             </tr>
         }
@@ -44,9 +44,9 @@
             <td></td>
             <td></td>
             <td></td>
-            <td>$@(ExpenseEntities.Sum(x => x.Amount).ToString("0.00"))</td>
-            <td>$@(ExpenseEntities.Sum(x => x.GST).ToString("0.00"))</td>
-            <td>$@(ExpenseEntities.Sum(x => x.Total).ToString("0.00"))</td>
+            <td>$@(SaleEntities.Sum(x => x.Amount).ToString("0.00"))</td>
+            <td>$@(SaleEntities.Sum(x => x.GST).ToString("0.00"))</td>
+            <td>$@(SaleEntities.Sum(x => x.Total).ToString("0.00"))</td>
             <td></td>
         </tr>
     </tfoot>

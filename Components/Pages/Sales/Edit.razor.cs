@@ -1,11 +1,12 @@
 using System.Security.Cryptography;
 using AccountingForDentists.Components.Pages.Expenses.Shared;
+using AccountingForDentists.Components.Pages.Sales.Shared;
 using AccountingForDentists.Infrastructure;
 using AccountingForDentists.Models;
 using Microsoft.AspNetCore.Components;
 using Microsoft.EntityFrameworkCore;
 
-namespace AccountingForDentists.Components.Pages.Expenses;
+namespace AccountingForDentists.Components.Pages.Sales;
 
 public partial class Edit(IDbContextFactory<AccountingContext> contextFactory, NavigationManager navigationManager)
 {
@@ -17,7 +18,7 @@ public partial class Edit(IDbContextFactory<AccountingContext> contextFactory, N
 
     public string? Error { get; set; }
 
-    ExpensesFormViewModel? Initial;
+    SalesFormViewModel? Initial;
 
     protected override async Task OnParametersSetAsync()
     {
@@ -28,11 +29,11 @@ public partial class Edit(IDbContextFactory<AccountingContext> contextFactory, N
         }
 
         using var context = await contextFactory.CreateDbContextAsync();
-        Initial = await context.Expenses
-           .Where(x => x.ExpensesId == entityGuid)
+        Initial = await context.Sales
+           .Where(x => x.SalesId == entityGuid)
            .Include(x => x.DateReference)
            .Include(x => x.Attachment)
-           .Select(x => new ExpensesFormViewModel()
+           .Select(x => new SalesFormViewModel()
            {
                InvoiceDate = x.DateReference.Date,
                Amount = x.Amount,
@@ -50,7 +51,7 @@ public partial class Edit(IDbContextFactory<AccountingContext> contextFactory, N
 
     }
 
-    private async Task Submit(ExpensesFormSubmitViewModel model)
+    private async Task Submit(SalesFormSubmitViewModel model)
     {
         Error = null;
         if (model is null) return;
@@ -60,15 +61,15 @@ public partial class Edit(IDbContextFactory<AccountingContext> contextFactory, N
         }
 
         using var context = await contextFactory.CreateDbContextAsync();
-        var entity = await context.Expenses
-           .Where(x => x.ExpensesId == entityGuid)
+        var entity = await context.Sales
+           .Where(x => x.SalesId == entityGuid)
            .Include(x => x.DateReference)
            .Include(x => x.Attachment)
            .SingleOrDefaultAsync();
 
         if (entity is null) return;
 
-        context.Expenses.Update(entity);
+        context.Sales.Update(entity);
 
         try
         {
