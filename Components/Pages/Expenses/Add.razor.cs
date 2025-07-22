@@ -1,4 +1,3 @@
-using System.Security.Cryptography;
 using AccountingForDentists.Components.Pages.Expenses.Shared;
 using AccountingForDentists.Infrastructure;
 using AccountingForDentists.Models;
@@ -14,50 +13,29 @@ public partial class Add(IDbContextFactory<AccountingContext> contextFactory, Te
 
     public string? Error { get; set; }
 
-    private async Task Submit(ExpensesFormSubmitViewModel Model)
+    private async Task Submit(ExpensesFormSubmitViewModel model)
     {
-        if (Model is null) return;
+        if (model is null) return;
         using var context = await contextFactory.CreateDbContextAsync();
+
+        DateContainerEntity dateReference = new()
+        {
+            DateContainerId = Guid.CreateVersion7(),
+            Date = model.InvoiceDate
+        };
+        context.DateReferences.Add(dateReference);
+
+        ExpensesEntity entity = new()
+        {
+            ExpensesId = Guid.CreateVersion7(),
+            DateReference = dateReference,
+        };
+        context.Expenses.Add(entity);
+
         try
         {
             using var transaction = await context.Database.BeginTransactionAsync();
-
-            DateContainerEntity dateReference = new()
-            {
-                DateContainerId = Guid.CreateVersion7(),
-                Date = Model.InvoiceDate
-            };
-            context.DateReferences.Add(dateReference);
-
-            AttachmentEntity? attachment = null;
-            if (Model.File is not null && Model.File.Bytes.Length > 0)
-            {
-                string md5hash = Convert.ToHexStringLower(MD5.HashData(Model.File.Bytes));
-
-                attachment = new()
-                {
-                    AttachmentId = Guid.CreateVersion7(),
-                    SizeBytes = Model.File.Bytes.Length,
-                    CustomerFilename = Model.File.Filename,
-                    MD5Hash = md5hash
-                };
-                context.Attachments.Add(attachment);
-                var attachmentPath = attachment.GetPath(tenantProvider.AttachmentsDirectory());
-                using var fs = new FileStream(attachmentPath, FileMode.Create, FileAccess.Write);
-                fs.Write(Model.File.Bytes);
-            }
-
-            ExpensesEntity entity = new()
-            {
-                ExpensesId = Guid.CreateVersion7(),
-                DateReference = dateReference,
-                Amount = Model.Amount,
-                GST = Model.GST,
-                BusinessName = Model.BusinessName,
-                Description = Model.Description,
-                Attachment = attachment
-            };
-            context.Expenses.Add(entity);
+            HelperMethods.AddOrUpdate(context, model, ref entity);
             await context.SaveChangesAsync();
             await transaction.CommitAsync();
             NavigateBack();

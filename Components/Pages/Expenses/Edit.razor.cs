@@ -50,10 +50,10 @@ public partial class Edit(IDbContextFactory<AccountingContext> contextFactory, T
 
     }
 
-    private async Task Submit(ExpensesFormSubmitViewModel args)
+    private async Task Submit(ExpensesFormSubmitViewModel model)
     {
         Error = null;
-        if (args is null) return;
+        if (model is null) return;
         if (!Guid.TryParse(EntityGuidString, out var entityGuid))
         {
             return;
@@ -68,41 +68,12 @@ public partial class Edit(IDbContextFactory<AccountingContext> contextFactory, T
 
         if (entity is null) return;
 
-        using var transaction = await context.Database.BeginTransactionAsync();
+        context.Expenses.Update(entity);
 
         try
         {
-            entity.BusinessName = args.BusinessName;
-            entity.DateReference.Date = args.InvoiceDate;
-            entity.Description = args.Description;
-            entity.Amount = args.Amount;
-            entity.GST = args.GST;
-            entity.BusinessName = args.BusinessName;
-            context.Entry(entity).State = EntityState.Modified;
-
-            if (args.File is null)
-            {
-                entity.Attachment = null;
-            }
-            else if (args.AttachmentId is null)
-            {
-                string md5hash = Convert.ToHexStringLower(MD5.HashData(args.File.Bytes));
-
-                AttachmentEntity attachment = new()
-                {
-                    AttachmentId = Guid.CreateVersion7(),
-                    CustomerFilename = args.File.Filename,
-                    MD5Hash = md5hash,
-                    SizeBytes = args.File.Bytes.Length,
-                };
-                entity.Attachment = attachment;
-                context.Attachments.Add(attachment);
-
-                var attachmentPath = attachment.GetPath(tenantProvider.AttachmentsDirectory());
-                using var fs = new FileStream(attachmentPath, FileMode.Create, FileAccess.Write);
-                fs.Write(args.File.Bytes);
-            }
-
+            using var transaction = await context.Database.BeginTransactionAsync();
+            HelperMethods.AddOrUpdate(context, model, ref entity);
             await context.SaveChangesAsync();
             await transaction.CommitAsync();
             NavigateBack();

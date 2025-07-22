@@ -29,7 +29,6 @@ public partial class Add(IDbContextFactory<AccountingContext> contextFactory, Te
         ContractIncomeEntity entity = new()
         {
             ContractualAgreementId = Guid.CreateVersion7(),
-            BusinessName = model.ClinicName,
             InvoiceDateReference = dateReference,
         };
 

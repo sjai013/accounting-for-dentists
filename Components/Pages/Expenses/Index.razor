@@ -3,6 +3,12 @@
 @using AccountingForDentists.Models
 @rendermode InteractiveServer
 
+@if (Error is not null)
+{
+    <div class="alert alert-warning" role="alert">
+        @(Error)
+    </div>
+}
 <h1 class="display-6">Expenses</h1>
 <table class="table">
     <thead>

@@ -9,7 +9,7 @@ namespace AccountingForDentists.Components.Pages.Expenses;
 public partial class Index(IDbContextFactory<AccountingContext> contextFactory, NavigationManager navigationManager)
 {
     public List<ExpensesEntity> ExpenseEntities { get; set; } = [];
-
+    public string? Error { get; set; }
     protected override async Task OnInitializedAsync()
     {
         using var context = await contextFactory.CreateDbContextAsync();
@@ -18,12 +18,19 @@ public partial class Index(IDbContextFactory<AccountingContext> contextFactory, 
 
     private async Task DeleteExpense(ExpensesEntity item)
     {
-        using var context = await contextFactory.CreateDbContextAsync();
+        try
+        {
+            using var context = await contextFactory.CreateDbContextAsync();
+            context.Expenses.Remove(item);
+            await context.SaveChangesAsync();
+            ExpenseEntities.Remove(item);
+            this.StateHasChanged();
+        }
+        catch (Exception e)
+        {
+            this.Error = "There was an error deleting this record.  It may be linked to an income entry.";
+        }
 
-        context.Expenses.Remove(item);
-        await context.SaveChangesAsync();
-        ExpenseEntities.Remove(item);
-        this.StateHasChanged();
     }
 
     private Task EditExpense(ExpensesEntity item)
