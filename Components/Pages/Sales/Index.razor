@@ -4,52 +4,78 @@
 @rendermode InteractiveServer
 
 
+
 <h1 class="fw-light fs-3">Sales</h1>
 <hr />
+
 @if (Error is not null)
 {
     <div class="alert alert-warning" role="alert">
         @(Error)
     </div>
 }
-<table class="table">
-    <thead>
-        <th scope="col">Date</th>
-        <th scope="col">Business</th>
-        <th scope="col">Description</th>
-        <th scope="col">Amount</th>
-        <th scope="col">GST</th>
-        <th scope="col">Total</th>
-        <th scope="col"></th>
-    </thead>
-    <tbody>
-        @foreach (SalesEntity item in SaleEntities)
-        {
-            <tr>
-                <td class="align-content-center">@item.DateReference.Date.ToString("dd/MM/yyyy")</td>
-                <td class="align-content-center">@item.BusinessName</td>
-                <td class="align-content-center">@item.Description</td>
-                <td class="align-content-center">$@item.Amount.ToString("0.00")</td>
-                <td class="align-content-center">$@item.GST.ToString("0.00")</td>
-                <td class="align-content-center">$@item.Total.ToString("0.00")</td>
-                <td class="align-content-center">
-                    <button class="btn" @onclick="() => DeleteSale(item)"><i class="bi bi-x-lg"></i></button>
-                    <button class="btn" @onclick="() => EditSale(item)"><i class="bi bi-pencil"></i></button>
-                </td>
-            </tr>
-        }
-    </tbody>
-    <tfoot class="table-group-divider fw-bold">
-        <tr>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td>$@(SaleEntities.Sum(x => x.Amount).ToString("0.00"))</td>
-            <td>$@(SaleEntities.Sum(x => x.GST).ToString("0.00"))</td>
-            <td>$@(SaleEntities.Sum(x => x.Total).ToString("0.00"))</td>
-            <td></td>
-        </tr>
-    </tfoot>
-</table>
 
-<button class="btn btn-primary w-100" @onclick="AddExpense">Add New</button>
+
+@if (SaleEntities is null)
+{
+    <div class="d-flex flex-column gap-2">
+        <div class="container-fluid placeholder-glow">
+            <div style="height:50px" class="placeholder col-12 rounded-2"></div>
+        </div>
+        <div class="container-fluid placeholder-glow">
+            <div style="height:150px" class="placeholder col-12 rounded-2"></div>
+        </div>
+        <div class="container-fluid placeholder-glow">
+            <div style="height:50px" class="placeholder col-12 rounded-2"></div>
+        </div>
+        <div class="container-fluid placeholder-glow">
+            <div style="height:50px" class="placeholder col-12 rounded-2"></div>
+        </div>
+    </div>
+}
+else
+{
+
+    <table class="table">
+        <thead>
+            <th scope="col">Date</th>
+            <th scope="col">Business</th>
+            <th scope="col">Description</th>
+            <th scope="col">Amount</th>
+            <th scope="col">GST</th>
+            <th scope="col">Total</th>
+            <th scope="col"></th>
+        </thead>
+        <tbody>
+            @foreach (SalesEntity item in SaleEntities ?? [])
+            {
+                <tr>
+                    <td class="align-content-center">@item.DateReference.Date.ToString("dd/MM/yyyy")</td>
+                    <td class="align-content-center">@item.BusinessName</td>
+                    <td class="align-content-center">@item.Description</td>
+                    <td class="align-content-center">$@item.Amount.ToString("0.00")</td>
+                    <td class="align-content-center">$@item.GST.ToString("0.00")</td>
+                    <td class="align-content-center">$@item.Total.ToString("0.00")</td>
+                    <td class="align-content-center">
+                        <button class="btn" @onclick="() => DeleteSale(item)"><i class="bi bi-x-lg"></i></button>
+                        <button class="btn" @onclick="() => EditSale(item)"><i class="bi bi-pencil"></i></button>
+                    </td>
+                </tr>
+            }
+
+        </tbody>
+        <tfoot class="table-group-divider fw-bold">
+            <tr>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td>$@((SaleEntities?.Sum(x => x.Amount) ?? 0).ToString("0.00"))</td>
+                <td>$@((SaleEntities?.Sum(x => x.GST) ?? 0).ToString("0.00"))</td>
+                <td>$@((SaleEntities?.Sum(x => x.Total) ?? 0).ToString("0.00"))</td>
+                <td></td>
+            </tr>
+        </tfoot>
+    </table>
+
+    <button class="btn btn-primary w-100" @onclick="AddExpense">Add New</button>
+}

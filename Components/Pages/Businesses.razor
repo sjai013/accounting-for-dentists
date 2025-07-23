@@ -3,15 +3,30 @@
 @rendermode InteractiveServer
 <h1 class="fw-light fs-3">Businesses</h1>
 <hr />
-<AddBusinessForm OnSaveSuccessful="BusinessListUpdated"></AddBusinessForm>
-<hr />
-<ul class="list-group">
-    @foreach (var item in BusinessEntities)
-    {
-        <li class="p-0 list-group-item d-flex gap-2 align-items-center">
-            <button @onclick="() => DeleteBusinessItem(item)" class="btn"><i class="bi bi-x-lg"></i></button>
-            <div>@item.Name</div>
-        </li>
-    }
+@if (BusinessEntities is null)
+{
+    <div class="d-flex flex-column gap-2">
+        <div class="container-fluid placeholder-glow">
+            <div style="height:50px" class="placeholder col-12 rounded-2"></div>
+        </div>
+        <div class="container-fluid placeholder-glow">
+            <div style="height:150px" class="placeholder col-12 rounded-2"></div>
+        </div>
 
-</ul>
+    </div>
+}
+else
+{
+    <AddBusinessForm OnSaveSuccessful="BusinessListUpdated"></AddBusinessForm>
+    <hr />
+    <ul class="list-group">
+        @foreach (var item in BusinessEntities)
+        {
+            <li class="p-0 list-group-item d-flex gap-2 align-items-center">
+                <button @onclick="() => DeleteBusinessItem(item)" class="btn"><i class="bi bi-x-lg"></i></button>
+                <div>@item.Name</div>
+            </li>
+        }
+
+    </ul>
+}

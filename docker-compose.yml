@@ -1,10 +1,13 @@
 services:
   web:
-    image: ghcr.io/sjai013.ece/accounting-for-dentists:1.0.0-alpha
+    container_name: accounting-for-dentists
+    image: ghcr.io/sjai013.ece/accounting-for-dentists:0.2.0-beta
     build: .
     ports:
       - "8080:8080"
     environment:
       - Authentication__Microsoft__ClientSecret={CLIENT_SECRET}
       - Authentication__Microsoft__ClientId={CLIENT_ID}
-      - ConnectionStrings__AccountingForDentists={CONNECTION_STRING}
+    volumes:
+      - tenants:/opt/accounting-for-dentists/tenants
+    

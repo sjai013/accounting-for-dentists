@@ -8,12 +8,16 @@ namespace AccountingForDentists.Components.Pages.Sales;
 
 public partial class Index(IDbContextFactory<AccountingContext> contextFactory, NavigationManager navigationManager)
 {
-    public List<SalesEntity> SaleEntities { get; set; } = [];
+    public List<SalesEntity>? SaleEntities { get; set; }
     public string? Error { get; set; }
-    protected override async Task OnInitializedAsync()
+    protected async override Task OnAfterRenderAsync(bool firstRender)
     {
+        var waitTask = Task.Delay(500);
         using var context = await contextFactory.CreateDbContextAsync();
-        SaleEntities = await context.Sales.Include(x => x.DateReference).OrderByDescending(x => x.DateReference.Date).ToListAsync();
+        var entities = await context.Sales.Include(x => x.DateReference).OrderByDescending(x => x.DateReference.Date).ToListAsync();
+        await waitTask;
+        SaleEntities = entities;
+        StateHasChanged();
     }
 
     private async Task DeleteSale(SalesEntity item)
@@ -23,7 +27,7 @@ public partial class Index(IDbContextFactory<AccountingContext> contextFactory, 
             using var context = await contextFactory.CreateDbContextAsync();
             context.Sales.Remove(item);
             await context.SaveChangesAsync();
-            SaleEntities.Remove(item);
+            SaleEntities?.Remove(item);
             this.StateHasChanged();
         }
         catch

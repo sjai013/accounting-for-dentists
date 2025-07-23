@@ -6,10 +6,13 @@ namespace AccountingForDentists.Components.Pages;
 
 public partial class Businesses(IDbContextFactory<AccountingContext> contextFactory)
 {
-    public List<BusinessEntity> BusinessEntities { get; set; } = [];
-    protected override async Task OnInitializedAsync()
+    public List<BusinessEntity>? BusinessEntities { get; set; }
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
+        var waitTask = Task.Delay(500);
         await UpdateBusinessEntities();
+        await waitTask;
+        StateHasChanged();
     }
 
     private async Task UpdateBusinessEntities()
