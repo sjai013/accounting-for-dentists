@@ -1,0 +1,58 @@
+@using AccountingForDentists.Components.Shared
+@using AccountingForDentists.Models
+<UndismissableModal Title="Confirm Delete" @ref="modal">
+
+    <Body>
+        Delete Business @pendingDelete?.Name?
+    </Body>
+    <Footer>
+        <button type="button" class="btn btn-outline-danger" disabled=@deleteInProgress
+            @onclick="async () => await Delete()">
+            @if (deleteInProgress)
+            {
+                <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+                <span role="status">Deleting...</span>
+            }
+            else
+            {
+                <span>Delete</span>
+            }
+        </button>
+        <button type="button" class="btn btn-outline-secondary" disabled=@deleteInProgress
+            @onclick="() => modal.Close()">No</button>
+    </Footer>
+</UndismissableModal>
+
+@code {
+    UndismissableModal modal { get; set; } = null!;
+    BusinessEntity? pendingDelete { get; set; }
+    bool deleteInProgress { get; set; }
+
+    [Parameter]
+    public EventCallback<BusinessEntity> OnDeleteEntity { get; set; }
+
+    public async Task ShowModal(BusinessEntity? entity)
+    {
+        if (entity is null) return;
+        deleteInProgress = false;
+        pendingDelete = entity;
+        await modal.Show();
+        this.StateHasChanged();
+    }
+
+    public async Task Delete()
+    {
+        var minWaitTime = Task.Delay(250);
+        this.deleteInProgress = true;
+        try
+        {
+            await OnDeleteEntity.InvokeAsync(pendingDelete);
+        }
+        finally
+        {
+            await minWaitTime;
+            await modal.Close();
+        }
+    }
+
+}

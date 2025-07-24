@@ -14,8 +14,8 @@ public partial class Form(IDbContextFactory<AccountingContext> contextFactory, I
     [Parameter]
     public ExpensesFormViewModel? InitialModel { get; set; }
     public ExpensesFormViewModel Model { get; set; } = new();
-
     public FileSelectedViewModel? SelectedFile { get; set; }
+    private bool IsDisabled { get; set; } = false;
 
     [Parameter]
     public required EventCallback<ExpensesFormSubmitViewModel> OnSubmit { get; set; }
@@ -33,22 +33,33 @@ public partial class Form(IDbContextFactory<AccountingContext> contextFactory, I
     {
         Model = InitialModel ?? new() { };
     }
-    private Task Submit(Microsoft.AspNetCore.Components.Forms.EditContext args)
+    private async Task Submit(Microsoft.AspNetCore.Components.Forms.EditContext args)
     {
-        return OnSubmit.InvokeAsync(new()
+        IsDisabled = true;
+        try
         {
-            Amount = Model.Amount,
-            AttachmentId = Model.AttachmentId,
-            BusinessName = Model.BusinessName,
-            Description = Model.Description,
-            File = SelectedFile is not null ? new()
+            await Task.Delay(1000);
+
+            await OnSubmit.InvokeAsync(new()
             {
-                Bytes = SelectedFile.Bytes,
-                Filename = SelectedFile.Filename
-            } : null,
-            GST = Model.GST,
-            InvoiceDate = Model.InvoiceDate
-        });
+                Amount = Model.Amount,
+                AttachmentId = Model.AttachmentId,
+                BusinessName = Model.BusinessName,
+                Description = Model.Description,
+                File = SelectedFile is not null ? new()
+                {
+                    Bytes = SelectedFile.Bytes,
+                    Filename = SelectedFile.Filename
+                } : null,
+                GST = Model.GST,
+                InvoiceDate = Model.InvoiceDate
+            });
+        }
+        finally
+        {
+            IsDisabled = false;
+        }
+
     }
     private async Task FileDownload(FileViewModel args)
     {

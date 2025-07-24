@@ -27,12 +27,12 @@ public partial class Index(IDbContextFactory<AccountingContext> contextFactory, 
             using var context = await contextFactory.CreateDbContextAsync();
             context.Expenses.Remove(item);
             await context.SaveChangesAsync();
-            ExpenseEntities.Remove(item);
+            ExpenseEntities?.Remove(item);
             this.StateHasChanged();
         }
         catch
         {
-            this.Error = "There was an error deleting this record.  It may be linked to an income entry.";
+            this.Error = "Unable to delete the entry.  Please try again.";
         }
 
     }

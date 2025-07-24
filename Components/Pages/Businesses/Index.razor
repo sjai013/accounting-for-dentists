@@ -1,5 +1,7 @@
 @page "/Businesses"
+@using AccountingForDentists.Components.Pages.Businesses.Shared
 @using AccountingForDentists.Components.Pages.Shared
+@using AccountingForDentists.Components.Shared
 @rendermode InteractiveServer
 <h1 class="fw-light fs-3">Businesses</h1>
 <hr />
@@ -22,11 +24,18 @@ else
     <ul class="list-group">
         @foreach (var item in BusinessEntities)
         {
-            <li class="p-0 list-group-item d-flex gap-2 align-items-center">
-                <button @onclick="() => DeleteBusinessItem(item)" class="btn"><i class="bi bi-x-lg"></i></button>
+            <li class="p-3 list-group-item fs-4 d-flex gap-2 align-items-center justify-content-between">
                 <div>@item.Name</div>
+                <div>
+                    <button @onclick=" () => MarkDeleteBusinessItem(item)" class="btn btn-outline-dark"><i
+                            class="bi bi-trash"></i></button>
+                </div>
+
             </li>
+
         }
 
     </ul>
 }
+
+<DeleteModal @ref="DeleteConfirmModal" OnDeleteEntity="DeleteBusinessItem" />

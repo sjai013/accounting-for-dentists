@@ -10,8 +10,8 @@
 
         </div>
         <div class="col-auto">
-            <button disabled="@string.IsNullOrWhiteSpace(Model.BusinessName)" class="btn btn-outline-dark"
-                type="submit"><i class="bi bi-plus"></i> Add</button>
+            <button disabled="@DisableSubmit" class="btn btn-outline-dark" type="submit"><i class="bi bi-plus"></i>
+                Add</button>
         </div>
     </div>
 </EditForm>
@@ -20,6 +20,8 @@
 @code {
     [SupplyParameterFromForm]
     private BusinessEntityModel? Model { get; set; }
+
+    private bool DisableSubmit { get; set; } = false;
 
     protected override void OnInitialized() => Model ??= new() { BusinessName = string.Empty };
 

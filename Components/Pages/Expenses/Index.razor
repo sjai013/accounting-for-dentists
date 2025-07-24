@@ -53,7 +53,7 @@ else
                     <td class="align-content-center">$@item.GST.ToString("0.00")</td>
                     <td class="align-content-center">$@item.Total.ToString("0.00")</td>
                     <td class="align-content-center">
-                        <button class="btn" @onclick="() => DeleteExpense(item)"><i class="bi bi-x-lg"></i></button>
+                        <button class="btn" @onclick="() => DeleteExpense(item)"><i class="bi bi-trash"></i></button>
                         <button class="btn" @onclick="() => EditExpense(item)"><i class="bi bi-pencil"></i></button>
                     </td>
                 </tr>

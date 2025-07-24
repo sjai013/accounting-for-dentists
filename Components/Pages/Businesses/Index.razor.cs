@@ -1,12 +1,18 @@
+using System.Threading.Tasks;
+using AccountingForDentists.Components.Pages.Businesses.Shared;
+using AccountingForDentists.Components.Shared;
 using AccountingForDentists.Infrastructure;
 using AccountingForDentists.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace AccountingForDentists.Components.Pages;
+namespace AccountingForDentists.Components.Pages.Businesses;
 
-public partial class Businesses(IDbContextFactory<AccountingContext> contextFactory)
+public partial class Index(IDbContextFactory<AccountingContext> contextFactory)
 {
     public List<BusinessEntity>? BusinessEntities { get; set; }
+    BusinessEntity? PendingDeleteBusiness { get; set; }
+    bool DeleteInProgress { get; set; }
+    DeleteModal DeleteConfirmModal { get; set; } = null!;
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         var waitTask = Task.Delay(500);
@@ -27,12 +33,17 @@ public partial class Businesses(IDbContextFactory<AccountingContext> contextFact
         this.StateHasChanged();
     }
 
-    private async void DeleteBusinessItem(BusinessEntity entity)
+    private async Task MarkDeleteBusinessItem(BusinessEntity? entity)
+    {
+        this.PendingDeleteBusiness = entity;
+        await DeleteConfirmModal.ShowModal(entity);
+    }
+
+    private async Task DeleteBusinessItem(BusinessEntity entity)
     {
         using var context = await contextFactory.CreateDbContextAsync();
         context.Businesses.Remove(entity);
         await context.SaveChangesAsync();
         await UpdateBusinessEntities();
-        this.StateHasChanged();
     }
 }

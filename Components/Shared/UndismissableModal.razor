@@ -1,0 +1,68 @@
+<div class="modal fade @(DisplayBlock ? "d-block" : "d-none") @(ShowModal ? "show" : "")" id="staticBackdrop"
+    data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel"
+    aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="staticBackdropLabel">@Title</h1>
+                <button type="button" @onclick="() => Close()" class="btn-close" aria-label="Close"></button>
+            </div>
+            @if (@Body is not null)
+            {
+                <div class="modal-body">
+                    @Body
+                </div>
+            }
+            @if (@Footer is not null)
+            {
+                <div class="modal-footer">
+                    @Footer
+                </div>
+            }
+        </div>
+    </div>
+
+</div>
+
+<div class="modal-backdrop fade @(ShowModal ? "show" : "") @(DisplayBlock ? "d-block" : "d-none")"></div>
+
+@code {
+
+    private bool ShowModal { get; set; }
+    private bool DisplayBlock { get; set; }
+
+    [Parameter]
+    public string Title { get; set; } = string.Empty;
+
+    [Parameter]
+    public RenderFragment? Body { get; set; }
+
+    [Parameter]
+    public RenderFragment? Footer { get; set; }
+
+    [Parameter]
+    public EventCallback? OnShow { get; set; }
+
+    [Parameter]
+    public EventCallback? OnCancel { get; set; }
+
+    public async Task Show()
+    {
+        DisplayBlock = true;
+        this.StateHasChanged();
+        await Task.Delay(100);
+        ShowModal = true;
+        if (OnShow.HasValue) await OnShow.Value.InvokeAsync();
+        this.StateHasChanged();
+    }
+
+    public async Task Close()
+    {
+        ShowModal = false;
+        await Task.Delay(100);
+        DisplayBlock = false;
+        if (OnCancel.HasValue) await OnCancel.Value.InvokeAsync();
+        StateHasChanged();
+
+    }
+}

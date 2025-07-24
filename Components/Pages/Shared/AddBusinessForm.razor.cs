@@ -12,7 +12,7 @@ public partial class AddBusinessForm(IDbContextFactory<AccountingContext> contex
 
     public async Task Submit()
     {
-        if (Model is null) return;
+        if (Model is null || string.IsNullOrWhiteSpace(Model.BusinessName)) return;
 
         var businessEntity = new BusinessEntity()
         {
@@ -21,8 +21,8 @@ public partial class AddBusinessForm(IDbContextFactory<AccountingContext> contex
 
         try
         {
+            DisableSubmit = true;
             using var context = await contextFactory.CreateDbContextAsync();
-
             context.Businesses.Add(businessEntity);
             await context.SaveChangesAsync();
             OnSaveSuccessful?.Invoke(businessEntity);
@@ -34,6 +34,8 @@ public partial class AddBusinessForm(IDbContextFactory<AccountingContext> contex
         finally
         {
             Model = new() { BusinessName = string.Empty };
+            DisableSubmit = false;
+
         }
     }
 }
