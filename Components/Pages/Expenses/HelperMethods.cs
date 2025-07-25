@@ -7,7 +7,7 @@ namespace AccountingForDentists.Components.Pages.Expenses;
 
 public static class HelperMethods
 {
-    public static void AddOrUpdate(AccountingContext context, ExpensesFormSubmitViewModel model, ref ExpensesEntity entity)
+    public static void AddOrUpdate(AccountingContext context, ExpensesFormSubmitViewModel model, TenantProvider tenantProvider, ref ExpensesEntity entity)
     {
         string md5Hash = string.Empty;
         if (model.File is not null)
@@ -22,14 +22,20 @@ public static class HelperMethods
             (entity.Attachment is null
             || (entity.Attachment is not null && entity.Attachment.MD5Hash != md5Hash)))
         {
+            FileEncryptionResult encryptionResult = AttachmentEntity.Encrypt(model.File.Bytes, tenantProvider.GetUserObjectId());
+
             entity.Attachment = new()
             {
                 AttachmentId = Guid.CreateVersion7(),
                 CustomerFilename = model.File.Filename,
                 MD5Hash = md5Hash,
                 SizeBytes = model.File.Bytes.Length,
+                Key = encryptionResult.Key
             };
             context.Attachments.Add(entity.Attachment);
+            var directory = tenantProvider.AttachmentsDirectory();
+            var filePath = AttachmentEntity.GetPath(directory, entity.Attachment.AttachmentId);
+            File.WriteAllBytes(filePath, encryptionResult.Bytes);
         }
         // There is no attachemnt selected
         else if (model.File is null)

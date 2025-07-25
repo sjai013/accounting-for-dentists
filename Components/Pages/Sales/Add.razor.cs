@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AccountingForDentists.Components.Pages.Sales;
 
-public partial class Add(IDbContextFactory<AccountingContext> contextFactory, NavigationManager navigationManager)
+public partial class Add(IDbContextFactory<AccountingContext> contextFactory, TenantProvider tenantProvider, NavigationManager navigationManager)
 {
     [SupplyParameterFromQuery]
     public string? ReturnUri { get; set; } = string.Empty;
@@ -34,7 +34,7 @@ public partial class Add(IDbContextFactory<AccountingContext> contextFactory, Na
         try
         {
             using var transaction = await context.Database.BeginTransactionAsync();
-            HelperMethods.AddOrUpdate(context, model, ref entity);
+            HelperMethods.AddOrUpdate(context, model, tenantProvider, ref entity);
             await context.SaveChangesAsync();
             await transaction.CommitAsync();
             NavigateBack();

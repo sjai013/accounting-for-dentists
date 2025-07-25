@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AccountingForDentists.Components.Pages.Expenses;
 
-public partial class Add(IDbContextFactory<AccountingContext> contextFactory, NavigationManager navigationManager)
+public partial class Add(IDbContextFactory<AccountingContext> contextFactory, NavigationManager navigationManager, TenantProvider tenantProvider)
 {
     [SupplyParameterFromQuery]
     public string? ReturnUri { get; set; } = string.Empty;
@@ -15,6 +15,7 @@ public partial class Add(IDbContextFactory<AccountingContext> contextFactory, Na
 
     private async Task Submit(ExpensesFormSubmitViewModel model)
     {
+        Console.WriteLine(tenantProvider.GetSubject());
         if (model is null) return;
         using var context = await contextFactory.CreateDbContextAsync();
 
@@ -35,7 +36,7 @@ public partial class Add(IDbContextFactory<AccountingContext> contextFactory, Na
         try
         {
             using var transaction = await context.Database.BeginTransactionAsync();
-            HelperMethods.AddOrUpdate(context, model, ref entity);
+            HelperMethods.AddOrUpdate(context, model, tenantProvider, ref entity);
             await context.SaveChangesAsync();
             await transaction.CommitAsync();
             NavigateBack();

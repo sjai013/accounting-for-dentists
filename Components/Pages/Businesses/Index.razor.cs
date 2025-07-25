@@ -1,6 +1,4 @@
-using System.Threading.Tasks;
 using AccountingForDentists.Components.Pages.Businesses.Shared;
-using AccountingForDentists.Components.Shared;
 using AccountingForDentists.Infrastructure;
 using AccountingForDentists.Models;
 using Microsoft.EntityFrameworkCore;
@@ -11,14 +9,17 @@ public partial class Index(IDbContextFactory<AccountingContext> contextFactory)
 {
     public List<BusinessEntity>? BusinessEntities { get; set; }
     BusinessEntity? PendingDeleteBusiness { get; set; }
-    bool DeleteInProgress { get; set; }
     DeleteModal DeleteConfirmModal { get; set; } = null!;
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        var waitTask = Task.Delay(500);
-        await UpdateBusinessEntities();
-        await waitTask;
-        StateHasChanged();
+        if (firstRender)
+        {
+            var waitTask = Task.Delay(500);
+            await UpdateBusinessEntities();
+            await waitTask;
+            this.StateHasChanged();
+        }
+
     }
 
     private async Task UpdateBusinessEntities()

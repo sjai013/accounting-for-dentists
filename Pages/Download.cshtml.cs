@@ -20,9 +20,11 @@ public class DownloadModel(IDbContextFactory<AccountingContext> contextFactory, 
         var filePath = AttachmentEntity.GetPath(directory, FileId);
 
         using var fs = new FileStream(filePath, FileMode.Open, FileAccess.Read);
-        byte[] bytes = new byte[fs.Length];
-        fs.ReadExactly(bytes);
+        byte[] encryptedBytes = new byte[fs.Length];
+        fs.ReadExactly(encryptedBytes);
 
-        return File(bytes, "application/octet-stream", attachment.CustomerFilename);
+        FileDecryptionResult decryptionResult = attachment.Decrypt(encryptedBytes, tenantProvider.GetUserObjectId());
+
+        return File(decryptionResult.Bytes, "application/octet-stream", attachment.CustomerFilename);
     }
 }

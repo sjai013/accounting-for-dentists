@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AccountingForDentists.Components.Pages.Expenses;
 
-public partial class Edit(IDbContextFactory<AccountingContext> contextFactory, NavigationManager navigationManager)
+public partial class Edit(IDbContextFactory<AccountingContext> contextFactory, NavigationManager navigationManager, TenantProvider tenantProvider)
 {
     [Parameter]
     public required string EntityGuidString { get; set; }
@@ -73,7 +73,7 @@ public partial class Edit(IDbContextFactory<AccountingContext> contextFactory, N
         try
         {
             using var transaction = await context.Database.BeginTransactionAsync();
-            HelperMethods.AddOrUpdate(context, model, ref entity);
+            HelperMethods.AddOrUpdate(context, model, tenantProvider, ref entity);
             await context.SaveChangesAsync();
             await transaction.CommitAsync();
             NavigateBack();
