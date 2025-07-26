@@ -1,0 +1,63 @@
+<div class="d-flex flex-column gap-2">
+    <div class="d-flex gap-2">
+        <div class="me-auto fw-bold">@Model.InvoiceDate.ToString("dd/MM/yyyy")</div>
+        <div class="ms-auto d-flex flex-row gap-2 small">
+            <div class="text-success">
+                <i class="bi bi-arrow-down d-none d-sm-inline"></i>
+                $@Model.SalesExclGst.ToString("#,##0.00")
+            </div>
+            <div class="text-danger">
+                <i class="bi bi-arrow-up d-none d-sm-inline"></i>
+                $@Model.ExpensesExclGst.ToString("#,##0.00")
+            </div>
+            <div class="fw-bold">
+                <i class="bi bi-dot d-none d-sm-inline"></i>
+                $@((Model.SalesExclGst - Model.ExpensesExclGst).ToString("#,##0.00"))
+            </div>
+        </div>
+    </div>
+    <div class="d-flex flex-row gap-2">
+        <div>@Model.BusinessName</div>
+    </div>
+    <div class="d-flex">
+        <div class="ms-auto d-flex gap-2">
+            <button class="btn btn-outline-dark"
+                @onclick="() => { if (OnEditClicked.HasDelegate) OnEditClicked.InvokeAsync(); }">
+                <i class="bi bi-pencil"></i>
+            </button>
+            <button class="btn btn-outline-dark"
+                @onclick="() => { if (OnDeleteClicked.HasDelegate) OnDeleteClicked.InvokeAsync(); }">
+                <i class="bi bi-trash"></i>
+            </button>
+            @if (Model.ShowAttachmentButton)
+            {
+                <button class="btn btn-outline-dark"
+                    @onclick="() => { if (OnDownloadClicked.HasDelegate) OnDownloadClicked.InvokeAsync(); }">
+                    <i class="bi bi-file-earmark-text"></i>
+                </button>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+
+    [Parameter]
+    [EditorRequired]
+    public required ContractListItemViewModel Model { get; set; }
+
+    [Parameter]
+    public EventCallback OnEditClicked { get; set; }
+    [Parameter]
+    public EventCallback OnDeleteClicked { get; set; }
+    [Parameter]
+    public EventCallback OnDownloadClicked { get; set; }
+    public class ContractListItemViewModel
+    {
+        public DateOnly InvoiceDate { get; set; }
+        public decimal SalesExclGst { get; set; }
+        public decimal ExpensesExclGst { get; set; }
+        public string BusinessName { get; set; } = string.Empty;
+        public bool ShowAttachmentButton { get; set; } = false;
+    }
+}

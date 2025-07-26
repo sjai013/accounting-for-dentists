@@ -8,7 +8,6 @@ namespace AccountingForDentists.Components.Pages.Businesses;
 public partial class Index(IDbContextFactory<AccountingContext> contextFactory)
 {
     public List<BusinessEntity>? BusinessEntities { get; set; }
-    BusinessEntity? PendingDeleteBusiness { get; set; }
     DeleteModal DeleteConfirmModal { get; set; } = null!;
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -36,7 +35,6 @@ public partial class Index(IDbContextFactory<AccountingContext> contextFactory)
 
     private async Task MarkDeleteBusinessItem(BusinessEntity? entity)
     {
-        this.PendingDeleteBusiness = entity;
         await DeleteConfirmModal.ShowModal(entity);
     }
 

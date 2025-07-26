@@ -4,6 +4,15 @@
 
     <Body>
         Delete Contract Entry?
+        <div class="fs-5">@pendingDelete?.BusinessName @@
+            @pendingDelete?.InvoiceDateReference.Date.ToString("dd/MM/yyyy")</div>
+        <div class="d-flex gap-2 fs-5">
+            <div class="text-success"> Sales: $@pendingDelete?.SalesEntity?.Amount.ToString("#,##0.00")</div>
+            <div class="text-danger"> Expenses: $@pendingDelete?.ExpensesEntity?.Amount.ToString("#,##0.00")</div>
+        </div>
+
+
+
     </Body>
     <Footer>
         <button type="button" class="btn btn-outline-danger" disabled=@deleteInProgress
