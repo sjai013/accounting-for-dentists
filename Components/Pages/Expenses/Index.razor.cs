@@ -4,6 +4,7 @@ using AccountingForDentists.Models;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
+using static AccountingForDentists.Components.Pages.Expenses.Shared.ExpensesListItem;
 
 namespace AccountingForDentists.Components.Pages.Expenses;
 
@@ -145,6 +146,21 @@ public partial class Index(IDbContextFactory<AccountingContext> contextFactory, 
         Uri addUri = new(QueryHelpers.AddQueryString(addUriString, param));
         navigationManager.NavigateTo(addUri.ToString(), forceLoad: true);
         return Task.CompletedTask;
+    }
+
+
+    private ExpensesListItemViewModel ExpensesEntityToViewModel(ExpensesEntity entity)
+    {
+        return new()
+        {
+            AmountExclGst = entity.Amount,
+            BusinessName = entity.BusinessName,
+            Description = entity.Description,
+            Gst = entity.GST,
+            InvoiceDate = entity.DateReference.Date,
+            ShowAttachmentButton = entity.Attachment is not null,
+            Total = entity.Total
+        };
     }
 
 }

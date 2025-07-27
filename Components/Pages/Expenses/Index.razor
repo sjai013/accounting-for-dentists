@@ -1,4 +1,5 @@
 @page "/Expenses"
+@using AccountingForDentists.Components.Pages.Expenses.Shared
 @using AccountingForDentists.Components.Pages.Shared.InputDatalist
 @using AccountingForDentists.Components.Pages.Shared.YearBusinessFilter
 @using AccountingForDentists.Models
@@ -38,42 +39,25 @@
 }
 else
 {
+
+    @foreach (ExpensesEntity item in ExpenseEntities)
+    {
+        <ExpensesListItem Model="ExpensesEntityToViewModel(item)" />
+        <hr />
+
+    }
     <table class="table">
         <thead>
-            <th scope="col">Date</th>
-            <th scope="col">Business</th>
-            <th scope="col">Description</th>
-            <th scope="col">Amount</th>
-            <th scope="col">GST</th>
-            <th scope="col">Total</th>
-            <th scope="col"></th>
+            <th class="text-center" scope="col">Amount</th>
+            <th class="text-center" scope="col">GST</th>
+            <th class="text-center" scope="col">Total</th>
         </thead>
-        <tbody>
-            @foreach (ExpensesEntity item in ExpenseEntities)
-            {
-                <tr>
-                    <td class="align-content-center">@item.DateReference.Date.ToString("dd/MM/yyyy")</td>
-                    <td class="align-content-center">@item.BusinessName</td>
-                    <td class="align-content-center">@item.Description</td>
-                    <td class="align-content-center">$@item.Amount.ToString("0.00")</td>
-                    <td class="align-content-center">$@item.GST.ToString("0.00")</td>
-                    <td class="align-content-center">$@item.Total.ToString("0.00")</td>
-                    <td class="align-content-center">
-                        <button class="btn" @onclick="() => DeleteExpense(item)"><i class="bi bi-trash"></i></button>
-                        <button class="btn" @onclick="() => EditExpense(item)"><i class="bi bi-pencil"></i></button>
-                    </td>
-                </tr>
-            }
-        </tbody>
+
         <tfoot class="table-group-divider fw-bold">
             <tr>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td>$@(ExpenseEntities.Sum(x => x.Amount).ToString("0.00"))</td>
-                <td>$@(ExpenseEntities.Sum(x => x.GST).ToString("0.00"))</td>
-                <td>$@(ExpenseEntities.Sum(x => x.Total).ToString("0.00"))</td>
-                <td></td>
+                <td class="text-center">$@(ExpenseEntities.Sum(x => x.Amount).ToString("0.00"))</td>
+                <td class="text-center">$@(ExpenseEntities.Sum(x => x.GST).ToString("0.00"))</td>
+                <td class="text-center">$@(ExpenseEntities.Sum(x => x.Total).ToString("0.00"))</td>
             </tr>
         </tfoot>
     </table>
