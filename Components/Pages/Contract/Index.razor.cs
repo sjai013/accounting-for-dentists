@@ -19,7 +19,7 @@ public partial class Index(IDbContextFactory<AccountingContext> contextFactory, 
     [SupplyParameterFromQuery]
     public int FY { get; set; }
 
-    List<OptionList<string>.Option>? Businesses { get; set; } = [];
+    List<OptionList<string>.Option>? Businesses { get; set; }
 
     DeleteModal DeleteConfirmModal { get; set; } = null!;
 
@@ -32,28 +32,43 @@ public partial class Index(IDbContextFactory<AccountingContext> contextFactory, 
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        base.OnAfterRender(firstRender);
+        var waitTask = Task.Delay(1000);
         if (firstRender)
         {
-            using var context = await contextFactory.CreateDbContextAsync();
-            List<BusinessEntity> businessesEntities = await context.Businesses.OrderBy(x => x.Name).ToListAsync();
-            this.Businesses = [new OptionList<string>.Option() { Label = "All", Value = null }, .. businessesEntities.Select(x => new OptionList<string>.Option() { Label = x.Name, Value = x.Name })];
+            await UpdateBusinessEntities();
+            await waitTask;
+
+            this.StateHasChanged();
+        }
+
+        if (SFAEntities is null)
+        {
+            await RenderUpdateEntities();
+            await waitTask;
+            this.StateHasChanged();
         }
     }
 
+
     protected override async Task OnParametersSetAsync()
     {
-        await RenderUpdateEntities();
-        Console.WriteLine("OnParametersSetAsync");
+        await base.OnParametersSetAsync();
+        this.SFAEntities = null;
+        this.StateHasChanged();
+    }
+
+
+    private async Task UpdateBusinessEntities()
+    {
+        await Task.Delay(1000);
+        using var context = await contextFactory.CreateDbContextAsync();
+        List<BusinessEntity> businessesEntities = await context.Businesses.OrderBy(x => x.Name).ToListAsync();
+        this.Businesses = [new OptionList<string>.Option() { Label = "All", Value = null }, .. businessesEntities.Select(x => new OptionList<string>.Option() { Label = x.Name, Value = x.Name })];
     }
 
     private async Task RenderUpdateEntities()
     {
-        Console.WriteLine($"FY: {FY}");
-        this.SFAEntities = null;
-        var waitTask = Task.Delay(1000);
         List<ContractIncomeEntity> sfaEntities = await GetEntities();
-        await waitTask;
         this.SFAEntities = sfaEntities;
         Console.WriteLine("RenderUpdateEntities");
 
@@ -81,7 +96,7 @@ public partial class Index(IDbContextFactory<AccountingContext> contextFactory, 
         .Include(x => x.InvoiceDateReference)
         .ToListAsync();
 
-        return (sfaEntities);
+        return sfaEntities;
     }
 
     private void SelectBusiness(string? selectedBusiness)
@@ -173,6 +188,6 @@ public partial class Index(IDbContextFactory<AccountingContext> contextFactory, 
         // Delete SFA record
         context.ContractIncome.Remove(item);
         await context.SaveChangesAsync();
-        SFAEntities?.Remove(item);
+        this.SFAEntities = null;
     }
 }

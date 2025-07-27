@@ -4,23 +4,47 @@
 @rendermode InteractiveServer
 <h1 class="fw-light fs-3">Income</h1>
 <hr />
-<div class="container-fluid ps-0">
-    <div class="row gy-2">
-        <div class="col-md-4">
-            <div class="d-flex flex-row gap-2">
-                <div style="flex-basis:40px" class="flex-shrink-0 flex-grow-0 align-content-center">FY</div>
-                <FYOptionList class="flex-grow-1" @bind-SelectedFY:get="FY" @bind-SelectedFY:set="SelectFY" />
+@if (Businesses is null)
+{
+    <div class="container-fluid ps-0">
+        <div class="row gy-2">
+            <div class="col-md-4">
+                <div class="p-0 container-fluid placeholder-glow">
+                    <div style="height:24px" class="placeholder col-12 rounded-2"></div>
+                </div>
             </div>
-        </div>
-        <div class="col-md-8">
-            <div class="d-flex flex-row gap-2">
-                <div style="flex-basis:40px" class="flex-shrink-0 flex-grow-0 align-content-center">Cinic</div>
-                <OptionList class="flex-grow-1" Items="Businesses!" @bind-Selected:get="Business"
-                    @bind-Selected:set="SelectBusiness" />
+            <div class="col-md-8">
+                <div class="d-flex flex-row gap-2">
+                    <div class="p-0 container-fluid placeholder-glow">
+                        <div style="height:24px" class="placeholder col-12 rounded-2"></div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
-</div>
+}
+else
+{
+    <div class="container-fluid ps-0">
+        <div class="row gy-2">
+            <div class="col-md-4">
+                <div class="d-flex flex-row gap-2">
+                    <div style="flex-basis:40px" class="flex-shrink-0 flex-grow-0 align-content-center">FY</div>
+                    <FYOptionList class="flex-grow-1" @bind-SelectedFY:get="FY" @bind-SelectedFY:set="SelectFY" />
+                </div>
+            </div>
+            <div class="col-md-8">
+                <div class="d-flex flex-row gap-2">
+                    <div style="flex-basis:40px" class="flex-shrink-0 flex-grow-0 align-content-center">Cinic</div>
+                    <OptionList class="flex-grow-1" Items="Businesses!" @bind-Selected:get="Business"
+                        @bind-Selected:set="SelectBusiness" />
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+
 <hr />
 @if (SFAEntities is null)
 {

@@ -42,16 +42,16 @@
 
     public async Task Delete()
     {
-        var minWaitTime = Task.Delay(250);
         this.deleteInProgress = true;
         try
         {
+            await Task.Delay(250);
             await OnDeleteEntity.InvokeAsync(pendingDelete);
+            await modal.Close();
         }
         finally
         {
-            await minWaitTime;
-            await modal.Close();
+            this.deleteInProgress = false;
         }
     }
 

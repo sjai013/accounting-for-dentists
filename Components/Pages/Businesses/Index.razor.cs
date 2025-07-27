@@ -11,14 +11,13 @@ public partial class Index(IDbContextFactory<AccountingContext> contextFactory)
     DeleteModal DeleteConfirmModal { get; set; } = null!;
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (firstRender)
+        if (BusinessEntities is null)
         {
             var waitTask = Task.Delay(500);
             await UpdateBusinessEntities();
             await waitTask;
             this.StateHasChanged();
         }
-
     }
 
     private async Task UpdateBusinessEntities()
@@ -27,9 +26,10 @@ public partial class Index(IDbContextFactory<AccountingContext> contextFactory)
         BusinessEntities = await context.Businesses.ToListAsync();
 
     }
-    private async void BusinessListUpdated(BusinessEntity args)
+
+    private void BusinessListUpdated(BusinessEntity args)
     {
-        await UpdateBusinessEntities();
+        BusinessEntities = null;
         this.StateHasChanged();
     }
 
@@ -43,6 +43,7 @@ public partial class Index(IDbContextFactory<AccountingContext> contextFactory)
         using var context = await contextFactory.CreateDbContextAsync();
         context.Businesses.Remove(entity);
         await context.SaveChangesAsync();
-        await UpdateBusinessEntities();
+        BusinessEntities = null;
+        this.StateHasChanged();
     }
 }
