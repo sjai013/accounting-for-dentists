@@ -1,3 +1,4 @@
+using AccountingForDentists.Components.Pages.Shared;
 using AccountingForDentists.Infrastructure;
 using AccountingForDentists.Models;
 using Microsoft.AspNetCore.Components;
@@ -8,16 +9,58 @@ namespace AccountingForDentists.Components.Pages.Expenses;
 
 public partial class Index(IDbContextFactory<AccountingContext> contextFactory, NavigationManager navigationManager)
 {
+    [SupplyParameterFromQuery]
+    public string? Business { get; set; }
+
+    [SupplyParameterFromQuery]
+    public int FY { get; set; }
+
+    List<OptionList<string>.Option>? Businesses { get; set; }
+
     public List<ExpensesEntity>? ExpenseEntities { get; set; }
     public string? Error { get; set; }
+
+    protected override void OnInitialized()
+    {
+        if (FY == default)
+            FY = DateTime.Now.AddMonths(6).Year;
+    }
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        Task waitTask = Task.Delay(500);
-        using var context = await contextFactory.CreateDbContextAsync();
-        var entities = await context.Expenses.Include(x => x.DateReference).OrderByDescending(x => x.DateReference.Date).ToListAsync();
-        await waitTask;
-        ExpenseEntities = entities;
-        StateHasChanged();
+        var waitTask = Task.Delay(250);
+        if (firstRender)
+        {
+            await UpdateBusinessEntities();
+            await waitTask;
+            this.StateHasChanged();
+        }
+
+        if (ExpenseEntities is null)
+        {
+            using var context = await contextFactory.CreateDbContextAsync();
+            var entitiesQuery = context.Expenses
+                .Include(x => x.DateReference)
+                .Where(x => Business == null || x.BusinessName.Trim() == Business.Trim());
+
+            if (FY != default)
+            {
+                DateOnly startDate = DateOnly.FromDateTime(new DateTime(FY - 1, 7, 1));
+                DateOnly endDate = DateOnly.FromDateTime(new DateTime(FY, 7, 1));
+                entitiesQuery = entitiesQuery.Where(x => x.DateReference.Date >= startDate && x.DateReference.Date < endDate);
+            }
+
+            ExpenseEntities = await entitiesQuery.OrderByDescending(x => x.DateReference.Date).ToListAsync();
+            await waitTask;
+            this.StateHasChanged();
+        }
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await base.OnParametersSetAsync();
+        this.ExpenseEntities = null;
+        this.StateHasChanged();
     }
 
     private async Task DeleteExpense(ExpensesEntity item)
@@ -35,6 +78,46 @@ public partial class Index(IDbContextFactory<AccountingContext> contextFactory, 
             this.Error = "Unable to delete the entry.  Please try again.";
         }
 
+    }
+    private async Task UpdateBusinessEntities()
+    {
+        using var context = await contextFactory.CreateDbContextAsync();
+        List<string> businessesEntities = await context.ContractIncome
+            .Select(x => x.BusinessName.Trim())
+            .Where(x => !string.IsNullOrWhiteSpace(x))
+            .OrderBy(x => x)
+            .Distinct()
+            .ToListAsync();
+        this.Businesses = [new OptionList<string>.Option() { Label = "All", Value = null }, new OptionList<string>.Option() { Label = "(Unspecified)", Value = "" }, .. businessesEntities.Select(x => new OptionList<string>.Option() { Label = x, Value = x })];
+    }
+
+    private void SelectBusiness(string? selectedBusiness)
+    {
+        string newUri;
+        Dictionary<string, object?> uriParams = new()
+        {
+            ["Business"] = selectedBusiness,
+            ["FY"] = FY
+        };
+
+        newUri = navigationManager.GetUriWithQueryParameters(uriParams);
+        Business = selectedBusiness;
+        navigationManager.NavigateTo(newUri);
+    }
+
+    void SelectFY(int FY)
+    {
+        this.FY = FY;
+        string newUri;
+        if (FY == default)
+        {
+            newUri = navigationManager.GetUriWithQueryParameter("FY", (int?)null);
+        }
+        else
+        {
+            newUri = navigationManager.GetUriWithQueryParameter("FY", FY);
+        }
+        navigationManager.NavigateTo(newUri);
     }
 
     private Task EditExpense(ExpensesEntity item)

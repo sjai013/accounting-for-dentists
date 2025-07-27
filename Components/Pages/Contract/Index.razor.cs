@@ -23,7 +23,6 @@ public partial class Index(IDbContextFactory<AccountingContext> contextFactory, 
 
     DeleteModal DeleteConfirmModal { get; set; } = null!;
 
-
     protected override void OnInitialized()
     {
         if (FY == default)
@@ -32,12 +31,11 @@ public partial class Index(IDbContextFactory<AccountingContext> contextFactory, 
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        var waitTask = Task.Delay(1000);
+        var waitTask = Task.Delay(250);
         if (firstRender)
         {
             await UpdateBusinessEntities();
             await waitTask;
-
             this.StateHasChanged();
         }
 
@@ -49,7 +47,6 @@ public partial class Index(IDbContextFactory<AccountingContext> contextFactory, 
         }
     }
 
-
     protected override async Task OnParametersSetAsync()
     {
         await base.OnParametersSetAsync();
@@ -57,21 +54,22 @@ public partial class Index(IDbContextFactory<AccountingContext> contextFactory, 
         this.StateHasChanged();
     }
 
-
     private async Task UpdateBusinessEntities()
     {
-        await Task.Delay(1000);
         using var context = await contextFactory.CreateDbContextAsync();
-        List<BusinessEntity> businessesEntities = await context.Businesses.OrderBy(x => x.Name).ToListAsync();
-        this.Businesses = [new OptionList<string>.Option() { Label = "All", Value = null }, .. businessesEntities.Select(x => new OptionList<string>.Option() { Label = x.Name, Value = x.Name })];
+        List<string> businessesEntities = await context.ContractIncome
+            .Select(x => x.BusinessName.Trim())
+            .Where(x => !string.IsNullOrWhiteSpace(x))
+            .OrderBy(x => x)
+            .Distinct()
+            .ToListAsync();
+        this.Businesses = [new OptionList<string>.Option() { Label = "All", Value = null }, new OptionList<string>.Option() { Label = "(Unspecified)", Value = "" }, .. businessesEntities.Select(x => new OptionList<string>.Option() { Label = x, Value = x })];
     }
 
     private async Task RenderUpdateEntities()
     {
         List<ContractIncomeEntity> sfaEntities = await GetEntities();
         this.SFAEntities = sfaEntities;
-        Console.WriteLine("RenderUpdateEntities");
-
     }
 
     private async Task<List<ContractIncomeEntity>> GetEntities()
@@ -81,14 +79,13 @@ public partial class Index(IDbContextFactory<AccountingContext> contextFactory, 
         .Include(x => x.SalesEntity)
         .Include(x => x.ExpensesEntity)
         .Include(x => x.Attachment)
-        .Where(x => x.BusinessName == Business || Business == null);
+        .Where(x => Business == null || x.BusinessName.Trim() == Business.Trim());
 
         if (FY != default)
         {
             DateOnly startDate = DateOnly.FromDateTime(new DateTime(FY - 1, 7, 1));
             DateOnly endDate = DateOnly.FromDateTime(new DateTime(FY, 7, 1));
             sfaEntitiesQuery = sfaEntitiesQuery.Where(x => x.InvoiceDateReference.Date >= startDate && x.InvoiceDateReference.Date < endDate);
-            Console.WriteLine($"Filter for invoices between: {startDate} and {endDate}");
         }
 
         List<ContractIncomeEntity> sfaEntities = await sfaEntitiesQuery
@@ -141,7 +138,6 @@ public partial class Index(IDbContextFactory<AccountingContext> contextFactory, 
         navigationManager.NavigateTo(editUri.ToString(), forceLoad: true);
     }
 
-
     void AddContractIncome(Microsoft.AspNetCore.Components.Web.MouseEventArgs args)
     {
         string currentBaseUri = navigationManager.ToAbsoluteUri(navigationManager.Uri).GetLeftPart(UriPartial.Path);
@@ -157,10 +153,7 @@ public partial class Index(IDbContextFactory<AccountingContext> contextFactory, 
 
     async Task DownloadInvoice(ContractIncomeEntity item)
     {
-        Console.WriteLine("Download");
         if (item.Attachment is null) return;
-        Console.WriteLine("Download Prep");
-
         await JSRuntime.InvokeVoidAsync("open", $"/portal/download/{item.Attachment.AttachmentId}", "");
     }
 
@@ -175,6 +168,7 @@ public partial class Index(IDbContextFactory<AccountingContext> contextFactory, 
             ShowAttachmentButton = entity.Attachment is not null
         };
     }
+
     private async Task DeleteContractIncome(ContractIncomeEntity item)
     {
         using var context = await contextFactory.CreateDbContextAsync();

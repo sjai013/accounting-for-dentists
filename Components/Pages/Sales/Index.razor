@@ -1,12 +1,13 @@
 @page "/Sales"
 @using AccountingForDentists.Components.Pages.Shared.InputDatalist
+@using AccountingForDentists.Components.Pages.Shared.YearBusinessFilter
 @using AccountingForDentists.Models
 @rendermode InteractiveServer
 
 
 
 <h1 class="fw-light fs-3">Sales</h1>
-<hr />
+
 
 @if (Error is not null)
 {
@@ -15,20 +16,24 @@
     </div>
 }
 
+<hr />
+<YearBusinessFilter @bind-SelectedFY:get="FY" @bind-SelectedFY:set="SelectFY" @bind-SelectedBusiness:get="Business"
+    @bind-SelectedBusiness:set="SelectBusiness" Businesses="Businesses!" />
+<hr />
 
 @if (SaleEntities is null)
 {
     <div class="d-flex flex-column gap-2">
-        <div class="container-fluid placeholder-glow">
+        <div class="p-0 container-fluid placeholder-glow">
             <div style="height:50px" class="placeholder col-12 rounded-2"></div>
         </div>
-        <div class="container-fluid placeholder-glow">
+        <div class="p-0 container-fluid placeholder-glow">
             <div style="height:150px" class="placeholder col-12 rounded-2"></div>
         </div>
-        <div class="container-fluid placeholder-glow">
+        <div class="p-0 container-fluid placeholder-glow">
             <div style="height:50px" class="placeholder col-12 rounded-2"></div>
         </div>
-        <div class="container-fluid placeholder-glow">
+        <div class="p-0 container-fluid placeholder-glow">
             <div style="height:50px" class="placeholder col-12 rounded-2"></div>
         </div>
     </div>
