@@ -82,7 +82,7 @@ public partial class Index(IDbContextFactory<AccountingContext> contextFactory, 
     private async Task UpdateBusinessEntities()
     {
         using var context = await contextFactory.CreateDbContextAsync();
-        List<string> businessesEntities = await context.ContractIncome
+        List<string> businessesEntities = await context.Sales
             .Select(x => x.BusinessName.Trim())
             .Where(x => !string.IsNullOrWhiteSpace(x))
             .OrderBy(x => x)
