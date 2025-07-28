@@ -1,14 +1,17 @@
+using AccountingForDentists.Components.Pages.Expenses.Shared;
 using AccountingForDentists.Components.Pages.Shared;
 using AccountingForDentists.Infrastructure;
 using AccountingForDentists.Models;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.JSInterop;
+using SQLitePCL;
 using static AccountingForDentists.Components.Pages.Expenses.Shared.ExpensesListItem;
 
 namespace AccountingForDentists.Components.Pages.Expenses;
 
-public partial class Index(IDbContextFactory<AccountingContext> contextFactory, NavigationManager navigationManager)
+public partial class Index(IDbContextFactory<AccountingContext> contextFactory, NavigationManager navigationManager, IJSRuntime JSRuntime)
 {
     [SupplyParameterFromQuery]
     public string? Business { get; set; }
@@ -20,6 +23,8 @@ public partial class Index(IDbContextFactory<AccountingContext> contextFactory, 
 
     public List<ExpensesEntity>? ExpenseEntities { get; set; }
     public string? Error { get; set; }
+    DeleteModal DeleteConfirmModal { get; set; } = null!;
+
 
     protected override void OnInitialized()
     {
@@ -42,6 +47,7 @@ public partial class Index(IDbContextFactory<AccountingContext> contextFactory, 
             using var context = await contextFactory.CreateDbContextAsync();
             var entitiesQuery = context.Expenses
                 .Include(x => x.DateReference)
+                .Include(x => x.Attachment)
                 .Where(x => Business == null || x.BusinessName.Trim() == Business.Trim());
 
             if (FY != default)
@@ -66,6 +72,7 @@ public partial class Index(IDbContextFactory<AccountingContext> contextFactory, 
 
     private async Task DeleteExpense(ExpensesEntity item)
     {
+        this.Error = null;
         try
         {
             using var context = await contextFactory.CreateDbContextAsync();
@@ -80,6 +87,14 @@ public partial class Index(IDbContextFactory<AccountingContext> contextFactory, 
         }
 
     }
+
+    async Task DownloadInvoice(ExpensesEntity item)
+    {
+        if (item.Attachment is null) return;
+        await JSRuntime.InvokeVoidAsync("open", $"/portal/download/{item.Attachment.AttachmentId}", "");
+    }
+
+
     private async Task UpdateBusinessEntities()
     {
         using var context = await contextFactory.CreateDbContextAsync();

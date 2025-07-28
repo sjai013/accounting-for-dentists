@@ -14,10 +14,10 @@
                     <InputDate id="Model.InvoiceDate" class="form-control fs-3" @bind-Value="Model!.InvoiceDate" />
                 </div>
                 <div class="flex-grow-1">
-                    <label for="Model.TotalSalesGST">Clinic:</label>
+                    <label for="clinic-datalist">Clinic:</label>
                     <input @bind-value="Model.ClinicName" class="form-control fs-3" list="datalistOptions"
-                        id="exampleDataList" placeholder="Search for clinic...">
-                    <datalist id="datalistOptions">
+                        id="clinic-datalist" placeholder="Search for clinic...">
+                    <datalist id="clinic-datalist-options">
                         @foreach (string business in RegisteredBusinessNames)
                         {
                             <option value="@business" />

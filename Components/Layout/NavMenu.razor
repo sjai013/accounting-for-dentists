@@ -10,6 +10,7 @@
 
 <div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
     <nav class="nav flex-column">
+
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
                 <span class="bi bi-house-door-fill bi-nav-icon fs-4" aria-hidden="true"></span> Home
@@ -36,7 +37,7 @@
 
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="Contracts">
-                <span class="bi bi-coin bi-nav-icon fs-4" aria-hidden="true"></span> Contracts Income
+                <span class="bi bi-coin bi-nav-icon fs-4" aria-hidden="true"></span> Contracts
             </NavLink>
         </div>
 
@@ -46,11 +47,34 @@
             </NavLink>
         </div>
 
-        <div class="ps-3 text-white-50">
-            @(version)
-        </div>
+        <hr class="text-white" />
+        <div class="countainer-fluid">
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="https://github.com/sjai013/accounting-for-dentists" target="_blank"
+                    Match="NavLinkMatch.All">
+                    <span class="bi bi-github bi-nav-icon fs-4" aria-hidden="true"></span> View Source
+                </NavLink>
+            </div>
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="https://blog.accountingfordentists.com.au/" target="_blank"
+                    Match="NavLinkMatch.All">
+                    <span class="bi bi-book bi-nav-icon fs-4" aria-hidden="true"></span> Blog
+                </NavLink>
+            </div>
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="/Privacy" Match="NavLinkMatch.All">
+                    <span class="bi bi-shield bi-nav-icon fs-4" aria-hidden="true"></span> Privacy Policy
+                </NavLink>
+            </div>
 
+            <div class="ms-2 ps-4 text-white-50">
+                @(version)
+            </div>
+
+            <hr class="text-white" />
+        </div>
     </nav>
+
 
 </div>
 
