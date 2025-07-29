@@ -76,6 +76,13 @@ public partial class Form(IDbContextFactory<AccountingContext> contextFactory, I
     {
         return OnCancel.InvokeAsync();
     }
+    private Task RemoveFile()
+    {
+        Model.AttachmentId = null;
+        Model.File = null;
+        SelectedFile = null;
+        return Task.CompletedTask;
+    }
 }
 
 public class ExpensesFormViewModel

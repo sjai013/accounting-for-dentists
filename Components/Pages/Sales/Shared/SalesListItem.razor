@@ -32,7 +32,7 @@
 @code {
     [Parameter]
     [EditorRequired]
-    public required ExpensesListItemViewModel Model { get; set; }
+    public required SalesListItemViewModel Model { get; set; }
 
     [Parameter]
     public EventCallback OnEditClicked { get; set; }
@@ -41,7 +41,7 @@
     [Parameter]
     public EventCallback OnDownloadClicked { get; set; }
 
-    public class ExpensesListItemViewModel
+    public class SalesListItemViewModel
     {
         public DateOnly InvoiceDate { get; set; }
         public decimal AmountExclGst { get; set; }

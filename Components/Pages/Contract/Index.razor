@@ -3,7 +3,8 @@
 @using AccountingForDentists.Components.Pages.Shared
 @using AccountingForDentists.Components.Pages.Shared.YearBusinessFilter
 @rendermode InteractiveServer
-<h1 class="fw-light fs-3">Income</h1>
+<PageTitle>View Contract Income</PageTitle>
+<h1 class="fw-light fs-3">Contract Income</h1>
 <hr />
 <YearBusinessFilter @bind-SelectedFY:get="FY" @bind-SelectedFY:set="SelectFY" @bind-SelectedBusiness:get="Business"
     @bind-SelectedBusiness:set="SelectBusiness" Businesses="Businesses!" />

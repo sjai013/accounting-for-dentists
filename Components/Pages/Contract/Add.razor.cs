@@ -48,11 +48,15 @@ public partial class Add(IDbContextFactory<AccountingContext> contextFactory, Te
         }
     }
 
-    public void NavigateBack()
+    private void NavigateBack()
     {
         if (!string.IsNullOrEmpty(ReturnUri))
         {
             navigationManager.NavigateTo(ReturnUri);
         }
+    }
+    private void Cancel()
+    {
+        NavigateBack();
     }
 }

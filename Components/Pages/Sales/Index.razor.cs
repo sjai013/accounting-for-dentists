@@ -1,13 +1,16 @@
+using AccountingForDentists.Components.Pages.Sales.Shared;
 using AccountingForDentists.Components.Pages.Shared;
 using AccountingForDentists.Infrastructure;
 using AccountingForDentists.Models;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.JSInterop;
+using static AccountingForDentists.Components.Pages.Sales.Shared.SalesListItem;
 
 namespace AccountingForDentists.Components.Pages.Sales;
 
-public partial class Index(IDbContextFactory<AccountingContext> contextFactory, NavigationManager navigationManager)
+public partial class Index(IDbContextFactory<AccountingContext> contextFactory, NavigationManager navigationManager, IJSRuntime JSRuntime)
 {
     [SupplyParameterFromQuery]
     public string? Business { get; set; }
@@ -19,6 +22,7 @@ public partial class Index(IDbContextFactory<AccountingContext> contextFactory, 
 
     public List<SalesEntity>? SaleEntities { get; set; }
     public string? Error { get; set; }
+    DeleteModal DeleteConfirmModal { get; set; } = null!;
 
     protected override void OnInitialized()
     {
@@ -40,6 +44,7 @@ public partial class Index(IDbContextFactory<AccountingContext> contextFactory, 
             using var context = await contextFactory.CreateDbContextAsync();
             var entitiesQuery = context.Sales
                 .Include(x => x.DateReference)
+                .Include(x => x.Attachment)
                 .Where(x => Business == null || x.BusinessName.Trim() == Business.Trim());
 
             if (FY != default)
@@ -77,6 +82,12 @@ public partial class Index(IDbContextFactory<AccountingContext> contextFactory, 
             this.Error = "There was an error deleting this record.  It may be linked to an income entry.";
         }
 
+    }
+
+    async Task DownloadInvoice(SalesEntity item)
+    {
+        if (item.Attachment is null) return;
+        await JSRuntime.InvokeVoidAsync("open", $"/portal/download/{item.Attachment.AttachmentId}", "");
     }
 
     private async Task UpdateBusinessEntities()
@@ -145,6 +156,20 @@ public partial class Index(IDbContextFactory<AccountingContext> contextFactory, 
         Uri addUri = new(QueryHelpers.AddQueryString(addUriString, param));
         navigationManager.NavigateTo(addUri.ToString(), forceLoad: true);
         return Task.CompletedTask;
+    }
+
+    private SalesListItemViewModel SalesEntityToViewModel(SalesEntity entity)
+    {
+        return new()
+        {
+            AmountExclGst = entity.Amount,
+            BusinessName = entity.BusinessName,
+            Description = entity.Description,
+            Gst = entity.GST,
+            InvoiceDate = entity.DateReference.Date,
+            ShowAttachmentButton = entity.Attachment is not null,
+            Total = entity.Total
+        };
     }
 
 }

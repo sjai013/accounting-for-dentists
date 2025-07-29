@@ -1,7 +1,6 @@
 @using System.Security.Cryptography
 @using AccountingForDentists.Components.Pages.Shared.InputFile
 @inject IJSRuntime JSRuntime
-
 <EditForm id="contract-income-form" Model=@Model OnSubmit="Submit" class="d-flex flex-column gap-3">
     <div class="d-flex flex-xl-row flex-column gap-2">
         <div class="border border-1 p-3 pt-1 rounded flex-grow-1">
@@ -15,7 +14,7 @@
                 </div>
                 <div class="flex-grow-1">
                     <label for="clinic-datalist">Clinic:</label>
-                    <input @bind-value="Model.ClinicName" class="form-control fs-3" list="datalistOptions"
+                    <input @bind-value="Model.ClinicName" class="form-control fs-3" list="clinic-datalist-options"
                         id="clinic-datalist" placeholder="Search for clinic...">
                     <datalist id="clinic-datalist-options">
                         @foreach (string business in RegisteredBusinessNames)

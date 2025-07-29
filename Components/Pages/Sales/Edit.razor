@@ -1,7 +1,10 @@
 @page "/Sales/Edit/{EntityGuidString}"
 @rendermode InteractiveServer
-
 @using AccountingForDentists.Components.Pages.Sales.Shared
+
+<PageTitle>Edit Sale</PageTitle>
+<h1 class="fw-light fs-3">Edit Sale</h1>
+
 <Form InitialModel="@Initial" OnCancel="Cancel" OnSubmit="Submit"></Form>
 
 @code {

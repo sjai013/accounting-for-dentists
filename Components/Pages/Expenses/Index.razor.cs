@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.JSInterop;
-using SQLitePCL;
 using static AccountingForDentists.Components.Pages.Expenses.Shared.ExpensesListItem;
 
 namespace AccountingForDentists.Components.Pages.Expenses;
