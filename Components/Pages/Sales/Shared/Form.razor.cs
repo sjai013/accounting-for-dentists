@@ -2,7 +2,6 @@ using AccountingForDentists.Components.Pages.Shared.InputFile;
 using AccountingForDentists.Infrastructure;
 using Microsoft.AspNetCore.Components;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.JSInterop;
 
 namespace AccountingForDentists.Components.Pages.Sales.Shared;
 
