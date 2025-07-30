@@ -47,12 +47,13 @@ Sahil Jain
 
 ## Version History
 
-* 0.2.0
+* 1.0.0
     * Form for entering net income (combination of sales and expenses) and viewing BAS.
     * Form for entering expenses
     * View income, sales, expenses
     * Upload attachments for income or expense
     * Highly secure multi-tenant SQLite database - database decryption requires token from login provider
+
 
 
 ## License
