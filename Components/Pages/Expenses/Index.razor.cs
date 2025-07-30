@@ -90,7 +90,7 @@ public partial class Index(IDbContextFactory<AccountingContext> contextFactory, 
     async Task DownloadInvoice(ExpensesEntity item)
     {
         if (item.Attachment is null) return;
-        await JSRuntime.InvokeVoidAsync("open", $"/portal/download/{item.Attachment.AttachmentId}", "");
+        navigationManager.NavigateTo($"/portal/download/{item.Attachment.AttachmentId}", true);
     }
 
 

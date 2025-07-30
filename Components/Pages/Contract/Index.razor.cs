@@ -151,10 +151,11 @@ public partial class Index(IDbContextFactory<AccountingContext> contextFactory, 
         navigationManager.NavigateTo(addUri.ToString(), forceLoad: true);
     }
 
-    async Task DownloadInvoice(ContractIncomeEntity item)
+    Task DownloadInvoice(ContractIncomeEntity item)
     {
-        if (item.Attachment is null) return;
-        await JSRuntime.InvokeVoidAsync("open", $"/portal/download/{item.Attachment.AttachmentId}", "");
+        if (item.Attachment is null) return Task.CompletedTask;
+        navigationManager.NavigateTo($"/portal/download/{item.Attachment.AttachmentId}", true);
+        return Task.CompletedTask;
     }
 
     private static ContractListItem.ContractListItemViewModel ContractListItemViewModelFromEntity(ContractIncomeEntity entity)

@@ -6,7 +6,7 @@ using Microsoft.JSInterop;
 
 namespace AccountingForDentists.Components.Pages.Expenses.Shared;
 
-public partial class Form(IDbContextFactory<AccountingContext> contextFactory, IJSRuntime JSRuntime)
+public partial class Form(IDbContextFactory<AccountingContext> contextFactory, NavigationManager navigationManager)
 {
     public string[] RegisteredBusinessNames { get; set; } = [];
     public string SelectedItem = string.Empty;
@@ -61,10 +61,11 @@ public partial class Form(IDbContextFactory<AccountingContext> contextFactory, I
         }
 
     }
-    private async Task FileDownload(FileViewModel args)
+    private Task FileDownload(FileViewModel args)
     {
-        if (Model.File is null) return;
-        await JSRuntime.InvokeVoidAsync("open", $"/portal/download/{Model.AttachmentId}", "");
+        if (Model.File is null) return Task.CompletedTask;
+        navigationManager.NavigateTo($"/portal/download/{Model.AttachmentId}", true);
+        return Task.CompletedTask;
     }
     private Task SelectFile(FileSelectedViewModel args)
     {

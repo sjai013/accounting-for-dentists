@@ -6,7 +6,7 @@ using Microsoft.JSInterop;
 
 namespace AccountingForDentists.Components.Pages.Contract.Shared;
 
-public partial class Form(IDbContextFactory<AccountingContext> contextFactory)
+public partial class Form(IDbContextFactory<AccountingContext> contextFactory, NavigationManager navigationManager)
 {
     const int maxFileSize = 5000000;
     [SupplyParameterFromForm]
@@ -71,10 +71,11 @@ public partial class Form(IDbContextFactory<AccountingContext> contextFactory)
         };
         return Task.CompletedTask;
     }
-    private async Task FileDownload(FileViewModel args)
+    private Task FileDownload(FileViewModel args)
     {
-        if (Model.File is null) return;
-        await JSRuntime.InvokeVoidAsync("open", $"/portal/download/{Model.AttachmentId}", "");
+        if (Model.File is null) return Task.CompletedTask;
+        navigationManager.NavigateTo($"/portal/download/{Model.AttachmentId}", true);
+        return Task.CompletedTask;
     }
     private Task RemoveFile()
     {
