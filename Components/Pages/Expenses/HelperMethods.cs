@@ -37,6 +37,11 @@ public static class HelperMethods
             var filePath = AttachmentEntity.GetPath(directory, entity.Attachment.AttachmentId);
             File.WriteAllBytes(filePath, encryptionResult.Bytes);
         }
+        // There is an attachment already and it hasn't been removed.  Don't change the attachment
+        else if (model.AttachmentId is not null)
+        {
+            // Do nothing, keep the existing attachment
+        }
         // There is no attachemnt selected
         else if (model.File is null)
         {
