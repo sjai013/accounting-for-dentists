@@ -2,11 +2,10 @@ using AccountingForDentists.Components.Pages.Shared.InputFile;
 using AccountingForDentists.Infrastructure;
 using Microsoft.AspNetCore.Components;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.JSInterop;
 
 namespace AccountingForDentists.Components.Pages.Sales.Shared;
 
-public partial class Form(IDbContextFactory<AccountingContext> contextFactory, IJSRuntime JSRuntime)
+public partial class Form(IDbContextFactory<AccountingContext> contextFactory, NavigationManager navigationManager)
 {
     public string[] RegisteredBusinessNames { get; set; } = [];
     public string SelectedItem = string.Empty;
@@ -50,10 +49,11 @@ public partial class Form(IDbContextFactory<AccountingContext> contextFactory, I
             InvoiceDate = Model.InvoiceDate
         });
     }
-    private async Task FileDownload(FileViewModel args)
+    private Task FileDownload(FileViewModel args)
     {
-        if (Model.File is null) return;
-        await JSRuntime.InvokeVoidAsync("open", $"/portal/download/{Model.AttachmentId}", "");
+        if (Model.File is null) return Task.CompletedTask;
+        navigationManager.NavigateTo($"/portal/download/{Model.AttachmentId}", true);
+        return Task.CompletedTask;
     }
     private Task SelectFile(FileSelectedViewModel args)
     {

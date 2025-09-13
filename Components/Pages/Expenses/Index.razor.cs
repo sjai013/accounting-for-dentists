@@ -10,7 +10,7 @@ using static AccountingForDentists.Components.Pages.Expenses.Shared.ExpensesList
 
 namespace AccountingForDentists.Components.Pages.Expenses;
 
-public partial class Index(IDbContextFactory<AccountingContext> contextFactory, NavigationManager navigationManager, IJSRuntime JSRuntime)
+public partial class Index(IDbContextFactory<AccountingContext> contextFactory, NavigationManager navigationManager)
 {
     [SupplyParameterFromQuery]
     public string? Business { get; set; }
@@ -87,10 +87,11 @@ public partial class Index(IDbContextFactory<AccountingContext> contextFactory, 
 
     }
 
-    async Task DownloadInvoice(ExpensesEntity item)
+    Task DownloadInvoice(ExpensesEntity item)
     {
-        if (item.Attachment is null) return;
-        await JSRuntime.InvokeVoidAsync("open", $"/portal/download/{item.Attachment.AttachmentId}", "");
+        if (item.Attachment is null) return Task.CompletedTask;
+        navigationManager.NavigateTo($"/portal/download/{item.Attachment.AttachmentId}", true);
+        return Task.CompletedTask;
     }
 
 

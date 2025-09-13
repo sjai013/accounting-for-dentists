@@ -46,7 +46,10 @@ Raise an issue for help
 Sahil Jain
 
 ## Version History
-
+* 1.1.0
+    * Feature: Modified contract page to allow entry of multiple sales and expenses.
+    * Bugfix: Fixed a visual bug where the currency icon would not be visible while editing an input form.
+    * Bugfix: Fixed a bug where attachments would be deleted when editing a form.
 * 1.0.0
     * Form for entering net income (combination of sales and expenses) and viewing BAS.
     * Form for entering expenses
