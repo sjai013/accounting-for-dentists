@@ -35,6 +35,18 @@ public partial class Form(IDbContextFactory<AccountingContext> contextFactory, N
     protected override void OnParametersSet()
     {
         Model = InitialModel ?? Model;
+        if (Model.SalesAmounts.Count == 0)
+            Model.SalesAmounts.Add(new());
+        if (Model.ExpensesAmounts.Count == 0)
+            Model.ExpensesAmounts.Add(new());
+
+        if (InitialModel is not null)
+        {
+            Model.SalesAmounts[0].Amount = InitialModel.TotalSalesAmount;
+            Model.SalesAmounts[0].GST = InitialModel.TotalSalesGSTAmount;
+            Model.ExpensesAmounts[0].Amount = InitialModel.TotalExpensesAmount;
+            Model.ExpensesAmounts[0].GST = InitialModel.TotalExpensesGSTAmount;
+        }
     }
 
     private async Task Submit(Microsoft.AspNetCore.Components.Forms.EditContext args)
@@ -84,14 +96,27 @@ public partial class Form(IDbContextFactory<AccountingContext> contextFactory, N
         SelectedFile = null;
         return Task.CompletedTask;
     }
+
+    private Task OnAddExpenseRow()
+    {
+        Model.ExpensesAmounts.Add(new());
+        return Task.CompletedTask;
+    }
+    private Task OnAddSalesRow()
+    {
+        Model.SalesAmounts.Add(new());
+        return Task.CompletedTask;
+    }
 }
 
 public class ContractViewModel
 {
-    public decimal TotalSalesAmount { get; set; }
-    public decimal TotalSalesGSTAmount { get; set; }
-    public decimal TotalExpensesAmount { get; set; }
-    public decimal TotalExpensesGSTAmount { get; set; }
+    public decimal TotalSalesAmount => SalesAmounts.Sum(x => x.Amount);
+    public decimal TotalSalesGSTAmount => SalesAmounts.Sum(x => x.GST);
+    public List<AmountWithGST> SalesAmounts { get; set; } = [];
+    public decimal TotalExpensesAmount => ExpensesAmounts.Sum(x => x.Amount);
+    public decimal TotalExpensesGSTAmount => ExpensesAmounts.Sum(x => x.GST);
+    public List<AmountWithGST> ExpensesAmounts { get; set; } = [];
     public decimal IncomeAmount { get => (TotalSalesAmount + TotalSalesGSTAmount) - (TotalExpensesAmount + TotalExpensesGSTAmount); }
     public decimal IncomeGST { get => TotalExpensesGSTAmount - TotalSalesGSTAmount; }
     public decimal TotalIncome { get => IncomeAmount + IncomeGST; }
@@ -99,6 +124,12 @@ public class ContractViewModel
     public string ClinicName { get; set; } = string.Empty;
     public Guid? AttachmentId { get; set; }
     public FileViewModel? File { get; set; }
+
+    public class AmountWithGST
+    {
+        public decimal Amount { get; set; }
+        public decimal GST { get; set; }
+    }
 }
 
 public class ContractSubmitViewModel
