@@ -27,70 +27,80 @@
         </div>
     </div>
     <div class="d-flex flex-xl-row flex-column gap-2">
-        <div class="border border-1 p-3 pt-1 rounded">
+        <div class="d-flex flex-column border border-1 p-3 pt-1 rounded gap-2 flex-grow-1">
             <h1 class="display-6 border-bottom d-flex flex-row justify-content-between">
                 <div>Sales </div>
-                <div>$ @((Model.TotalSalesAmount + Model.TotalSalesGSTAmount).ToString("0.00"))</div>
+                <div>$ @((Model.SalesAmounts.Sum(x => x.Amount) + Model.SalesAmounts.Sum(x => x.GST)).ToString("0.00"))
+                </div>
             </h1>
-            <div class="d-flex flex-row gap-2">
-                <div class="flex-grow-1">
-                    <label for="Model.TotalSalesAmount">Amount:</label>
-                    <div class="fs-3 input-group">
-                        <InputNumber id="Model.TotalSalesAmount" class="form-control ps-5 fs-3"
-                            @bind-Value="Model!.TotalSalesAmount" />
-                        <span style="z-index: 3;" class="input-group-prepend">
-                            <div class=" ms-4 position-absolute top-50 start-0 translate-middle ">
-                                <span class="text-muted ">$</span>
-                            </div>
-                        </span>
+            @foreach (var salesAmount in Model.SalesAmounts)
+            {
+                <div class="d-flex flex-row gap-2">
+                    <div class="flex-grow-1">
+                        <label for="Model.TotalSalesAmount">Amount:</label>
+                        <div class="fs-3 input-group">
+                            <InputNumber class="form-control ps-5 fs-3 bg-transparent" @bind-Value="salesAmount.Amount" />
+                            <span style="z-index: 3;" class="input-group-prepend">
+                                <div class=" ms-4 position-absolute top-50 start-0 translate-middle ">
+                                    <span class="text-muted ">$</span>
+                                </div>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="flex-grow-1">
+                        <label for="Model.TotalSalesGST">GST:</label>
+                        <div class="fs-3 input-group">
+                            <InputNumber class="form-control ps-5 fs-3 bg-transparent" @bind-Value="salesAmount.GST" />
+                            <span style="z-index: 3;" class="input-group-prepend">
+                                <div class=" ms-4 position-absolute top-50 start-0 translate-middle ">
+                                    <span class="text-muted ">$</span>
+                                </div>
+                            </span>
+                        </div>
                     </div>
                 </div>
-                <div class="flex-grow-1">
-                    <label for="Model.TotalSalesGST">GST:</label>
-                    <div class="fs-3 input-group">
-                        <InputNumber class="form-control ps-5 fs-3" @bind-Value="Model!.TotalSalesGSTAmount" />
-                        <span style="z-index: 3;" class="input-group-prepend">
-                            <div class=" ms-4 position-absolute top-50 start-0 translate-middle ">
-                                <span class="text-muted ">$</span>
-                            </div>
-                        </span>
-                    </div>
-                </div>
-            </div>
+            }
+            <button class="btn btn-primary btn-sm btn-block" @onclick="OnAddSalesRow" type="button">Add Sales </button>
         </div>
 
-        <div class="border border-1 p-3 pt-1 rounded">
+        <div class="d-flex flex-column border border-1 p-3 pt-1 rounded gap-2 flex-grow-1">
             <h1 class="display-6 border-bottom d-flex flex-row justify-content-between">
                 <div>Expenses</div>
                 <div>$ @(
-                                        (Model.TotalExpensesAmount +
-                                        Model.TotalExpensesGSTAmount).ToString("0.00")
+                                        (Model.ExpensesAmounts.Sum(x => x.Amount) +
+                                        Model.ExpensesAmounts.Sum(x => x.GST)).ToString("0.00")
                                         )</div>
             </h1>
-            <div class="d-flex flex-row gap-2">
-                <div class="flex-grow-1">
-                    <label for="Model.ServiceFee">Expenses:</label>
-                    <div class="fs-3 input-group">
-                        <InputNumber class="form-control ps-5 fs-3" @bind-Value="Model!.TotalExpensesAmount" />
-                        <span style="z-index: 3;" class="input-group-prepend">
-                            <div class=" ms-4 position-absolute top-50 start-0 translate-middle ">
-                                <span class="text-muted ">$</span>
-                            </div>
-                        </span>
+            @foreach (var expensesAmount in Model.ExpensesAmounts)
+            {
+                <div class="d-flex flex-row gap-2">
+                    <div class="flex-grow-1">
+                        <label for="Model.ServiceFee">Expense:</label>
+                        <div class="fs-3 input-group">
+                            <InputNumber class="form-control ps-5 fs-3 bg-transparent"
+                                @bind-Value="expensesAmount.Amount" />
+                            <span style="z-index: 3;" class="input-group-prepend">
+                                <div class=" ms-4 position-absolute top-50 start-0 translate-middle ">
+                                    <span class="text-muted ">$</span>
+                                </div>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="flex-grow-1">
+                        <label for="Model.ServiceFeeGST">GST:</label>
+                        <div class="fs-3 input-group">
+                            <InputNumber class="form-control ps-5 fs-3 bg-transparent" @bind-Value="expensesAmount.GST" />
+                            <span style="z-index: 3;" class="input-group-prepend">
+                                <div class=" ms-4 position-absolute top-50 start-0 translate-middle ">
+                                    <span class="text-muted ">$</span>
+                                </div>
+                            </span>
+                        </div>
                     </div>
                 </div>
-                <div class="flex-grow-1">
-                    <label for="Model.ServiceFeeGST">GST:</label>
-                    <div class="fs-3 input-group">
-                        <InputNumber class="form-control ps-5 fs-3" @bind-Value="Model!.TotalExpensesGSTAmount" />
-                        <span style="z-index: 3;" class="input-group-prepend">
-                            <div class=" ms-4 position-absolute top-50 start-0 translate-middle ">
-                                <span class="text-muted ">$</span>
-                            </div>
-                        </span>
-                    </div>
-                </div>
-            </div>
+            }
+            <button class="btn btn-primary btn-sm btn-block" @onclick="OnAddExpenseRow" type="button">Add
+                Expense</button>
         </div>
     </div>
     <FileSelector IsFileUploaded="Model.AttachmentId is not null" Value="Model.File"

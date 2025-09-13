@@ -33,10 +33,8 @@ public partial class Edit(IDbContextFactory<AccountingContext> contextFactory, T
                 {
                     ClinicName = x.BusinessName,
                     InvoiceDate = x.InvoiceDateReference.Date,
-                    TotalExpensesAmount = x.ExpensesEntity == null ? 0m : x.ExpensesEntity.Amount,
-                    TotalExpensesGSTAmount = x.ExpensesEntity == null ? 0m : x.ExpensesEntity.GST,
-                    TotalSalesAmount = x.SalesEntity == null ? 0m : x.SalesEntity.Amount,
-                    TotalSalesGSTAmount = x.SalesEntity == null ? 0m : x.SalesEntity.GST,
+                    ExpensesAmounts = x.ExpensesEntity == null ? new List<ContractViewModel.AmountWithGST>() : new List<ContractViewModel.AmountWithGST> { new() { Amount = x.ExpensesEntity.Amount, GST = x.ExpensesEntity.GST } },
+                    SalesAmounts = x.SalesEntity == null ? new List<ContractViewModel.AmountWithGST>() : new List<ContractViewModel.AmountWithGST> { new() { Amount = x.SalesEntity.Amount, GST = x.SalesEntity.GST } },
                     AttachmentId = x.Attachment != null ? x.Attachment.AttachmentId : null,
                     File = x.Attachment != null ? new()
                     {
