@@ -5,12 +5,11 @@ using AccountingForDentists.Models;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.JSInterop;
 using static AccountingForDentists.Components.Pages.Expenses.Shared.ExpensesListItem;
 
 namespace AccountingForDentists.Components.Pages.Expenses;
 
-public partial class Index(IDbContextFactory<AccountingContext> contextFactory, NavigationManager navigationManager)
+public partial class Index2(IDbContextFactory<AccountingContext> contextFactory, NavigationManager navigationManager)
 {
     [SupplyParameterFromQuery]
     public string? Business { get; set; }

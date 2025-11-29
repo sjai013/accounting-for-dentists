@@ -1,0 +1,15 @@
+{
+  "dependencies": {
+    "@tailwindcss/cli": "^4.1.17",
+    "tailwindcss": "^4.1.17"
+  },
+  "devDependencies": {
+    "@iconify/json": "^2.2.412",
+    "@iconify/tailwind4": "^1.2.0",
+    "daisyui": "^5.5.5"
+  },
+  "scripts": {
+    "build:css": "npx @tailwindcss/cli -i wwwroot/app.css -o wwwroot/dist.css",
+    "watch:css": "npx @tailwindcss/cli -i wwwroot/app.css -o wwwroot/dist.css --watch"
+  }
+}

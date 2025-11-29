@@ -1,0 +1,70 @@
+@page "/Sales2"
+@using AccountingForDentists.Components.Pages.Sales.Shared
+@using AccountingForDentists.Components.Pages.Shared.InputDatalist
+@using AccountingForDentists.Components.Pages.Shared.YearBusinessFilter
+@using AccountingForDentists.Models
+
+<PageTitle>View Sales</PageTitle>
+
+<h1 class="font-bold text-4xl text-center pt-5 pb-5">Sales</h1>
+
+@if (Error is not null)
+{
+    <div class="alert alert-warning" role="alert">
+        @(Error)
+    </div>
+}
+
+<hr />
+<YearBusinessFilter @bind-SelectedFY:get="FY" @bind-SelectedFY:set="SelectFY" @bind-SelectedBusiness:get="Business"
+    @bind-SelectedBusiness:set="SelectBusiness" Businesses="Businesses!" />
+<hr />
+
+@if (SaleEntities is null)
+{
+    <div class="d-flex flex-column gap-2">
+        <div class="p-0 container-fluid placeholder-glow">
+            <div style="height:50px" class="placeholder col-12 rounded-2"></div>
+        </div>
+        <div class="p-0 container-fluid placeholder-glow">
+            <div style="height:150px" class="placeholder col-12 rounded-2"></div>
+        </div>
+        <div class="p-0 container-fluid placeholder-glow">
+            <div style="height:50px" class="placeholder col-12 rounded-2"></div>
+        </div>
+        <div class="p-0 container-fluid placeholder-glow">
+            <div style="height:50px" class="placeholder col-12 rounded-2"></div>
+        </div>
+    </div>
+}
+else
+{
+    @foreach (SalesEntity item in SaleEntities)
+    {
+        <SalesListItem Model="SalesEntityToViewModel(item)" OnEditClicked="async () => await EditSale(item)"
+            OnDownloadClicked="async () => await DownloadInvoice(item)"
+            OnDeleteClicked="async () => await DeleteConfirmModal.ShowModal(item)" />
+        <hr />
+
+    }
+
+    <table class="table">
+        <thead>
+            <th class="text-center" scope="col">Amount</th>
+            <th class="text-center" scope="col">GST</th>
+            <th class="text-center" scope="col">Total</th>
+        </thead>
+
+        <tfoot class="table-group-divider fw-bold">
+            <tr>
+                <td class="text-center">$@(SaleEntities.Sum(x => x.Amount).ToString("0.00"))</td>
+                <td class="text-center">$@(SaleEntities.Sum(x => x.GST).ToString("0.00"))</td>
+                <td class="text-center">$@(SaleEntities.Sum(x => x.Total).ToString("0.00"))</td>
+            </tr>
+        </tfoot>
+    </table>
+
+    <button class="btn btn-primary w-100" @onclick="AddExpense">Add New</button>
+}
+
+<DeleteModal @ref="DeleteConfirmModal" OnDeleteEntity="DeleteSale" />
