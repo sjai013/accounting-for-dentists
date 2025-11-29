@@ -1,0 +1,11 @@
+@page "/Expenses/Edit2/{EntityGuidString}"
+@rendermode InteractiveServer
+<PageTitle>Edit Expense</PageTitle>
+<h1 class="fw-light fs-3">Edit Expenses</h1>
+
+@using AccountingForDentists.Components.Pages.Expenses.Shared
+<Form InitialModel="@Initial" OnCancel="Cancel" OnSubmit="Submit"></Form>
+
+@code {
+
+}

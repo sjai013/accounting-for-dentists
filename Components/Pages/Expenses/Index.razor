@@ -3,8 +3,10 @@
 @using AccountingForDentists.Components.Shared
 @using AccountingForDentists.Infrastructure
 @using AccountingForDentists.Models
+@using Microsoft.AspNetCore.WebUtilities
 @using Microsoft.EntityFrameworkCore
 @inject IDbContextFactory<AccountingContext> contextFactory
+@inject NavigationManager navigationManager
 
 <PageTitle>Expenses</PageTitle>
 
@@ -16,24 +18,24 @@
     </DetailsFilterComponent>
 
     <hr class="my-4"/>
-    @foreach (var Model in ExpenseEntities ?? Enumerable.Empty<ExpensesEntity>())
+    @foreach (var model in ExpenseEntities ?? Enumerable.Empty<ExpensesEntity>())
     {
 
         <DataListLayout>
-            <Header>@Model.DateReference.Date.ToString("dd/MM/yyyy")</Header>
+            <Header>@model.DateReference.Date.ToString("dd/MM/yyyy")</Header>
             <SecondaryHeader>
-            <span class="font-bold">@Model.BusinessName </span>
-            @if (!string.IsNullOrWhiteSpace(Model.Description))
+            <span class="font-bold">@model.BusinessName </span>
+            @if (!string.IsNullOrWhiteSpace(model.Description))
             {   
-                <span> - </span> <span class="font-extralight">@Model.Description</span>
+                <span> - </span> <span class="font-extralight">@model.Description</span>
             }
             </SecondaryHeader>
             <PrimaryValue>
-                $@Model.Amount.ToString("#,##0.00")
+                $@model.Amount.ToString("#,##0.00")
             </PrimaryValue>
             <ButtonBar>
-                <button class="btn btn-outline p-2 h-10 w-10"><span class="icon-[material-symbols--edit] w-8 h-8"> </span>
-                </button>
+                <a href="@EditUri(model)" class="btn btn-outline p-2 h-10 w-10"><span class="icon-[material-symbols--edit] w-8 h-8"> </span>
+                </a>
             </ButtonBar>
         </DataListLayout>
         <hr class="my-4"/>
@@ -99,4 +101,16 @@
         BusinessOptions = businessesEntities;
     }
 
+    private string EditUri(ExpensesEntity item) {
+        string currentBaseUri = navigationManager.ToAbsoluteUri(navigationManager.Uri).GetLeftPart(UriPartial.Path);
+        string baseEditUri = $"{currentBaseUri}/Edit/{item.ExpensesId}";
+        Dictionary<string, string?> param = new() {
+            {"returnUri", navigationManager.Uri}
+        };
+
+        Uri editUri = new(QueryHelpers.AddQueryString(baseEditUri, param));
+
+
+        return editUri.ToString();
+    }
 }

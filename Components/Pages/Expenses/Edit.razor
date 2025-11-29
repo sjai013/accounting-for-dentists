@@ -1,11 +1,10 @@
-@page "/Expenses/Edit/{EntityGuidString}"
-@rendermode InteractiveServer
-<PageTitle>Edit Expense</PageTitle>
-<h1 class="fw-light fs-3">Edit Expenses</h1>
+@page "/Expenses/Edit/{EntityGuidString:guid}"
 
-@using AccountingForDentists.Components.Pages.Expenses.Shared
-<Form InitialModel="@Initial" OnCancel="Cancel" OnSubmit="Submit"></Form>
 
-@code {
+@EntityGuidString
 
+@code
+{
+    [Parameter]
+    public required Guid EntityGuidString { get; set; }
 }
