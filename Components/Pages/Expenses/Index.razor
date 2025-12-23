@@ -57,7 +57,7 @@
         await InitialiseFYOptions();
         await IntitialiseBusinessOptions();
         await LoadExpenseData();
-        base.OnInitializedAsync();
+        await base.OnInitializedAsync();
     }
 
     private async Task LoadExpenseData()
@@ -103,14 +103,7 @@
 
     private string EditUri(ExpensesEntity item) {
         string currentBaseUri = navigationManager.ToAbsoluteUri(navigationManager.Uri).GetLeftPart(UriPartial.Path);
-        string baseEditUri = $"{currentBaseUri}/Edit/{item.ExpensesId}";
-        Dictionary<string, string?> param = new() {
-            {"returnUri", navigationManager.Uri}
-        };
-
-        Uri editUri = new(QueryHelpers.AddQueryString(baseEditUri, param));
-
-
+        string editUri = $"{currentBaseUri}/Edit/{item.ExpensesId}";
         return editUri.ToString();
     }
 }
