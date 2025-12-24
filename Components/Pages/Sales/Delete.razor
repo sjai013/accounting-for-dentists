@@ -1,0 +1,10 @@
+@page "/Sales/Delete/{EntityId:guid}"
+
+<PageTitle>Delete Sale</PageTitle>
+
+
+
+@code {
+    [Parameter]
+    public required Guid EntityId { get; set; }
+}

@@ -3,10 +3,10 @@
 @using Microsoft.EntityFrameworkCore
 
 @inject IDbContextFactory<AccountingContext> contextFactory
+<PageTitle>Edit Sale</PageTitle>
 
 <FormComponent Title="Edit Sale" FormName="edit-sale-form" ReturnUri="/Sales"
     ActionUri=@($"/Sales/Post/Edit/{SalesEntity?.SalesId.ToString()}") AllowRemoveAttachment=true    SalesEntity="SalesEntity" BuyerNames="BuyerNames"></FormComponent>
-
 
 @code {
     [Parameter]

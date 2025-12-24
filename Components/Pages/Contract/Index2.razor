@@ -1,0 +1,59 @@
+@page "/Contracts2"
+@using AccountingForDentists.Components.Pages.Contract.Shared
+@using AccountingForDentists.Components.Pages.Shared
+@using AccountingForDentists.Components.Pages.Shared.YearBusinessFilter
+@rendermode InteractiveServer
+<PageTitle>View Contract Income</PageTitle>
+<h1 class="fw-light fs-3">Contract Income</h1>
+<hr />
+<YearBusinessFilter @bind-SelectedFY:get="FY" @bind-SelectedFY:set="SelectFY" @bind-SelectedBusiness:get="Business"
+    @bind-SelectedBusiness:set="SelectBusiness" Businesses="Businesses!" />
+<hr />
+@if (SFAEntities is null)
+{
+    <div class="d-flex flex-column gap-2 pt-2 pb-2">
+        <div class="p-0 container-fluid placeholder-glow">
+            <div style="height:120px" class="placeholder col-12 rounded-2"></div>
+        </div>
+        <div class="p-0 container-fluid placeholder-glow">
+            <div style="height:98px" class="placeholder col-12 rounded-2"></div>
+        </div>
+    </div>
+}
+else
+{
+
+    <div class="d-flex flex-column">
+        @foreach (var item in SFAEntities)
+        {
+            <ContractListItem OnEditClicked="() => EditContractIncome(item)"
+                OnDeleteClicked="async () => await DeleteConfirmModal.ShowModal(item)"
+                OnDownloadClicked="() => DownloadInvoice(item)" Model="ContractListItemViewModelFromEntity(item)" />
+            <hr />
+        }
+    </div>
+
+    <div class="table-responsive"></div>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th class="text-center" scope="col">Sales</th>
+                <th class="text-center" scope="col">Expenses</th>
+                <th class="text-center" scope="col">Income</th>
+            </tr>
+        </thead>
+        <tfoot class="table-group-divider fw-bold">
+            <tr>
+                <td class="text-center">$@SFAEntities.Sum(x => x.SalesEntity?.Total ?? 0).ToString("#,#0.00")</td>
+                <td class="text-center">$@SFAEntities.Sum(x => x.ExpensesEntity?.Amount ?? 0).ToString("#,#0.00")</td>
+                <td class="text-center">$@SFAEntities.Sum(x => (x.SalesEntity?.Amount ?? 0) - (x.ExpensesEntity?.Amount ??
+                                    0)).ToString("#,#0.00")
+            </td>
+        </tr>
+    </tfoot>
+</table>
+}
+
+<button class="btn btn-primary w-100" @onclick="AddContractIncome">Add New</button>
+
+<DeleteModal @ref="DeleteConfirmModal" OnDeleteEntity="DeleteContractIncome" />

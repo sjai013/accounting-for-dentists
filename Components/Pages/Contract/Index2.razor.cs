@@ -9,7 +9,7 @@ using Microsoft.JSInterop;
 
 namespace AccountingForDentists.Components.Pages.Contract;
 
-public partial class Index(IDbContextFactory<AccountingContext> contextFactory, NavigationManager navigationManager)
+public partial class Index2(IDbContextFactory<AccountingContext> contextFactory, NavigationManager navigationManager)
 {
     List<ContractIncomeEntity>? SFAEntities;
 

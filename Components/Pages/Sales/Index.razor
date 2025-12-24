@@ -17,9 +17,8 @@
         </Button>
     </PageTitleComponent>
     <hr />
-    <DetailsFilterComponent BusinessOptions="@(new string[] { "Business A", "Business B" })"
-        FYOptions="new int[] { 2025, 2026 }" SelectedFY="@FY" SelectedBusinesses="@Business">
-
+    <DetailsFilterComponent BusinessOptions="@BusinessOptions" FYOptions="@FYOptions" SelectedFY="@FY"
+        SelectedBusinesses="@Business">
     </DetailsFilterComponent>
 
      <hr class="my-4"/>
@@ -39,8 +38,9 @@
                 $@model.Amount.ToString("#,##0.00")
             </PrimaryValue>
             <ButtonBar>
-                <a href="@EditUri(model)" class="btn btn-outline p-2 h-10 w-10"><span class="icon-[material-symbols--edit] w-8 h-8"> </span>
+                <a href="@BuildUri(model, "Edit")" class="btn btn-outline p-2 h-10 w-10"><span class="icon-[material-symbols--edit] w-8 h-8"> </span>
                 </a>
+                <a href="@BuildUri(model, "Delete")" class="btn btn-outline p-2 h-10 w-10"><span class="icon-[material-symbols--delete-outline-rounded] w-8 h-8"></span></a>
             </ButtonBar>
         </DataListLayout>
         <hr class="my-4"/>
@@ -106,9 +106,9 @@
         BusinessOptions = businessesEntities;
     }
 
-    private string EditUri(SalesEntity item) {
+    private string BuildUri(SalesEntity item, string action) {
         string currentBaseUri = navigationManager.ToAbsoluteUri(navigationManager.Uri).GetLeftPart(UriPartial.Path);
-        string editUri = $"{currentBaseUri}/Edit/{item.SalesId}";
+        string editUri = $"{currentBaseUri}/{action}/{item.SalesId}";
         return editUri.ToString();
     }
 }
