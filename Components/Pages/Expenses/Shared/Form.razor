@@ -1,74 +1,95 @@
-@using AccountingForDentists.Components.Pages.Shared.InputDatalist
-@using AccountingForDentists.Components.Pages.Shared.InputFile
-
-<EditForm id="expenses-form" Model=@Model OnSubmit="Submit" class="d-flex flex-column gap-3">
-    <div class="d-flex flex-xl-row flex-column gap-2">
-        <div class="border border-1 p-3 pt-1 rounded flex-grow-1 d-flex flex-column gap-2">
-            <h1 class="display-6 border-bottom d-flex flex-row justify-content-between">
-                <div>Details </div>
-            </h1>
-            <div class="d-flex gap-2 flex-xl-row flex-column gap-2">
-                <div class="">
-                    <label for="Model.InvoiceDate">Invoice Date:</label>
-                    <InputDate id="Model.InvoiceDate" class="form-control fs-3" @bind-Value="Model!.InvoiceDate" />
+@using AccountingForDentists.Models
+<div class="grow justify-items-center-safe">
+    <h1 class="mt-4 mb-2 flex gap-2">
+        <a href="/Expenses" class="icon-[material-symbols--arrow-left-alt-rounded] self-center"> </a>
+        <div>@Title</div>
+    </h1>
+    <form class="" @formname="@FormName" method="post" action="@ActionUri" enctype="multipart/form-data">
+        <AntiforgeryToken />
+        <fieldset class="fieldset min-w-sm max-w-lg rounded-box  p-4">
+            <datalist id="sellers">
+                @foreach (var seller in SellerNames ?? Enumerable.Empty<string>())
+                {
+                    <option value="@seller"></option>
+                }
+            </datalist>
+            <label class="label">Invoice Date</label>
+            <input class="input w-full" type="date" id="date" name="date"
+                value="@ExpenseEntity?.DateReference?.Date.ToString("yyyy-MM-dd")" />
+            <label class="label">Seller</label>
+            <input class="input w-full" list="sellers" id="seller" name="seller" value="@ExpenseEntity?.BusinessName" />
+            <label class="label">Description</label>
+            <input class="input w-full" id="description" name="description" value="@ExpenseEntity?.Description" />
+            <div class="flex gap-2 mt-2">
+                <div class="w-28 grow-2">
+                    <label class="label">Amount</label>
+                    <input class="input" type="number" step="0.01" id="amount" name="amount" onchange="calculateTotal()"
+                        value="@ExpenseEntity?.Amount.ToString("0.00")" />
                 </div>
-                <div class="flex-grow-1">
-                    <label for="business_name">Entity:</label>
-                    <InputDatalist @bind-value="@Model.BusinessName" id="business_name" class="form-control fs-3">
-                        @foreach (string name in RegisteredBusinessNames)
-                        {
-                            <DatalistOption Value="@name"></DatalistOption>
-                        }
-                    </InputDatalist>
+                <div class="w-24 grow">
+                    <label class="label">GST</label>
+                    <input class="input" type="number" step="0.01" id="gst" name="gst" onchange="calculateTotal()"
+                        value="@ExpenseEntity?.GST.ToString("0.00")" />
                 </div>
             </div>
-            <div>
-                <label for="description">Description:</label>
-                <InputText class="form-control fs-3" @bind-value="Model.Description" />
-            </div>
+            <label class="label">Total</label>
+            <input class="input w-full" type="number" readonly step="0.01" id="total"
+                value="@(((ExpenseEntity?.Amount + ExpenseEntity?.GST) ?? 0).ToString("0.00"))" />
 
+            <label class="label mt-2">Add/Replace Attachment</label>
+            <input type="file" class="file-input w-full" name="attachment" />
+            @if (ExpenseEntity?.Attachment is null)
+            {
+                <p class="mt-2">No attachment uploaded.</p>
+            }
+            else
+            {
+                <p class="mt-2">Current Attachment: <a class="link" target="_blank"
+                        href="/api/attachment/@ExpenseEntity?.Attachment?.AttachmentId">@ExpenseEntity?.Attachment?.CustomerFilename</a>
+                </p>
+                @if (AllowRemoveAttachment)
+                {
+                    <label class="label peer mt-2">
+                        <input type="checkbox" class="toggle peer" name="removeAttachment" value="true" />
+                        <div class="peer-checked:text-black  peer-checked:font-bold">Remove attachment</div>
+                    </label>
+                }
+            }
+
+        </fieldset>
+
+        <div class="flex gap-2  justify-center-safe">
+            <input type="submit" disabled style="display: none" aria-hidden="true" />
+            <button class="btn btn-neutral mt-4" tab type="submit">Save</button>
+            <button class="btn btn-ghost mt-4" type="reset">Reset</button>
         </div>
-    </div>
-    <div class="border border-1 p-3 pt-1 rounded">
-        <h1 class="display-6 border-bottom d-flex flex-row justify-content-between">
-            <div>Expenses</div>
-            <div>$ @(
-                                (Model.Total).ToString("0.00")
-                                )</div>
-        </h1>
-        <div class="d-flex flex-row gap-2">
-            <div class="flex-grow-1">
-                <label for="Model.ServiceFee">Expenses:</label>
-                <div class="fs-3 input-group">
-                    <InputNumber class="form-control ps-5 fs-3 bg-transparent" @bind-Value="Model!.Amount" />
-                    <span style="z-index: 3;" class="input-group-prepend">
-                        <div class=" ms-4 position-absolute top-50 start-0 translate-middle ">
-                            <span class="text-muted ">$</span>
-                        </div>
-                    </span>
-                </div>
-            </div>
-            <div class="flex-grow-1">
-                <label for="Model.ServiceFeeGST">GST:</label>
-                <div class="fs-3 input-group">
-                    <InputNumber class="form-control ps-5 fs-3 bg-transparent" @bind-Value="Model!.GST" />
-                    <span style="z-index: 3;" class="input-group-prepend">
-                        <div class=" ms-4 position-absolute top-50 start-0 translate-middle ">
-                            <span class="text-muted ">$</span>
-                        </div>
-                    </span>
-                </div>
-            </div>
-        </div>
-    </div>
-    <FileSelector IsFileUploaded="Model.AttachmentId is not null" Value="Model.File"
-        OnFileDownloadRequest="FileDownload" OnFileRemoved="RemoveFile" OnFileSelected="SelectFile">
-    </FileSelector>
-</EditForm>
-
-<div class="d-flex flex-row gap-2">
-    <button disabled="@IsDisabled" style="flex-basis: 100px;" class="flex-grow-1 btn btn-primary btn-block"
-        form="expenses-form" type="submit">Save</button>
-    <button disabled="@IsDisabled" @onclick="Cancel" style="flex-basis: 50px;" class="btn btn-outline-danger btn-block"
-        type="button">Cancel</button>
+    </form>
 </div>
+
+<script>
+    function calculateTotal() {
+        const amount = parseFloat(document.getElementById('amount').value) || 0;
+        const gst = parseFloat(document.getElementById('gst').value) || 0;
+        const total = amount + gst;
+        document.getElementById('total').value = total.toFixed(2);
+    }
+</script>
+
+@code {
+    [Parameter]
+    public required string Title { get; set; }
+    [Parameter]
+    public required string FormName { get; set; }
+
+    [Parameter]
+    public ExpensesEntity? ExpenseEntity { get; set; }
+
+    [Parameter]
+    public List<string>? SellerNames { get; set; }
+
+    [Parameter]
+    public required string ActionUri { get; set; }
+
+    [Parameter]
+    public bool AllowRemoveAttachment { get; set; } = true;
+}

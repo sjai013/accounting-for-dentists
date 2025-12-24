@@ -11,7 +11,10 @@
 <PageTitle>Expenses</PageTitle>
 
 <div class="mx-10">
+<div class="flex justify-between items-center">
     <h1 class="font-bold text-4xl pt-5 pb-5">Expenses</h1>
+    <a href="/Expenses/Add" class="btn btn-outline text-1xl"><span class="icon-[material-symbols--add-2-rounded]"></span> New Expense</a>
+</div>
     <hr />
     <DetailsFilterComponent BusinessOptions="@BusinessOptions" FYOptions="@FYOptions" SelectedFY="@FY"
         SelectedBusinesses="@Business">

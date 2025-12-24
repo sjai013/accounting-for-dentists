@@ -1,10 +1,10 @@
-@page "/Expenses/Post/Edit/{EntityId:guid}"
+@page "/Expenses/Post/Add"
 @using AccountingForDentists.Infrastructure
 @using AccountingForDentists.Models
 @using Microsoft.EntityFrameworkCore
 @using System.Security.Cryptography
 
-<form @formname="edit-expense-form" method="post" @onsubmit="HandleSubmit"></form>
+<form @formname="add-expense-form" method="post" @onsubmit="HandleSubmit"></form>
 @inject NavigationManager NavigationManager;
 @inject IDbContextFactory<AccountingContext> contextFactory
 @inject TenantProvider tenantProvider
@@ -54,22 +54,30 @@
         .Include(e => e.DateReference)
         .FirstOrDefaultAsync();
 
-        if (expenseEntity is null)
+        if (expenseEntity is not null)
         {
-            NavigationManager.NavigateTo($"/Expenses/Edit/${EntityId}");
+            NavigationManager.NavigateTo($"/Expenses");
             return;
         }
 
-        expenseEntity.DateReference.Date = DateOnly.FromDateTime(Date);
-        expenseEntity.BusinessName = Seller ?? string.Empty;
-        expenseEntity.Description = Description ?? string.Empty;
-        expenseEntity.Amount = Amount;
-        expenseEntity.GST = Gst;
-        if (RemoveAttachment ?? false)
+        expenseEntity = new ExpensesEntity
         {
-            expenseEntity.Attachment = null;
-        }
-        else if (Attachment is not null)
+            ExpensesId = Guid.NewGuid(),
+            BusinessName = Seller ?? string.Empty,
+            Description = Description ?? string.Empty,
+            Amount = Amount,
+            GST = Gst,
+            DateReference = new()
+            {
+                Date = DateOnly.FromDateTime(Date),
+                DateContainerId = Guid.NewGuid()
+            },
+            Attachment = null
+        };
+
+        context.Expenses.Add(expenseEntity);
+
+        if (Attachment is not null)
         {
             using MemoryStream? memoryStream = new MemoryStream();
             await Attachment.CopyToAsync(memoryStream);
@@ -92,7 +100,7 @@
         }
 
         await context.SaveChangesAsync();
-        NavigationManager.NavigateTo($"/Expenses/Edit/{EntityId}", forceLoad: true);
+        NavigationManager.NavigateTo($"/Expenses", forceLoad: true);
     }
 
 
