@@ -1,12 +1,44 @@
-@page "/Sales/Edit/{EntityGuidString}"
-@rendermode InteractiveServer
-@using AccountingForDentists.Components.Pages.Sales.Shared
+@page "/Sales/Edit/{EntityId:guid}"
+@using AccountingForDentists.Infrastructure
+@using Microsoft.EntityFrameworkCore
 
-<PageTitle>Edit Sale</PageTitle>
-<h1 class="fw-light fs-3">Edit Sale</h1>
+@inject IDbContextFactory<AccountingContext> contextFactory
 
-<Form InitialModel="@Initial" OnCancel="Cancel" OnSubmit="Submit"></Form>
+<FormComponent Title="Edit Sale" FormName="edit-sale-form" ReturnUri="/Sales"
+    ActionUri=@($"/Sales/Post/Edit/{SalesEntity?.SalesId.ToString()}") AllowRemoveAttachment=true    SalesEntity="SalesEntity" BuyerNames="BuyerNames"></FormComponent>
+
 
 @code {
+    [Parameter]
+    public required Guid EntityId { get; set; }
 
+    List<string>? BuyerNames { get; set; } = [];
+    Models.SalesEntity? SalesEntity { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadBuyers();
+        await LoadSaleData();
+        await base.OnInitializedAsync();
+    }
+
+    private async Task LoadBuyers()
+    {
+        using var context = await contextFactory.CreateDbContextAsync();
+        BuyerNames = await context.Sales.Select(x => x.BusinessName).Distinct().AsNoTracking().ToListAsync();
+    }
+    private async Task LoadSaleData()
+    {
+        using var context = await contextFactory.CreateDbContextAsync();
+        SalesEntity = await context.Sales
+        .Include(x => x.DateReference)
+        .Include(x => x.Attachment)
+        .FirstOrDefaultAsync(e => e.SalesId == EntityId);
+
+        if (SalesEntity is null)
+        {
+            // Handle the case where the entity is not found
+            throw new InvalidOperationException("Sales entity not found.");
+        }
+    }
 }

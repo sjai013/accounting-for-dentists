@@ -1,5 +1,4 @@
 @page "/Expenses/Add"
-@using AccountingForDentists.Components.Pages.Expenses.Shared
 @using AccountingForDentists.Infrastructure
 @using Microsoft.EntityFrameworkCore
 @inject IDbContextFactory<AccountingContext> contextFactory
@@ -7,9 +6,9 @@
 
 <PageTitle>Add New Expense</PageTitle>
 
-<Form Title="Add New Expense" FormName="add-expense-form" ActionUri="/Expenses/Post/Add" AllowRemoveAttachment="false"
-    ExpenseEntity="null" SellerNames="SellerNames">
-</Form>
+<FormComponent Title="Add New Expense" ReturnUri="/Expenses" FormName="add-expense-form" ActionUri="/Expenses/Post/Add"
+    AllowRemoveAttachment="false" ExpenseEntity="null" SellerNames="SellerNames">
+</FormComponent>
 
 
 @code {

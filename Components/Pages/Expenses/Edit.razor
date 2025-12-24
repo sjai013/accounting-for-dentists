@@ -1,12 +1,11 @@
 @page "/Expenses/Edit/{EntityId:guid}"
 @using AccountingForDentists.Infrastructure
 @using Microsoft.EntityFrameworkCore
-@using AccountingForDentists.Components.Pages.Expenses.Shared
 
 @inject IDbContextFactory<AccountingContext> contextFactory
 
-<Form Title="Edit Expense" FormName="edit-expense-form"
-    ActionUri=@($"/Expenses/Post/Edit/{ExpenseEntity?.ExpensesId.ToString()}") AllowRemoveAttachment=true    ExpenseEntity="ExpenseEntity" SellerNames="SellerNames"></Form>
+<FormComponent Title="Edit Expense" FormName="edit-expense-form"
+    ActionUri=@($"/Expenses/Post/Edit/{ExpenseEntity?.ExpensesId.ToString()}") AllowRemoveAttachment=true    ExpenseEntity="ExpenseEntity" SellerNames="SellerNames"></FormComponent>
 
 
 @code {
