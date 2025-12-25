@@ -1,10 +1,48 @@
 @page "/Sales/Delete/{EntityId:guid}"
+@using AccountingForDentists.Infrastructure
+@using Microsoft.EntityFrameworkCore
+@inject IDbContextFactory<AccountingContext> contextFactory
 
 <PageTitle>Delete Sale</PageTitle>
 
+@if (error)
+{
+    <div class="alert alert-error ml-auto mr-auto grow my-2 px-5 w-lg justify-center">There was an error deleting this sale.
+        Please try again
+        later.</div>
+}
+
+<FormComponent Title="Delete Sale" FormName="delete-sale-form" ReturnUri="/Sales" Disabled="true"
+    ActionUri=@($"/Sales/Post/Delete/{SalesEntity?.SalesId.ToString()}") AllowRemoveAttachment=false    SalesEntity="SalesEntity" BuyerNames=[] ActionText="Delete"></FormComponent>
 
 
 @code {
     [Parameter]
     public required Guid EntityId { get; set; }
+
+    [SupplyParameterFromQuery]
+    bool error { get; set; } = false;
+
+    public Models.SalesEntity? SalesEntity { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadSaleData();
+        await base.OnInitializedAsync();
+    }
+
+    private async Task LoadSaleData()
+    {
+        using var context = await contextFactory.CreateDbContextAsync();
+        SalesEntity = await context.Sales
+        .Include(x => x.DateReference)
+        .Include(x => x.Attachment)
+        .FirstOrDefaultAsync(e => e.SalesId == EntityId);
+
+        if (SalesEntity is null)
+        {
+            // Handle the case where the entity is not found
+            throw new InvalidOperationException("Sales entity not found.");
+        }
+    }
 }
