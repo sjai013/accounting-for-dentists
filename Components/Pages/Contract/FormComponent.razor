@@ -22,20 +22,9 @@
 
             <fieldset id="sale-fieldset" class="fieldset bg-base-200 border-base-300 rounded-box border px-4 py-2 grow">
                 <legend class="fieldset-legend">Sales</legend>
-                <div class="flex gap-2 sale-input-row">
-                    <div class="w-28 grow-2">
-                        <label class="label">Amount</label>
-                        <input readonly=@Disabled class="amount-input input" type="number" step="0.01"
-                            name="sale-amount" onchange="calculateTotal()"
-                            value="@ContractIncomeEntity?.SalesEntity?.Amount.ToString("0.00")" />
-                    </div>
-                    <div class="w-24 grow">
-                        <label class="label">GST</label>
-                        <input readonly=@Disabled class="gst-input input" type="number" step="0.01" name="sale-gst"
-                            onchange="calculateTotal()"
-                            value="@ContractIncomeEntity?.SalesEntity?.GST.ToString("0.00")" />
-                    </div>
-                </div>
+                <FormComponentCostSubform NamePrefix="sale" OnChangeCallback="onSaleInputChange()"
+                    DefaultAmountValue="@ContractIncomeEntity?.SalesEntity?.Amount"
+                    DefaultGstValue="@ContractIncomeEntity?.SalesEntity?.GST" />
                 <hr />
                 <div class="flex gap-2">
                     <div class="w-28 grow-2">
@@ -57,6 +46,31 @@
             </fieldset>
 
 
+            <fieldset id="expense-fieldset"
+                class="fieldset bg-base-200 border-base-300 rounded-box border px-4 py-2 grow">
+                <legend class="fieldset-legend">Expenses</legend>
+                <FormComponentCostSubform NamePrefix="expense" OnChangeCallback="onExpenseInputChange()"
+                    DefaultAmountValue="@ContractIncomeEntity?.ExpensesEntity?.Amount"
+                    DefaultGstValue="@ContractIncomeEntity?.ExpensesEntity?.GST" />
+                <hr />
+                <div class="flex gap-2">
+                    <div class="w-28 grow-2">
+                        <label class="label">Amount</label>
+                        <input readonly id="expense-amount-total" class="input" type="number" step="0.01"
+                            value="@ContractIncomeEntity?.ExpensesEntity?.Amount.ToString("0.00")" />
+                    </div>
+                    <div class="w-24 grow">
+                        <label class="label">GST</label>
+                        <input readonly id="expense-gst-total" class="input" type="number" step="0.01"
+                            value="@ContractIncomeEntity?.ExpensesEntity?.GST.ToString("0.00")" />
+                    </div>
+                </div>
+
+                <button type="button" class="btn btn-sm  mt-2"
+                    onclick="clone('expense-form-row', 'expense-fieldset', Array.from(document.getElementsByClassName('expense-input-row')).at(-1))">Add
+                    Another
+                    Expense</button>
+            </fieldset>
 
 
 
@@ -94,52 +108,53 @@
 </div>
 
 <template id="sale-form-row">
-    <div class="flex gap-2 sale-input-row">
-        <div class="w-28 grow-2">
-            <label class="label">Amount</label>
-            <input readonly=@Disabled class="amount-input input" type="number" step="0.01" name="sale-amount"
-                onchange="calculateTotal()" value="0" />
-        </div>
-        <div class="w-24 grow">
-            <label class="label">GST</label>
-            <input readonly=@Disabled class="gst-input input" type="number" step="0.01" name="sale-gst"
-                onchange="calculateTotal()" value="0" />
-        </div>
-    </div>
+    <FormComponentCostSubform NamePrefix="sale" OnChangeCallback="onSaleInputChange()" />
 </template>
+
+<template id="expense-form-row">
+    <FormComponentCostSubform NamePrefix="expense" OnChangeCallback="onExpenseInputChange()" />
+</template>
+
 <template id="expense-form-row"></template>
 
 <script>
-    function calculateTotal() {
-        const form = document.getElementById("form");
-        if (!form) return;
-        if (!form.elements["sale-amount"] || !form.elements["sale-gst"]) return;
-        console.log(form.elements["sale-amount"]);
-        if (form.elements["sale-amount"].length === undefined && form.elements["sale-gst"].length === undefined) {
-            // Only one row
-            console.log("Single row");
-            const amount = parseFloat(form.elements["sale-amount"].value) || 0;
-            const gst = parseFloat(form.elements["sale-gst"].value) || 0;
-            document.getElementById("sale-amount-total").value = amount.toFixed(2);
-            document.getElementById("sale-gst-total").value = gst.toFixed(2);
-            return;
-        } else {
-            // Multiple rows
-            console.log("Multiple rows");
-            const amount = Array.from(form.elements["sale-amount"]).reduce((acc, el) => acc + parseFloat(el.value) || 0, 0);
-            const gst = Array.from(form.elements["sale-gst"]).reduce((acc, el) => acc + parseFloat(el.value) || 0, 0);
-            document.getElementById("sale-amount-total").value = amount.toFixed(2);
-            document.getElementById("sale-gst-total").value = gst.toFixed(2);
-        }
+    onSaleInputChange = () => {
+        updateTotals();
     }
 
-    function clone(templateId, parentId, element) {
-        console.log(element);
-        const template = document.getElementById(templateId);
-        const parent = document.getElementById(parentId);
-        const existingElements = parent.getElementsByClassName(templateId + '-row');
-        element.after(template.content.cloneNode(true));
+    onExpenseInputChange = () => {
+        updateTotals();
     }
+
+    totalSalesAmount = () => {
+        return calculateTotal("form", "sale-amount");
+    }
+
+    totalSalesGst = () => {
+        return calculateTotal("form", "sale-gst");
+    }
+
+    totalExpenseAmount = () => {
+        return calculateTotal("form", "expense-amount");
+    }
+
+    totalExpenseGst = () => {
+        return calculateTotal("form", "expense-gst");
+    }
+
+    updateTotals = () => {
+        const salesAmount = totalSalesAmount();
+        const salesGst = totalSalesGst();
+        const expenseAmount = totalExpenseAmount();
+        const expenseGst = totalExpenseGst();
+        document.getElementById('sale-amount-total').value = salesAmount.toFixed(2);
+        document.getElementById('sale-gst-total').value = salesGst.toFixed(2);
+        document.getElementById('expense-amount-total').value = expenseAmount.toFixed(2);
+        document.getElementById('expense-gst-total').value = expenseGst.toFixed(2);
+    }
+
+
+
 
 </script>
 

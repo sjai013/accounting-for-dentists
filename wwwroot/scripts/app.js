@@ -17,3 +17,25 @@ function resetForm(event) {
         }
     });
 }
+
+function calculateTotal(formName, inputName) {
+    const form = document.getElementById(formName);
+    if (!form) return 0;
+    if (!form.elements[inputName]) return 0;
+    if (form.elements[inputName].length === undefined) {
+        // Only one row
+        return parseFloat(form.elements[inputName].value) || 0;
+    } else {
+        // Multiple rows
+        return Array.from(form.elements[inputName]).reduce((acc, el) => acc + parseFloat(el.value) || 0, 0);
+    }
+
+}
+
+function clone(templateId, parentId, element) {
+    console.log(element);
+    const template = document.getElementById(templateId);
+    const parent = document.getElementById(parentId);
+    const existingElements = parent.getElementsByClassName(templateId + '-row');
+    element.after(template.content.cloneNode(true));
+}
