@@ -1,8 +1,50 @@
-@page "/Contracts/Edit/{EntityGuidString}"
-@using AccountingForDentists.Components.Pages.Contract.Shared
-@rendermode InteractiveServer
+@page "/Contracts/Edit/{EntityId:guid}"
+@using AccountingForDentists.Infrastructure
+@using Microsoft.EntityFrameworkCore
+
+@inject IDbContextFactory<AccountingContext> contextFactory
 <PageTitle>Edit Contract Income</PageTitle>
 
-<h1 class="display-6">Edit Contract Income</h1>
 
-<Form InitialModel="InitialModel" OnCancel="Cancel" OnSubmit="Submit" />
+<FormComponent Title="Edit Contract Income" FormName="edit-contract-income-form" ReturnUri="/Contracts"
+    ActionText="Update Contract Income"
+    ActionUri=@($"/Contracts/Post/Edit/{ContractEntity?.ContractualAgreementId.ToString()}") AllowRemoveAttachment=true    ContractIncomeEntity="@ContractEntity" BusinessNames="@BusinessNames"></FormComponent>
+
+@code {
+    [Parameter]
+    public required Guid EntityId { get; set; }
+
+    List<string>? BusinessNames { get; set; } = [];
+    List<string>? SellerNames { get; set; } = [];
+    Models.ContractIncomeEntity? ContractEntity { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadBuyersAndSellers();
+        await LoadContractData();
+        await base.OnInitializedAsync();
+    }
+
+    private async Task LoadBuyersAndSellers()
+    {
+        using var context = await contextFactory.CreateDbContextAsync();
+        BusinessNames = await context.Businesses.Select(x => x.Name).Distinct().AsNoTracking().ToListAsync();
+    }
+
+    private async Task LoadContractData()
+    {
+        using var context = await contextFactory.CreateDbContextAsync();
+        ContractEntity = await context.ContractIncome
+        .Include(x => x.InvoiceDateReference)
+        .Include(x => x.Attachment)
+        .Include(x => x.SalesEntity)
+        .Include(x => x.ExpensesEntity)
+        .FirstOrDefaultAsync(e => e.ContractualAgreementId == EntityId);
+
+        if (ContractEntity is null)
+        {
+            // Handle the case where the entity is not found
+            throw new InvalidOperationException("Contract entity not found.");
+        }
+    }
+}

@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AccountingForDentists.Components.Pages.Contract;
 
-public partial class Edit(IDbContextFactory<AccountingContext> contextFactory, TenantProvider tenantProvider, NavigationManager navigationManager)
+public partial class Edit2(IDbContextFactory<AccountingContext> contextFactory, TenantProvider tenantProvider, NavigationManager navigationManager)
 {
     [Parameter]
     public required string EntityGuidString { get; set; }

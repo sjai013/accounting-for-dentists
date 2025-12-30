@@ -38,8 +38,10 @@
                 $@model.Amount.ToString("#,##0.00")
             </PrimaryValue>
             <ButtonBar>
-                <a href="@EditUri(model)" class="btn btn-outline p-2 h-10 w-10"><span class="icon-[material-symbols--edit] w-8 h-8"> </span>
+                <a href="@BuildUri(model, "Edit")" class="btn btn-outline p-2 h-10 w-10"><span class="icon-[material-symbols--edit] w-8 h-8"> </span>
                 </a>
+                <a href="@BuildUri(model, "Delete")" class="btn btn-outline p-2 h-10 w-10"><span class="icon-[material-symbols--delete-outline-rounded] w-8 h-8"></span></a>
+
             </ButtonBar>
         </DataListLayout>
         <hr class="my-4"/>
@@ -105,9 +107,10 @@
         BusinessOptions = businessesEntities;
     }
 
-    private string EditUri(ExpensesEntity item) {
+
+        private string BuildUri(ExpensesEntity item, string action) {
         string currentBaseUri = navigationManager.ToAbsoluteUri(navigationManager.Uri).GetLeftPart(UriPartial.Path);
-        string editUri = $"{currentBaseUri}/Edit/{item.ExpensesId}";
+        string editUri = $"{currentBaseUri}/{action}/{item.ExpensesId}";
         return editUri.ToString();
     }
 }

@@ -1,7 +1,7 @@
 @using AccountingForDentists.Models
 <div class="grow justify-items-center-safe">
     <h1 class="mt-4 mb-2 flex gap-2">
-        <a href="/Expenses" class="icon-[material-symbols--arrow-left-alt-rounded] self-center"> </a>
+        <a href="@ReturnUri" class="icon-[material-symbols--arrow-left-alt-rounded] self-center"> </a>
         <div>@Title</div>
     </h1>
     <form class="" @formname="@FormName" method="post" action="@ActionUri" enctype="multipart/form-data">
@@ -14,22 +14,24 @@
                 }
             </datalist>
             <label class="label">Invoice Date</label>
-            <input class="input w-full" type="date" id="date" name="date"
+            <input readonly=@Disabled class="input w-full" type="date" id="date" name="date"
                 value="@ExpenseEntity?.DateReference?.Date.ToString("yyyy-MM-dd")" />
             <label class="label">Seller</label>
-            <input class="input w-full" list="sellers" id="seller" name="seller" value="@ExpenseEntity?.BusinessName" />
+            <input readonly=@Disabled class="input w-full" list="sellers" id="seller" name="seller"
+                value="@ExpenseEntity?.BusinessName" />
             <label class="label">Description</label>
-            <input class="input w-full" id="description" name="description" value="@ExpenseEntity?.Description" />
+            <input readonly=@Disabled class="input w-full" id="description" name="description"
+                value="@ExpenseEntity?.Description" />
             <div class="flex gap-2 mt-2">
                 <div class="w-28 grow-2">
                     <label class="label">Amount</label>
-                    <input class="input" type="number" step="0.01" id="amount" name="amount" onchange="calculateTotal()"
-                        value="@ExpenseEntity?.Amount.ToString("0.00")" />
+                    <input readonly=@Disabled class="input" type="number" step="0.01" id="amount" name="amount"
+                        onchange="calculateTotal()" value="@ExpenseEntity?.Amount.ToString("0.00")" />
                 </div>
                 <div class="w-24 grow">
                     <label class="label">GST</label>
-                    <input class="input" type="number" step="0.01" id="gst" name="gst" onchange="calculateTotal()"
-                        value="@ExpenseEntity?.GST.ToString("0.00")" />
+                    <input readonly=@Disabled class="input" type="number" step="0.01" id="gst" name="gst"
+                        onchange="calculateTotal()" value="@ExpenseEntity?.GST.ToString("0.00")" />
                 </div>
             </div>
             <label class="label">Total</label>
@@ -37,7 +39,7 @@
                 value="@(((ExpenseEntity?.Amount + ExpenseEntity?.GST) ?? 0).ToString("0.00"))" />
 
             <label class="label mt-2">Add/Replace Attachment</label>
-            <input type="file" class="file-input w-full" name="attachment" />
+            <input readonly=@Disabled type="file" class="file-input w-full" name="attachment" />
             @if (ExpenseEntity?.Attachment is null)
             {
                 <p class="mt-2">No attachment uploaded.</p>
@@ -60,8 +62,11 @@
 
         <div class="flex gap-2  justify-center-safe">
             <input type="submit" disabled style="display: none" aria-hidden="true" />
-            <button class="btn btn-neutral mt-4" tab type="submit">Save</button>
-            <button class="btn btn-ghost mt-4" type="reset">Reset</button>
+            <button class="btn btn-neutral mt-4" tab type="submit">@ActionText</button>
+            @if (!Disabled)
+            {
+                <button class="btn btn-ghost mt-4" type="reset">Reset</button>
+            }
         </div>
     </form>
 </div>
@@ -77,6 +82,9 @@
 
 @code {
     [Parameter]
+    public bool Disabled { get; set; } = false;
+
+    [Parameter]
     public required string Title { get; set; }
     [Parameter]
     public required string FormName { get; set; }
@@ -91,5 +99,12 @@
     public required string ActionUri { get; set; }
 
     [Parameter]
+    public required string ReturnUri { get; set; }
+
+    [Parameter]
     public bool AllowRemoveAttachment { get; set; } = true;
+
+    [Parameter]
+    public string ActionText { get; set; } = "Save";
+
 }

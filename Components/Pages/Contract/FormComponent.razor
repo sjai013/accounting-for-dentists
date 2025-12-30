@@ -1,0 +1,172 @@
+@using AccountingForDentists.Models
+<div class="grow justify-items-center-safe">
+    <h1 class="mt-4 mb-2 flex gap-2">
+        <a href="@ReturnUri" class="icon-[material-symbols--arrow-left-alt-rounded] self-center"> </a>
+        <div>@Title</div>
+    </h1>
+    <form id="form" class="" @formname="@FormName" method="post" action="@ActionUri" enctype="multipart/form-data">
+        <AntiforgeryToken />
+        <fieldset class="fieldset min-w-sm max-w-lg rounded-box  p-4">
+            <datalist id="buyer">
+                @foreach (var buyer in BusinessNames ?? Enumerable.Empty<string>())
+                {
+                    <option value="@buyer"></option>
+                }
+            </datalist>
+            <label class="label">Invoice Date</label>
+            <input readonly=@Disabled class="input w-full" type="date" id="date" name="date"
+                value="@ContractIncomeEntity?.InvoiceDateReference?.Date.ToString("yyyy-MM-dd")" />
+            <label class="label">Buyer</label>
+            <input readonly=@Disabled class="input w-full" list="buyer" id="buyer" name="buyer"
+                value="@ContractIncomeEntity?.BusinessName" />
+
+            <fieldset id="sale-fieldset" class="fieldset bg-base-200 border-base-300 rounded-box border px-4 py-2 grow">
+                <legend class="fieldset-legend">Sales</legend>
+                <div class="flex gap-2 sale-input-row">
+                    <div class="w-28 grow-2">
+                        <label class="label">Amount</label>
+                        <input readonly=@Disabled class="amount-input input" type="number" step="0.01"
+                            name="sale-amount" onchange="calculateTotal()"
+                            value="@ContractIncomeEntity?.SalesEntity?.Amount.ToString("0.00")" />
+                    </div>
+                    <div class="w-24 grow">
+                        <label class="label">GST</label>
+                        <input readonly=@Disabled class="gst-input input" type="number" step="0.01" name="sale-gst"
+                            onchange="calculateTotal()"
+                            value="@ContractIncomeEntity?.SalesEntity?.GST.ToString("0.00")" />
+                    </div>
+                </div>
+                <hr />
+                <div class="flex gap-2">
+                    <div class="w-28 grow-2">
+                        <label class="label">Amount</label>
+                        <input readonly id="sale-amount-total" class="input" type="number" step="0.01"
+                            value="@ContractIncomeEntity?.SalesEntity?.Amount.ToString("0.00")" />
+                    </div>
+                    <div class="w-24 grow">
+                        <label class="label">GST</label>
+                        <input readonly id="sale-gst-total" class="input" type="number" step="0.01"
+                            value="@ContractIncomeEntity?.SalesEntity?.GST.ToString("0.00")" />
+                    </div>
+                </div>
+
+                <button type="button" class="btn btn-sm  mt-2"
+                    onclick="clone('sale-form-row', 'sale-fieldset', Array.from(document.getElementsByClassName('sale-input-row')).at(-1))">Add
+                    Another
+                    Sale</button>
+            </fieldset>
+
+
+
+
+
+            <label class="label mt-2">Add/Replace Attachment</label>
+            <input readonly=@Disabled type="file" class="file-input w-full" name="attachment" />
+            @if (ContractIncomeEntity?.Attachment is null)
+            {
+                <p class="mt-2">No attachment uploaded.</p>
+            }
+            else
+            {
+                <p class="mt-2">Current Attachment: <a class="link" target="_blank"
+                        href="/api/attachment/@ContractIncomeEntity?.Attachment?.AttachmentId">@ContractIncomeEntity?.Attachment?.CustomerFilename</a>
+                </p>
+                @if (AllowRemoveAttachment)
+                {
+                    <label class="label peer mt-2">
+                        <input type="checkbox" class="toggle peer" name="removeAttachment" value="true" />
+                        <div class="peer-checked:text-black  peer-checked:font-bold">Remove attachment</div>
+                    </label>
+                }
+            }
+
+        </fieldset>
+
+        <div class="flex gap-2  justify-center-safe">
+            <input type="submit" disabled style="display: none" aria-hidden="true" />
+            <button class="btn btn-neutral mt-4" tab type="submit">@ActionText</button>
+            @if (!Disabled)
+            {
+                <button class="btn btn-ghost mt-4" type="reset">Reset</button>
+            }
+        </div>
+    </form>
+</div>
+
+<template id="sale-form-row">
+    <div class="flex gap-2 sale-input-row">
+        <div class="w-28 grow-2">
+            <label class="label">Amount</label>
+            <input readonly=@Disabled class="amount-input input" type="number" step="0.01" name="sale-amount"
+                onchange="calculateTotal()" value="0" />
+        </div>
+        <div class="w-24 grow">
+            <label class="label">GST</label>
+            <input readonly=@Disabled class="gst-input input" type="number" step="0.01" name="sale-gst"
+                onchange="calculateTotal()" value="0" />
+        </div>
+    </div>
+</template>
+<template id="expense-form-row"></template>
+
+<script>
+    function calculateTotal() {
+        const form = document.getElementById("form");
+        if (!form) return;
+        if (!form.elements["sale-amount"] || !form.elements["sale-gst"]) return;
+        console.log(form.elements["sale-amount"]);
+        if (form.elements["sale-amount"].length === undefined && form.elements["sale-gst"].length === undefined) {
+            // Only one row
+            console.log("Single row");
+            const amount = parseFloat(form.elements["sale-amount"].value) || 0;
+            const gst = parseFloat(form.elements["sale-gst"].value) || 0;
+            document.getElementById("sale-amount-total").value = amount.toFixed(2);
+            document.getElementById("sale-gst-total").value = gst.toFixed(2);
+            return;
+        } else {
+            // Multiple rows
+            console.log("Multiple rows");
+            const amount = Array.from(form.elements["sale-amount"]).reduce((acc, el) => acc + parseFloat(el.value) || 0, 0);
+            const gst = Array.from(form.elements["sale-gst"]).reduce((acc, el) => acc + parseFloat(el.value) || 0, 0);
+            document.getElementById("sale-amount-total").value = amount.toFixed(2);
+            document.getElementById("sale-gst-total").value = gst.toFixed(2);
+        }
+    }
+
+    function clone(templateId, parentId, element) {
+        console.log(element);
+        const template = document.getElementById(templateId);
+        const parent = document.getElementById(parentId);
+        const existingElements = parent.getElementsByClassName(templateId + '-row');
+        element.after(template.content.cloneNode(true));
+    }
+
+</script>
+
+@code {
+    [Parameter]
+    public bool Disabled { get; set; } = false;
+
+    [Parameter]
+    public required string Title { get; set; }
+    [Parameter]
+    public required string FormName { get; set; }
+
+    [Parameter]
+    public ContractIncomeEntity? ContractIncomeEntity { get; set; }
+
+    [Parameter]
+    public List<string>? BusinessNames { get; set; }
+
+    [Parameter]
+    public required string ActionUri { get; set; }
+
+    [Parameter]
+    public required string ReturnUri { get; set; }
+
+    [Parameter]
+    public bool AllowRemoveAttachment { get; set; } = true;
+
+    [Parameter]
+    public string ActionText { get; set; } = "Save";
+}

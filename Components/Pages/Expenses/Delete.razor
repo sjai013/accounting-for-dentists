@@ -1,32 +1,37 @@
-@page "/Expenses/Edit/{EntityId:guid}"
+@page "/Expenses/Delete/{EntityId:guid}"
 @using AccountingForDentists.Infrastructure
 @using Microsoft.EntityFrameworkCore
-
 @inject IDbContextFactory<AccountingContext> contextFactory
 
-<FormComponent Title="Edit Expense" FormName="edit-expense-form" ActionText="Update Expense" ReturnUri="/Expenses"
-    Disabled=false ActionUri=@($"/Expenses/Post/Edit/{ExpenseEntity?.ExpensesId.ToString()}") AllowRemoveAttachment=true    ExpenseEntity="ExpenseEntity" SellerNames="SellerNames"></FormComponent>
+<PageTitle>Delete Expense</PageTitle>
+
+@if (error)
+{
+    <div class="alert alert-error ml-auto mr-auto grow my-2 px-5 w-lg justify-center">There was an error deleting this
+        expense.
+        Please try again
+        later.</div>
+}
+
+<FormComponent Title="Delete Expense" FormName="delete-expense-form" ReturnUri="/Expenses" Disabled="true"
+    ActionUri=@($"/Expenses/Post/Delete/{ExpenseEntity?.ExpensesId.ToString()}") AllowRemoveAttachment=false    ExpenseEntity="ExpenseEntity" SellerNames=[] ActionText="Delete"></FormComponent>
 
 
 @code {
     [Parameter]
     public required Guid EntityId { get; set; }
 
-    List<string>? SellerNames { get; set; } = [];
-    Models.ExpensesEntity? ExpenseEntity { get; set; }
+    [SupplyParameterFromQuery]
+    bool error { get; set; } = false;
+
+    public Models.ExpensesEntity? ExpenseEntity { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
-        await LoadSellers();
         await LoadExpenseData();
         await base.OnInitializedAsync();
     }
 
-    private async Task LoadSellers()
-    {
-        using var context = await contextFactory.CreateDbContextAsync();
-        SellerNames = await context.Expenses.Select(x => x.BusinessName).Distinct().ToListAsync();
-    }
     private async Task LoadExpenseData()
     {
         using var context = await contextFactory.CreateDbContextAsync();

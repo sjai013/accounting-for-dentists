@@ -1,0 +1,60 @@
+@page "/Expenses/Post/Delete/{EntityId:guid}"
+@using AccountingForDentists.Infrastructure
+@using AccountingForDentists.Models
+@using Microsoft.EntityFrameworkCore
+@using System.Security.Cryptography
+
+<form @formname="delete-expense-form" method="post" @onsubmit="HandleSubmit"></form>
+@inject NavigationManager NavigationManager;
+@inject IDbContextFactory<AccountingContext> contextFactory
+@inject TenantProvider tenantProvider
+
+
+@code {
+    [CascadingParameter]
+    public HttpContext? HttpContext { get; set; }
+
+    [Parameter]
+    public Guid EntityId { get; set; }
+
+
+    private async Task HandleSubmit()
+    {
+        if (HttpContext?.Request.Method != HttpMethod.Post.Method)
+        {
+            NavigationManager.NavigateTo($"/Expenses/Delete/${EntityId}");
+            return;
+        }
+
+        using var context = await contextFactory.CreateDbContextAsync();
+        var expensesEntity = await context.Expenses
+        .Where(x => x.ExpensesId == EntityId)
+        .Include(e => e.Attachment)
+        .Include(e => e.DateReference)
+        .FirstOrDefaultAsync();
+
+        if (expensesEntity is null)
+        {
+            NavigationManager.NavigateTo($"/Expenses/Delete/${EntityId}");
+            return;
+        }
+
+        context.Expenses.Remove(expensesEntity);
+
+        try
+        {
+            await context.SaveChangesAsync();
+        }
+        catch (Exception e)
+        {
+            // Log the error (uncomment ex variable name and write a log.)
+            NavigationManager.NavigateTo($"/Expenses/Delete/{EntityId}?error=true");
+            return;
+        }
+        NavigationManager.NavigateTo($"/Expenses", forceLoad: true);
+    }
+
+
+
+
+}

@@ -14,32 +14,32 @@
                 }
             </datalist>
             <label class="label">Invoice Date</label>
-            <input disabled=@Disabled class="input w-full" type="date" id="date" name="date"
+            <input readonly=@Disabled class="input w-full" type="date" id="date" name="date"
                 value="@SalesEntity?.DateReference?.Date.ToString("yyyy-MM-dd")" />
             <label class="label">Buyer</label>
-            <input disabled=@Disabled class="input w-full" list="buyer" id="buyer" name="buyer"
+            <input readonly=@Disabled class="input w-full" list="buyer" id="buyer" name="buyer"
                 value="@SalesEntity?.BusinessName" />
             <label class="label">Description</label>
-            <input disabled=@Disabled class="input w-full" id="description" name="description"
+            <input readonly=@Disabled class="input w-full" id="description" name="description"
                 value="@SalesEntity?.Description" />
             <div class="flex gap-2 mt-2">
                 <div class="w-28 grow-2">
                     <label class="label">Amount</label>
-                    <input disabled=@Disabled class="input" type="number" step="0.01" id="amount" name="amount"
+                    <input readonly=@Disabled class="input" type="number" step="0.01" id="amount" name="amount"
                         onchange="calculateTotal()" value="@SalesEntity?.Amount.ToString("0.00")" />
                 </div>
                 <div class="w-24 grow">
                     <label class="label">GST</label>
-                    <input disabled=@Disabled class="input" type="number" step="0.01" id="gst" name="gst"
+                    <input readonly=@Disabled class="input" type="number" step="0.01" id="gst" name="gst"
                         onchange="calculateTotal()" value="@SalesEntity?.GST.ToString("0.00")" />
                 </div>
             </div>
             <label class="label">Total</label>
-            <input disabled=@Disabled class="input w-full" type="number" readonly step="0.01" id="total"
+            <input class="input w-full" type="number" readonly step="0.01" id="total"
                 value="@(((SalesEntity?.Amount + SalesEntity?.GST) ?? 0).ToString("0.00"))" />
 
             <label class="label mt-2">Add/Replace Attachment</label>
-            <input disabled=@Disabled type="file" class="file-input w-full" name="attachment" />
+            <input readonly=@Disabled type="file" class="file-input w-full" name="attachment" />
             @if (SalesEntity?.Attachment is null)
             {
                 <p class="mt-2">No attachment uploaded.</p>
@@ -106,5 +106,4 @@
 
     [Parameter]
     public string ActionText { get; set; } = "Save";
-}
 }
