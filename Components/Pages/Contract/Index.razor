@@ -1,59 +1,124 @@
 @page "/Contracts"
-@using AccountingForDentists.Components.Pages.Contract.Shared
-@using AccountingForDentists.Components.Pages.Shared
-@using AccountingForDentists.Components.Pages.Shared.YearBusinessFilter
-@rendermode InteractiveServer
-<PageTitle>View Contract Income</PageTitle>
-<h1 class="fw-light fs-3">Contract Income</h1>
-<hr />
-<YearBusinessFilter @bind-SelectedFY:get="FY" @bind-SelectedFY:set="SelectFY" @bind-SelectedBusiness:get="Business"
-    @bind-SelectedBusiness:set="SelectBusiness" Businesses="Businesses!" />
-<hr />
-@if (SFAEntities is null)
-{
-    <div class="d-flex flex-column gap-2 pt-2 pb-2">
-        <div class="p-0 container-fluid placeholder-glow">
-            <div style="height:120px" class="placeholder col-12 rounded-2"></div>
-        </div>
-        <div class="p-0 container-fluid placeholder-glow">
-            <div style="height:98px" class="placeholder col-12 rounded-2"></div>
-        </div>
-    </div>
-}
-else
-{
+@using AccountingForDentists.Components.Pages.Shared.DetailsFilter
+@using AccountingForDentists.Components.Shared
+@using AccountingForDentists.Infrastructure
+@using AccountingForDentists.Models
+@using Microsoft.EntityFrameworkCore
+@inject IDbContextFactory<AccountingContext> contextFactory
+@inject NavigationManager navigationManager
 
-    <div class="d-flex flex-column">
-        @foreach (var item in SFAEntities)
+<PageTitle>Contracts</PageTitle>
+
+<div class="mx-10">
+    <PageTitleComponent Title="Contracts">
+        <Button>
+            <ActionButtonComponent Text="Add New Contract Income" Uri="/Contracts/Add"
+                Icon="material-symbols--add-2-rounded" />
+        </Button>
+    </PageTitleComponent>
+    <hr />
+    <DetailsFilterComponent BusinessOptions="@BusinessOptions" FYOptions="@FYOptions" SelectedFY="@FY"
+        SelectedBusinesses="@Business">
+    </DetailsFilterComponent>
+
+    <hr class="my-4" />
+    @foreach (var model in ContractIncomeEntity ?? Enumerable.Empty<ContractIncomeEntity>())
+    {
+        <DataListLayout>
+            <Header>@model.InvoiceDateReference.Date.ToString("dd/MM/yyyy")</Header>
+            <SecondaryHeader>
+                <span>@model.BusinessName</span>
+
+            </SecondaryHeader>
+            <PrimaryValue>
+                <div class="flex gap-4">
+                    <div class="text-green-700 w-25 text-right">
+                        @model.SalesEntity?.Amount.ToString("$#,##0.00;-$#,##0.00;$0.00")</div>
+                    <div class="text-red-700 w-25 text-right">
+                        @model.ExpensesEntity?.Amount.ToString("$#,##0.00;-$#,##0.00;$0.00")
+                    </div>
+                    <div class="w-25 text-right">@(((model.SalesEntity?.Amount - model.ExpensesEntity?.Amount) ??
+                                            0).ToString("$#,##0.00;-$#,##0.00;$0.00"))</div>
+                </div>
+            </PrimaryValue>
+            <ButtonBar>
+                <a href="@BuildUri(model, "Edit")" class="btn btn-outline p-2 h-10 w-10"><span
+                        class="icon-[material-symbols--edit] w-8 h-8"> </span>
+                </a>
+                <a href="@BuildUri(model, "Delete")" class="btn btn-outline p-2 h-10 w-10"><span
+                        class="icon-[material-symbols--delete-outline-rounded] w-8 h-8"></span></a>
+            </ButtonBar>
+        </DataListLayout>
+        <hr class="my-4" />
+
+    }
+</div>
+
+@code {
+    [Parameter][SupplyParameterFromQuery] public int[] FY { get => field ?? []; set; }
+    [Parameter][SupplyParameterFromQuery] public string[] Business { get; set; } = [];
+
+
+    List<ContractIncomeEntity>? ContractIncomeEntity { get; set; }
+
+    int[] FYOptions { get; set; } = [];
+    string[] BusinessOptions { get; set; } = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        await InitialiseFYOptions();
+        await IntitialiseBusinessOptions();
+        await LoadContractIncomeData();
+        await base.OnInitializedAsync();
+    }
+
+    private async Task LoadContractIncomeData()
+    {
+        using var context = await contextFactory.CreateDbContextAsync();
+        IQueryable<ContractIncomeEntity>? entitiesQuery = context.ContractIncome
+        .Include(x => x.InvoiceDateReference)
+        .Include(x => x.Attachment)
+        .Include(x => x.ExpensesEntity)
+        .Include(x => x.SalesEntity)
+        .Where(x => Business.Length == 0 || Business.Contains(x.BusinessName.Trim()));
+
+        if (FY.Length > 0)
         {
-            <ContractListItem OnEditClicked="() => EditContractIncome(item)"
-                OnDeleteClicked="async () => await DeleteConfirmModal.ShowModal(item)"
-                OnDownloadClicked="() => DownloadInvoice(item)" Model="ContractListItemViewModelFromEntity(item)" />
-            <hr />
+            entitiesQuery = entitiesQuery.Where(x => FY.Contains(x.InvoiceDateReference.Date.AddMonths(6).Year));
         }
-    </div>
 
-    <div class="table-responsive"></div>
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th class="text-center" scope="col">Sales</th>
-                <th class="text-center" scope="col">Expenses</th>
-                <th class="text-center" scope="col">Income</th>
-            </tr>
-        </thead>
-        <tfoot class="table-group-divider fw-bold">
-            <tr>
-                <td class="text-center">$@SFAEntities.Sum(x => x.SalesEntity?.Total ?? 0).ToString("#,#0.00")</td>
-                <td class="text-center">$@SFAEntities.Sum(x => x.ExpensesEntity?.Amount ?? 0).ToString("#,#0.00")</td>
-                <td class="text-center">$@SFAEntities.Sum(x => (x.SalesEntity?.Amount ?? 0) - (x.ExpensesEntity?.Amount ??
-                                    0)).ToString("#,#0.00")
-            </td>
-        </tr>
-    </tfoot>
-</table>
+        ContractIncomeEntity = await entitiesQuery.OrderByDescending(x => x.InvoiceDateReference.Date).ToListAsync();
+
+    }
+    private async Task InitialiseFYOptions()
+    {
+        const int numberOfFY = 10;
+        var maxFY = DateTime.Now.AddMonths(6).Year;
+        var minFY = maxFY - 9;
+        FYOptions = new int[numberOfFY];
+        for (int i = minFY, j = 0; i <= maxFY; i++, j++)
+        {
+            FYOptions[j] = i;
+        }
+        FYOptions = FYOptions.OrderByDescending(x => x).ToArray();
+    }
+
+    private async Task IntitialiseBusinessOptions()
+    {
+        using var context = await contextFactory.CreateDbContextAsync();
+        string[] businessesEntities = await context.ContractIncome
+        .Select(x => x.BusinessName.Trim())
+        .Where(x => !string.IsNullOrWhiteSpace(x))
+        .OrderBy(x => x)
+        .Distinct()
+        .ToArrayAsync();
+        BusinessOptions = businessesEntities;
+    }
+
+    private string BuildUri(ContractIncomeEntity item, string action)
+    {
+        string currentBaseUri = navigationManager.ToAbsoluteUri(navigationManager.Uri).GetLeftPart(UriPartial.Path);
+        string uri = $"{currentBaseUri}/{action}/{item.ContractualAgreementId}";
+        return uri.ToString();
+    }
 }
-
-<button class="btn btn-primary w-100" @onclick="AddContractIncome">Add New</button>
-
-<DeleteModal @ref="DeleteConfirmModal" OnDeleteEntity="DeleteContractIncome" />

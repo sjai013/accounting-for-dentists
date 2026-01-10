@@ -1,68 +1,149 @@
 # Accounting for Dentists
 
-Web app for dentists to track income and expenses and fulfil their tax obligations.
+A secure, multi-tenant ASP.NET Core web application to help dentists and other solo practitioners track income, expenses, and tax obligations.
 
-## Description
+---
 
-The web app allows dentists to record income and expenses and view detailed reports with BAS and income information for tax purposes.
+## 🦷 Overview
 
-## Getting Started
+**Accounting for Dentists** is a .NET web application built to simplify bookkeeping and tax preparation for dental practices and similar small businesses. The application focuses on clean data separation between users (tenants), secure authentication, and practical reporting for tax workflows.
 
-### Dependencies
+The project is implemented using **ASP.NET Core (minimal hosting model)** with **Entity Framework Core** and is designed to run either locally or in containers.
 
-* .NET 9.0
+---
 
-### Building Docker Image
-* Build the docker image by running
+## ✨ Key Features
+
+* Multi-tenant architecture with **separate encrypted databases per user**
+* Income and expense tracking
+* Attachment support for receipts and documents
+* Authentication via **Microsoft OpenID Connect**
+* Entity Framework Core with SQLite
+* Minimal-API based ASP.NET Core application
+* Ready for containerized deployment
+
+---
+
+## 🏗 Architecture
+
+* **ASP.NET Core Web App** (minimal APIs)
+* **Entity Framework Core** for data access
+* **SQLite** databases stored per tenant
+* **OpenID Connect** authentication
+* Strong separation between infrastructure, domain models, and endpoints
+
+Tenant data is stored under a `tenants/` directory, with one database per authenticated user. Encryption keys are derived from the authenticated user identity.
+
+---
+
+## 🛠 Tech Stack
+
+* **.NET** (ASP.NET Core Web SDK)
+* **C#** (preview language features enabled)
+* **Entity Framework Core**
+* **SQLite**
+* **Microsoft Authentication (OIDC)**
+* **HTML / CSS / Static Assets** for UI
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+* .NET SDK (matching the version specified in the `.csproj`)
+* (Optional) Docker
+
+### Clone the Repository
+
+```bash
+git clone https://github.com/sjai013/accounting-for-dentists.git
+cd accounting-for-dentists
 ```
- docker build . -t ghcr.io/sjai013/accounting-for-dentists:{VERSION} --platform linux/amd64
+
+### Run Locally
+
+```bash
+dotnet restore
+dotnet run
 ```
-### Installing
 
-* Build the application using `dotnet build`
-* Configure the following environment variables:  
-    `Authentication:Microsoft:ClientSecret` - Client secret for Microsoft OpenID SSO
-    `Authentication:Microsoft:ClientId` - Client ID for Microsoft OpenID SSO.
+The application will start on the configured local development port and redirect to the login flow when accessed.
 
-Tenant data (database, uploaded files) are stored in the `tenants` directory, with a separate database for each user using the `Tenand ID (tid)` and `User Object ID (oid)` returned by the login provider.  Each user's database is password-protected using the `sub` claim provided by the login provider.
+---
 
-### Executing program
+## 🔐 Authentication Configuration
 
-* Run the program by executing `dotnet accounting-for-dentists.dll`
+Authentication is configured using **Microsoft OpenID Connect**. The following configuration values must be provided via environment variables, user secrets, or `appsettings.json`:
 
-### Docker
-The application can be run in a docker container using the sample `docker-compose.yml` file.
+```json
+"Authentication": {
+  "Microsoft": {
+    "ClientId": "<client-id>",
+    "ClientSecret": "<client-secret>"
+  }
+}
+```
 
-* Modify `docker-compose.yml` with the connection settings for your environment.
-* Launch the image by running `docker compose up -d`
-* Access the website in a browser at `https://localhost:8080` (assuming default port) 
+> Client secrets should **never** be committed to source control.
 
-## Help
+---
 
-Raise an issue for help
+## 🗄 Data Storage & Multi-Tenancy
 
-## Authors
+* Each authenticated user is assigned a tenant
+* Tenant databases are stored separately on disk
+* Databases are encrypted using keys derived from the user identity
+* EF Core manages schema and migrations
 
-Sahil Jain
+This design ensures strong isolation between users while keeping deployment simple.
 
-## Version History
-* 1.1.0
-    * Feature: Modified contract page to allow entry of multiple sales and expenses.
-    * Bugfix: Fixed a visual bug where the currency icon would not be visible while editing an input form.
-    * Bugfix: Fixed a bug where attachments would be deleted when editing a form.
-* 1.0.0
-    * Form for entering net income (combination of sales and expenses) and viewing BAS.
-    * Form for entering expenses
-    * View income, sales, expenses
-    * Upload attachments for income or expense
-    * Highly secure multi-tenant SQLite database - database decryption requires token from login provider
+---
 
+## 🐳 Docker (Optional)
 
+If you wish to containerize the application:
 
-## License
+```bash
+docker build -t accounting-for-dentists .
+docker run -p 8080:8080 accounting-for-dentists
+```
 
-This project is licensed under the MIT License - see the LICENSE.md file for details
+Adjust ports and environment variables as required.
 
-## Acknowledgments
+---
 
-Developed for my wife to help her with her taxation and reporting requirements.
+## 📁 Project Structure (Simplified)
+
+```
+/AccountingForDentists
+  Program.cs           # Application bootstrap and endpoints
+  *.cs                 # Domain, data, and service logic
+/wwwroot               # Static assets (CSS, images)
+/appsettings.json      # Configuration
+```
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome.
+
+1. Fork the repository
+2. Create a feature branch
+3. Commit your changes
+4. Open a pull request
+
+---
+
+## 📄 License
+
+This project is licensed under the **MIT License**. See the `LICENSE` file for details.
+
+---
+
+## 👤 Author
+
+**Sahil Jain**
+
+Built to support real-world tax and accounting workflows for dental practices and other professionals.

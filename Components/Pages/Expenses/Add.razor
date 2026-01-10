@@ -1,9 +1,31 @@
 @page "/Expenses/Add"
-@rendermode InteractiveServer
+@using AccountingForDentists.Infrastructure
+@using Microsoft.EntityFrameworkCore
+@inject IDbContextFactory<AccountingContext> contextFactory
+@inject NavigationManager NavigationManager
+
 <PageTitle>Add New Expense</PageTitle>
 
-<h1 class="fw-light fs-3">Add New Expenses</h1>
+<FormComponent Title="Add New Expense" ReturnUri="/Expenses" FormName="add-expense-form" ActionUri="/Expenses/Post/Add"
+    AllowRemoveAttachment="false" ExpenseEntity="null" SellerNames="SellerNames" Disabled="false">
+</FormComponent>
 
-@using AccountingForDentists.Components.Pages.Expenses.Shared
 
-<Form OnCancel="Cancel" OnSubmit="Submit"></Form>
+@code {
+    [Parameter]
+    public required Guid EntityId { get; set; }
+    List<string>? SellerNames { get; set; } = [];
+    Models.ExpensesEntity? ExpenseEntity { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadSellers();
+        await base.OnInitializedAsync();
+    }
+
+    private async Task LoadSellers()
+    {
+        using var context = await contextFactory.CreateDbContextAsync();
+        SellerNames = await context.Expenses.Select(x => x.BusinessName).Distinct().ToListAsync();
+    }
+}

@@ -1,0 +1,40 @@
+<details
+    class="grow group border p-2 my-4 rounded-sm flex flex-col @(SelectedFY.Length > 0 || SelectedBusinesses.Length > 0 ? "border-warning" : "opacity-70")">
+    <summary class="group-open:border-b group-open:pb-2 border-b-gray-300">FY @(SelectedFY.Length > 0 ? string.Join(",",
+                SelectedFY) : "(All)") |
+        Businesses: @(SelectedBusinesses.Length > 0 ? string.Join(",", SelectedBusinesses) : "(All)")</summary>
+    <form class="flex flex-col gap-2 mt-2" method="get">
+        <fieldset class="flex gap-2 items-center">
+            <label class="label w-20">FY</label>
+            @foreach (var fy in FYOptions)
+            {
+                <input class="btn" type="checkbox" checked="@(SelectedFY.Contains(fy))" name="FY" value="@fy"
+                    aria-label="@fy" />
+            }
+        </fieldset>
+
+        @if (BusinessOptions.Length > 0)
+        {
+            <fieldset class="flex gap-2 items-center">
+                <label class="label w-20">Business</label>
+                @foreach (var business in BusinessOptions)
+                {
+                    <input class="btn" type="checkbox" checked="@(SelectedBusinesses.Contains(business))" name="Business"
+                        value="@business" aria-label="@business" />
+                }
+            </fieldset>
+        }
+        <div>
+            <button class="btn btn-primary w-32 mt-2" type="submit">Apply Filters</button>
+            <button class="btn btn-primary w-32 mt-2" type="button" onclick="resetForm(event)">Clear</button>
+        </div>
+    </form>
+</details>
+
+@code {
+    [Parameter] public int[] SelectedFY { get => field ?? []; set; }
+    [Parameter] public string[] SelectedBusinesses { get => field ?? []; set; }
+    [Parameter] public int[] FYOptions { get; set; } = [];
+    [Parameter] public string[] BusinessOptions { get; set; } = [];
+
+}

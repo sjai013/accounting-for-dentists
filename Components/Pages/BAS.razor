@@ -1,61 +1,167 @@
 @page "/BAS"
-@using AccountingForDentists.Components.Pages.Shared
-@rendermode InteractiveServer
-<PageTitle>BAS</PageTitle>
-<h1 class="fw-light fs-3">BAS</h1>
-<hr />
-<div class="container-fluid ps-0">
-    <div class="row gy-2">
-        <div class="col-md-4">
-            <div class="d-flex flex-row gap-2">
-                <div style="flex-basis:40px" class="flex-shrink-0 flex-grow-0 align-content-center">FY</div>
-                <FYOptionList class="flex-grow-1" @bind-SelectedFY:get="FY" @bind-SelectedFY:set="ChangeFY" />
-            </div>
-        </div>
-    </div>
-</div>
+@using AccountingForDentists.Components.Pages.Shared.DetailsFilter
+@using AccountingForDentists.Components.Shared
+@using AccountingForDentists.Infrastructure
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.Extensions.Options
 
-<hr />
-<div class="table-responsive">
-    <table class="table table-sm table-striped-columns table-striped">
-        <thead>
-            <tr>
-                <th class="text-center" scope="col">Month</th>
-                <th class="text-end" scope="col">Total Sales (G1)</th>
-                <th class="text-end" scope="col">GST-Free Sales(G3)</th>
-                <th class="text-end" scope="col">GST on Sales (1A)</th>
-                <th class="text-end" scope="col">Total Purchases</th>
-                <th class="text-end" scope="col">GST on Purchases (1B)</th>
-                <th class="text-end" scope="col">GST Claim</th>
+@inject IDbContextFactory<AccountingContext> contextFactory
+
+<div class="mx-10">
+    <PageTitleComponent Title="Business Activity Statement">
+    </PageTitleComponent>
+    <hr />
+    <DetailsFilterComponent BusinessOptions="[]" FYOptions="@FYOptions" SelectedFY="@FY" SelectedBusinesses="@Business">
+    </DetailsFilterComponent>
+
+    <hr class="my-4" />
+
+    <table class="table table-zebra table-pin-cols border-collapse">
+        <thead class="">
+            <tr class="">
+                <th class="border border-base-content/30" scope="col">Month</th>
+                <th class="border border-base-content/30" scope="col">Total Sales (G1)</th>
+                <th class="border border-base-content/30" scope="col">GST-Free Sales(G3)</th>
+                <th class="border border-base-content/30" scope="col">GST on Sales (1A)</th>
+                <th class="border border-base-content/30" scope="col">Total Purchases</th>
+                <th class="border border-base-content/30" scope="col">GST on Purchases (1B)</th>
+                <th class="border border-base-content/30" scope="col">GST Claim</th>
             </tr>
         </thead>
         <tbody>
-            @foreach (var item in MonthlyBAS.OrderByDescending(x => x.Key.Year).ThenByDescending(x => x.Key.Month))
+            @foreach (KeyValuePair<MonthModel, BASViewModel> item in MonthlyBAS.OrderByDescending(x =>
+                        x.Key.Year).ThenByDescending(x => x.Key.Month))
             {
-                <tr>
-                    <td class="ps-2 pe-2 text-center text-nowrap">@(new DateTime(item.Key.Year, item.Key.Month,
+                <tr class="hover:bg-base-300">
+                    <td class="border border-base-content/30">@(new DateTime(item.Key.Year, item.Key.Month,
                                             1).ToString("yyyy-MM"))</td>
-                    <td class="ps-2 pe-2 text-end">$@((item.Value.Sales).ToString("N0"))</td>
-                    <td class="ps-2 pe-2 text-end">$@item.Value.GSTFreeSales.ToString("N0")</td>
-                    <td class="ps-2 pe-2 text-end">$@item.Value.SalesGST.ToString("N0")</td>
-                    <td class="ps-2 pe-2 text-end">$@item.Value.Expenses.ToString("N0")</td>
-                    <td class="ps-2 pe-2 text-end">$@item.Value.ExpenseGST.ToString("N0")</td>
-                    <td class="ps-2 pe-2 text-end">$@((item.Value.ExpenseGST - item.Value.SalesGST).ToString("N0"))</td>
+                    <td class="border border-base-content/30 text-right">$@((item.Value.Sales).ToString("N0"))</td>
+                    <td class="border border-base-content/30 text-right">$@item.Value.GSTFreeSales.ToString("N0")</td>
+                    <td class="border border-base-content/30 text-right">$@item.Value.SalesGST.ToString("N0")</td>
+                    <td class="border border-base-content/30 text-right">$@item.Value.Expenses.ToString("N0")</td>
+                    <td class="border border-base-content/30 text-right">$@item.Value.ExpenseGST.ToString("N0")</td>
+                    <td class="border border-base-content/30 text-right">$@((item.Value.ExpenseGST -
+                                            item.Value.SalesGST).ToString("N0"))</td>
                 </tr>
             }
         </tbody>
-        <tfoot class="table-group-divider fw-bold">
-            <tr>
-                <th scope="row">Totals</th>
-                <td class="ps-2 pe-2 text-end">$@MonthlyBAS.Sum(x => x.Value.Sales).ToString("N0")</td>
-                <td class="ps-2 pe-2 text-end">$@MonthlyBAS.Sum(x => x.Value.GSTFreeSales).ToString("N0")</td>
-                <td class="ps-2 pe-2 text-end">$@MonthlyBAS.Sum(x => x.Value.SalesGST).ToString("N0")</td>
-                <td class="ps-2 pe-2 text-end">$@MonthlyBAS.Sum(x => x.Value.Expenses).ToString("N0")</td>
-                <td class="ps-2 pe-2 text-end">$@MonthlyBAS.Sum(x => x.Value.ExpenseGST).ToString("N0")</td>
-                <td class="ps-2 pe-2 text-end">$@(MonthlyBAS.Sum(x => x.Value.ExpenseGST -
+        <tfoot class="border-t-2">
+            <tr class=" text-base-content">
+                <th class="border border-base-content/30" scope="row">Totals</th>
+                <td class="border border-base-content/30 text-right">$@MonthlyBAS.Sum(x => x.Value.Sales).ToString("N0")
+                </td>
+                <td class="border border-base-content/30 text-right">$@MonthlyBAS.Sum(x =>
+                                        x.Value.GSTFreeSales).ToString("N0")</td>
+                <td class="border border-base-content/30 text-right">$@MonthlyBAS.Sum(x =>
+                                        x.Value.SalesGST).ToString("N0")</td>
+                <td class="border border-base-content/30 text-right">$@MonthlyBAS.Sum(x =>
+                                        x.Value.Expenses).ToString("N0")</td>
+                <td class="border border-base-content/30 text-right">$@MonthlyBAS.Sum(x =>
+                                        x.Value.ExpenseGST).ToString("N0")</td>
+                <td class="border border-base-content/30 text-right">$@(MonthlyBAS.Sum(x => x.Value.ExpenseGST -
                                         x.Value.SalesGST).ToString("N0"))
                 </td>
             </tr>
         </tfoot>
     </table>
+
+
 </div>
+
+@code {
+
+    [Parameter][SupplyParameterFromQuery] public int[] FY { get => field ?? []; set; }
+    [Parameter][SupplyParameterFromQuery] public string[] Business { get; set; } = [];
+    int[] FYOptions { get; set; } = [];
+    private Dictionary<MonthModel, BASViewModel> MonthlyBAS { get; set; } = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        await InitialiseFYOptions();
+        await InitialiseBAS();
+        await base.OnInitializedAsync();
+    }
+
+    private async Task InitialiseFYOptions()
+    {
+        const int numberOfFY = 10;
+        var maxFY = DateTime.Now.AddMonths(6).Year;
+        var minFY = maxFY - 9;
+        FYOptions = new int[numberOfFY];
+        for (int i = minFY, j = 0; i <= maxFY; i++, j++)
+        {
+            FYOptions[j] = i;
+        }
+        FYOptions = FYOptions.OrderByDescending(x => x).ToArray();
+    }
+
+    private async Task InitialiseBAS()
+    {
+        int minFY = FY.Length > 0 ? FY.Min() : DateTime.MinValue.AddYears(1).Year;
+        int maxFY = FY.Length > 0 ? FY.Max() : DateTime.MaxValue.AddYears(-1).Year;
+        using var context = await contextFactory.CreateDbContextAsync();
+
+        DateOnly startDate = DateOnly.FromDateTime(new DateTime(minFY - 1, 7, 1));
+        DateOnly endDate = DateOnly.FromDateTime(new DateTime(maxFY, 7, 1));
+
+        var expenses = await context.Expenses
+        .Where(x => x.DateReference.Date >= startDate
+        && x.DateReference.Date < endDate)
+        .Include(x => x.DateReference)
+        .ToListAsync();
+
+        var sales = await context.Sales
+        .Where(x => x.DateReference.Date >= startDate
+        && x.DateReference.Date < endDate)
+        .Include(x => x.DateReference)
+        .ToListAsync();
+
+        ILookup<MonthModel, Models.ExpensesEntity>? monthlyExpenses = expenses.ToLookup(e => new MonthModel
+        {
+            Year = e.DateReference.Date.Year,
+            Month =
+        e.DateReference.Date.Month
+        }, e => e);
+        ILookup<MonthModel, Models.SalesEntity>? monthlySales = sales.ToLookup(s => new MonthModel
+        {
+            Year = s.DateReference.Date.Year,
+            Month =
+        s.DateReference.Date.Month
+        }, s => s);
+
+        List<MonthModel>? uniqueMonths = monthlyExpenses.Select(x => x.Key).Union(monthlySales.Select(x => x.Key)).ToList();
+
+        MonthlyBAS.Clear();
+        foreach (MonthModel month in uniqueMonths)
+        {
+            Models.ExpensesEntity[] expenseInMonth = monthlyExpenses[month].ToArray();
+            Models.SalesEntity[] salesInMonth = monthlySales[month].ToArray();
+
+            BASViewModel BAS = new()
+            {
+                Sales = (int)salesInMonth.Sum(x => x.Amount),
+                SalesGST = (int)salesInMonth.Sum(x => x.GST),
+                Expenses = (int)expenseInMonth.Sum(x => x.Amount),
+                ExpenseGST = (int)expenseInMonth.Sum(x => x.GST)
+            };
+
+            MonthlyBAS.Add(month, BAS);
+        }
+    }
+
+    private record MonthModel
+    {
+        public int Month { get; set; }
+        public int Year { get; set; }
+
+    }
+
+    public class BASViewModel
+    {
+        public int Sales { get; set; }
+        public int GSTFreeSales => Sales + SalesGST;
+        public int SalesGST { get; set; }
+        public int Expenses { get; set; }
+        public int ExpenseGST { get; set; }
+    }
+}

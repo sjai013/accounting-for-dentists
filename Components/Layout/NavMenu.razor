@@ -1,93 +1,37 @@
-﻿@using System.Reflection
-<div class="top-row ps-3 navbar navbar-dark">
-    <div class="container-fluid">
-        @* <img width="32px" src="icon.webp" /> *@
-        <a class="navbar-brand" href="">Accounting For Dentists</a>
+﻿@using Microsoft.AspNetCore.Components.Authorization
+<div class="navbar bg-base-100 shadow-sm">
+    <div class="navbar-start">
+        <div class="dropdown">
+            <div tabindex="0" role="button" class="btn btn-ghost lg:hidden">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h8m-8 6h16" />
+                </svg>
+            </div>
+            <ul tabindex="-1" class="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow">
+                <NavigationItemsComponent />
+            </ul>
+        </div>
+        <a class="btn btn-ghost text-xl" href="/">Accounting For Dentists</a>
+    </div>
+    <div class="navbar-center hidden lg:flex">
+        <ul class="menu menu-horizontal px-1">
+            <NavigationItemsComponent />
+        </ul>
+    </div>
+    <div class="navbar-end">
+        <CascadingAuthenticationState>
+            <AuthorizeView>
+                <Authorized>
+                    <div class="flex gap-2 items-center">
+                        <div><a class="btn btn-sm btn-outline" href="/account/logout">Logout
+                                <span>@context?.User.Identity?.Name</span></a></div>
+                    </div>
+                </Authorized>
+                <NotAuthorized>
+                    <div><a class="btn btn-sm btn-outline" href="/account/login">Login</a></div>
+                </NotAuthorized>
+            </AuthorizeView>
+        </CascadingAuthenticationState>
     </div>
 </div>
-
-<input type="checkbox" title="Navigation menu" class="navbar-toggler" />
-
-<div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
-    <nav class="nav flex-column">
-
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="bi bi-house-door-fill bi-nav-icon fs-4" aria-hidden="true"></span> Home
-            </NavLink>
-        </div>
-
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="Businesses">
-                <span class="bi bi-hospital-fill bi-nav-icon fs-4" aria-hidden="true"></span> Businesses
-            </NavLink>
-        </div>
-
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="Expenses">
-                <span class="bi bi-arrow-up-circle-fill bi-nav-icon fs-4" aria-hidden="true"></span> Expenses
-            </NavLink>
-        </div>
-
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="Sales">
-                <span class="bi bi-arrow-down-circle-fill bi-nav-icon fs-4" aria-hidden="true"></span> Sales
-            </NavLink>
-        </div>
-
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="Contracts">
-                <span class="bi bi-coin bi-nav-icon fs-4" aria-hidden="true"></span> Contracts
-            </NavLink>
-        </div>
-
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="BAS">
-                <span class="bi bi-calculator-fill bi-nav-icon fs-4" aria-hidden="true"></span> BAS
-            </NavLink>
-        </div>
-
-        <hr class="text-white" />
-
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="/Privacy" Match="NavLinkMatch.All">
-                <span class="bi bi-shield bi-nav-icon fs-4" aria-hidden="true"></span> Privacy Policy
-            </NavLink>
-        </div>
-
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="/Contact" Match="NavLinkMatch.All">
-                <span class="bi bi-envelope bi-nav-icon fs-4" aria-hidden="true"></span> Contact Us
-            </NavLink>
-        </div>
-
-        <hr class="text-white" />
-        <div class="countainer-fluid">
-            <div class="nav-item px-3">
-                <NavLink class="nav-link" href="https://github.com/sjai013/accounting-for-dentists" target="_blank"
-                    Match="NavLinkMatch.All">
-                    <span class="bi bi-github bi-nav-icon fs-4" aria-hidden="true"></span> View Source
-                </NavLink>
-            </div>
-            <div class="nav-item px-3">
-                <NavLink class="nav-link" href="https://blog.accountingfordentists.com.au/" target="_blank"
-                    Match="NavLinkMatch.All">
-                    <span class="bi bi-book bi-nav-icon fs-4" aria-hidden="true"></span> Blog
-                </NavLink>
-            </div>
-
-            <div class="ms-2 ps-4 text-white-50">
-                @(version)
-            </div>
-
-            <hr class="text-white" />
-        </div>
-    </nav>
-
-
-</div>
-
-@code {
-    static Assembly? assembly = Assembly.GetEntryAssembly();
-    string version = assembly?.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion ?? "";
-}

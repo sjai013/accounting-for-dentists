@@ -1,5 +1,6 @@
 using System.Reflection;
 using AccountingForDentists;
+using AccountingForDentists.API.Attachment;
 using AccountingForDentists.Components;
 using AccountingForDentists.Infrastructure;
 using Microsoft.AspNetCore.Authentication;
@@ -48,11 +49,11 @@ builder.Services.AddDbContextFactory<AccountingContext>((sp, options) =>
     }
 }, ServiceLifetime.Scoped);
 
-
+builder.Services.AddTransient<IAttachmentDownloader, AttachmentDownloader>();
 builder.Services.Configure<ForwardedHeadersOptions>(options =>
 {
     options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
-    options.KnownNetworks.Clear();
+    options.KnownIPNetworks.Clear();
     options.KnownProxies.Clear();
 });
 
@@ -84,6 +85,7 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddAuthorization();
 // IdentityModelEventSource.ShowPII = true;
 builder.Services.AddHttpContextAccessor();
+
 var app = builder.Build();
 
 app.UseForwardedHeaders();
@@ -104,11 +106,12 @@ app.UseAuthorization();
 app.UseAntiforgery();
 
 app.MapStaticAssets();
-app.MapRazorComponents<App>()
-    .AddInteractiveServerRenderMode();
+app.MapRazorComponents<App>();
 
 app.MapRazorPages()
 .WithStaticAssets();
+
+app.MapAttachmentEndpoints();
 
 app.MapGet("/account/logout", async context =>
 {

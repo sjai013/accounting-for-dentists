@@ -1,32 +1,36 @@
-@page "/Sales/Edit/{EntityId:guid}"
+@page "/Sales/Delete/{EntityId:guid}"
 @using AccountingForDentists.Infrastructure
 @using Microsoft.EntityFrameworkCore
-
 @inject IDbContextFactory<AccountingContext> contextFactory
-<PageTitle>Edit Sale</PageTitle>
 
-<FormComponent Title="Edit Sale" FormName="edit-sale-form" ReturnUri="/Sales"
-    ActionUri=@($"/Sales/Post/Edit/{SalesEntity?.SalesId.ToString()}") AllowRemoveAttachment=true    SalesEntity="SalesEntity" BuyerNames="BuyerNames"></FormComponent>
+<PageTitle>Delete Sale</PageTitle>
+
+@if (error)
+{
+    <div class="alert alert-error ml-auto mr-auto grow my-2 px-5 w-lg justify-center">There was an error deleting this sale.
+        Please try again
+        later.</div>
+}
+
+<FormComponent Title="Delete Sale" FormName="delete-sale-form" ReturnUri="/Sales" Disabled="true"
+    ActionUri=@($"/Sales/Post/Delete/{SalesEntity?.SalesId.ToString()}") AllowRemoveAttachment=false    SalesEntity="SalesEntity" BuyerNames=[] ActionText="Delete"></FormComponent>
+
 
 @code {
     [Parameter]
     public required Guid EntityId { get; set; }
 
-    List<string>? BuyerNames { get; set; } = [];
-    Models.SalesEntity? SalesEntity { get; set; }
+    [SupplyParameterFromQuery]
+    bool error { get; set; } = false;
+
+    public Models.SalesEntity? SalesEntity { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
-        await LoadBuyers();
         await LoadSaleData();
         await base.OnInitializedAsync();
     }
 
-    private async Task LoadBuyers()
-    {
-        using var context = await contextFactory.CreateDbContextAsync();
-        BuyerNames = await context.Sales.Select(x => x.BusinessName).Distinct().AsNoTracking().ToListAsync();
-    }
     private async Task LoadSaleData()
     {
         using var context = await contextFactory.CreateDbContextAsync();

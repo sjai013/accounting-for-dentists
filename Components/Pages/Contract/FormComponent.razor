@@ -1,0 +1,261 @@
+@using AccountingForDentists.Models
+<div class="grow justify-items-center-safe">
+    <h1 class="mt-4 mb-2 flex gap-2">
+        <a href="@ReturnUri" class="icon-[material-symbols--arrow-left-alt-rounded] self-center"> </a>
+        <div>@Title</div>
+    </h1>
+    <form id="form" class="" @formname="@FormName" method="post" action="@ActionUri" enctype="multipart/form-data">
+        <AntiforgeryToken />
+        <fieldset class="fieldset min-w-sm max-w-lg rounded-box  p-4">
+            <datalist id="buyer">
+                @foreach (var buyer in BusinessNames ?? Enumerable.Empty<string>())
+                {
+                    <option value="@buyer"></option>
+                }
+            </datalist>
+            <label class="label">Invoice Date</label>
+            <input readonly=@Disabled class="input w-full" type="date" id="date" name="date"
+                value="@ContractIncomeEntity?.InvoiceDateReference?.Date.ToString("yyyy-MM-dd")" />
+            <label class="label">Buyer</label>
+            <input readonly=@Disabled class="input w-full" list="buyer" id="buyer" name="buyer"
+                value="@ContractIncomeEntity?.BusinessName" />
+
+            <fieldset id="sale-fieldset" class="fieldset bg-base-200 border-base-300 rounded-box border px-4 py-2 grow">
+                <legend class="fieldset-legend">Sales</legend>
+                @if (!Disabled)
+                {
+                    <FormComponentCostSubform NamePrefix="sale" OnChangeCallback="onSaleInputChange()" Disabled="@Disabled"
+                        DefaultAmountValue="@ContractIncomeEntity?.SalesEntity?.Amount"
+                        DefaultGstValue="@ContractIncomeEntity?.SalesEntity?.GST" />
+                    <hr />
+                }
+                <div class="flex gap-2">
+                    <div class="w-28 grow-2">
+                        <label class="label">Amount</label>
+                        <input readonly id="sale-amount-total" class="input" type="number" step="0.01"
+                            value="@ContractIncomeEntity?.SalesEntity?.Amount.ToString("0.00")" />
+                    </div>
+                    <div class="w-24 grow">
+                        <label class="label">GST</label>
+                        <input readonly id="sale-gst-total" class="input" type="number" step="0.01"
+                            value="@ContractIncomeEntity?.SalesEntity?.GST.ToString("0.00")" />
+                    </div>
+                </div>
+                @if (!Disabled)
+                {
+                    <button type="button" class="btn btn-sm  mt-2"
+                        onclick="clone('sale-form-row', 'sale-fieldset', Array.from(document.getElementsByClassName('sale-input-row')).at(-1))">Add
+                        Another
+                        Sale</button>
+                }
+            </fieldset>
+
+
+            <fieldset id="expense-fieldset"
+                class="fieldset bg-base-200 border-base-300 rounded-box border px-4 py-2 grow">
+                <legend class="fieldset-legend">Expenses</legend>
+                @if (!Disabled)
+                {
+                    <FormComponentCostSubform NamePrefix="expense" OnChangeCallback="onExpenseInputChange()"
+                        DefaultAmountValue="@ContractIncomeEntity?.ExpensesEntity?.Amount"
+                        DefaultGstValue="@ContractIncomeEntity?.ExpensesEntity?.GST" />
+                    <hr />
+                }
+                <div class="flex gap-2">
+                    <div class="w-28 grow-2">
+                        <label class="label">Amount</label>
+                        <input readonly id="expense-amount-total" class="input" type="number" step="0.01"
+                            value="@ContractIncomeEntity?.ExpensesEntity?.Amount.ToString("0.00")" />
+                    </div>
+                    <div class="w-24 grow">
+                        <label class="label">GST</label>
+                        <input readonly id="expense-gst-total" class="input" type="number" step="0.01"
+                            value="@ContractIncomeEntity?.ExpensesEntity?.GST.ToString("0.00")" />
+                    </div>
+                </div>
+                @if (!Disabled)
+                {
+                    <button type="button" class="btn btn-sm  mt-2"
+                        onclick="clone('expense-form-row', 'expense-fieldset', Array.from(document.getElementsByClassName('expense-input-row')).at(-1))">Add
+                        Another
+                        Expense</button>
+                }
+            </fieldset>
+
+            <fieldset id="expense-fieldset"
+                class="fieldset bg-base-200 border-base-300 rounded-box border px-4 py-2 grow">
+                <legend class="fieldset-legend">Payment</legend>
+                <div class="flex gap-2">
+                    <div class="w-28 grow-2">
+                        <label class="label">Amount</label>
+                        <input readonly id="amount-total" class="input" type="number" step="0.01"
+                            value="@((ContractIncomeEntity?.SalesEntity?.Amount - ContractIncomeEntity?.ExpensesEntity?.Amount - ContractIncomeEntity?.ExpensesEntity?.GST)?.ToString("0.00"))" />
+                    </div>
+                    <div class="w-24 grow">
+                        <label class="label">GST</label>
+                        <input readonly id="gst-total" class="input" type="number" step="0.01"
+                            value="@((ContractIncomeEntity?.ExpensesEntity?.GST - ContractIncomeEntity?.SalesEntity?.GST)?.ToString("0.00"))" />
+                    </div>
+                </div>
+                <hr />
+                <div class="flex flex-col gap-2">
+                    <div class="grow">
+                        <label class="label">Income</label>
+                        <input readonly id="payment-total" class="input" type="number" step="0.01"
+                            value="@((ContractIncomeEntity?.SalesEntity?.Amount - ContractIncomeEntity?.ExpensesEntity?.Amount)?.ToString("0.00"))" />
+                    </div>
+                    <div class="grow">
+                        <label class="label">Commission %</label>
+                        <input readonly id="commission" class="input" type="number" step="0.01"
+                            value="@(calculateCommissionPercentage(ContractIncomeEntity?.SalesEntity?.Amount ?? 0, ContractIncomeEntity?.ExpensesEntity?.Amount ?? 0).ToString("0.00"))" />
+                    </div>
+                </div>
+            </fieldset>
+
+            @if (!Disabled)
+            {
+                <label class="label mt-2">Add/Replace Attachment</label>
+                <input readonly=@Disabled type="file" class="file-input w-full" name="attachment" />
+            }
+            @if (ContractIncomeEntity?.Attachment is null)
+            {
+                <p class="mt-2">No attachment uploaded.</p>
+            }
+            else
+            {
+                <p class="mt-2">Current Attachment: <a class="link" target="_blank"
+                        href="/api/attachment/@ContractIncomeEntity?.Attachment?.AttachmentId">@ContractIncomeEntity?.Attachment?.CustomerFilename</a>
+                </p>
+                @if (AllowRemoveAttachment)
+                {
+                    <label class="label peer mt-2">
+                        <input type="checkbox" class="toggle peer" name="removeAttachment" value="true" />
+                        <div class="peer-checked:text-black  peer-checked:font-bold">Remove attachment</div>
+                    </label>
+                }
+            }
+        </fieldset>
+
+
+        <div class="flex gap-2  justify-center-safe">
+            <input type="submit" disabled style="display: none" aria-hidden="true" />
+            <button class="btn btn-neutral mt-4" tab type="submit">@ActionText</button>
+            @if (!Disabled)
+            {
+                <button class="btn btn-ghost mt-4" type="reset">Reset</button>
+            }
+        </div>
+    </form>
+</div>
+
+<template id="sale-form-row">
+    <FormComponentCostSubform NamePrefix="sale" OnChangeCallback="onSaleInputChange()" />
+</template>
+
+<template id="expense-form-row">
+    <FormComponentCostSubform NamePrefix="expense" OnChangeCallback="onExpenseInputChange()" />
+</template>
+
+<script>
+    onSaleInputChange = () => {
+        updateTotals();
+    }
+
+    onExpenseInputChange = () => {
+        updateTotals();
+    }
+
+    totalSalesAmount = () => {
+        return calculateTotal("form", "saleAmount");
+    }
+
+    totalSalesGst = () => {
+        return calculateTotal("form", "saleGst");
+    }
+
+    totalExpenseAmount = () => {
+        return calculateTotal("form", "expenseAmount");
+    }
+
+    totalExpenseGst = () => {
+        return calculateTotal("form", "expenseGst");
+    }
+
+    calculateCommission = (income, expenses) => {
+        if (income === 0) {
+            return 0;
+        }
+        if (expenses === 0) {
+            return 100;
+        }
+        return ((income - expenses) / income) * 100;
+    }
+
+    updateTotals = () => {
+        const salesAmount = totalSalesAmount();
+        const salesGst = totalSalesGst();
+        const expenseAmount = totalExpenseAmount();
+        const expenseGst = totalExpenseGst();
+        const totalAmount = (salesAmount + salesGst) - (expenseAmount + expenseGst);
+        const totalGst = expenseGst - salesGst;
+        const totalPayment = totalAmount + totalGst;
+        const commission = calculateCommission(salesAmount, expenseAmount);
+        document.getElementById('sale-amount-total').value = salesAmount.toFixed(2);
+        document.getElementById('sale-gst-total').value = salesGst.toFixed(2);
+        document.getElementById('expense-amount-total').value = expenseAmount.toFixed(2);
+        document.getElementById('expense-gst-total').value = expenseGst.toFixed(2);
+        document.getElementById('amount-total').value = totalAmount.toFixed(2);
+        document.getElementById('gst-total').value = totalGst.toFixed(2);
+        document.getElementById('payment-total').value = totalPayment.toFixed(2);
+        document.getElementById('commission').value = commission.toFixed(2);
+    }
+
+
+
+
+
+</script>
+
+@code {
+    [Parameter]
+    public bool Disabled { get; set; } = false;
+
+    [Parameter]
+    public required string Title { get; set; }
+    [Parameter]
+    public required string FormName { get; set; }
+
+    [Parameter]
+    public ContractIncomeEntity? ContractIncomeEntity { get; set; }
+
+    [Parameter]
+    public List<string>? BusinessNames { get; set; }
+
+    [Parameter]
+    public required string ActionUri { get; set; }
+
+    [Parameter]
+    public required string ReturnUri { get; set; }
+
+    [Parameter]
+    public bool AllowRemoveAttachment { get; set; } = true;
+
+    [Parameter]
+    public string ActionText { get; set; } = "Save";
+
+    decimal calculateCommissionPercentage(decimal sales, decimal expenses)
+    {
+        if (sales == 0)
+        {
+            return 0;
+        }
+
+        if (expenses == 0)
+        {
+            return 100;
+        }
+
+        decimal commission = (sales - expenses) / sales * 100;
+        return commission;
+    }
+}

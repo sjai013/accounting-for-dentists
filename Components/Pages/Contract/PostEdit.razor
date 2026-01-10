@@ -1,0 +1,134 @@
+@page "/Contracts/Post/Edit/{EntityId:guid}"
+@using AccountingForDentists.Infrastructure
+@using AccountingForDentists.Models
+@using Microsoft.EntityFrameworkCore
+@using System.Security.Cryptography
+
+<form @formname="edit-contract-income-form" method="post" @onsubmit="HandleSubmit"></form>
+@inject NavigationManager NavigationManager;
+@inject IDbContextFactory<AccountingContext> contextFactory
+@inject TenantProvider tenantProvider
+
+
+@code {
+    [CascadingParameter]
+    HttpContext? HttpContext { get; set; }
+
+    [SupplyParameterFromForm]
+    DateTime Date { get; set; }
+
+    [SupplyParameterFromForm]
+    string? Buyer { get; set; }
+
+    [SupplyParameterFromForm]
+    decimal[]? SaleAmount { get; set; }
+
+    [SupplyParameterFromForm]
+    decimal[]? SaleGst { get; set; }
+
+    [SupplyParameterFromForm]
+    decimal[]? ExpenseAmount { get; set; }
+
+    [SupplyParameterFromForm]
+    decimal[]? ExpenseGst { get; set; }
+
+    [SupplyParameterFromForm]
+    IFormFile? Attachment { get; set; }
+
+    [SupplyParameterFromForm]
+    bool? RemoveAttachment { get; set; }
+
+    [Parameter]
+    public Guid EntityId { get; set; }
+
+    private async Task HandleSubmit()
+    {
+        if (HttpContext?.Request.Method != HttpMethod.Post.Method)
+        {
+            NavigationManager.NavigateTo($"/Contracts/Edit/${EntityId}");
+            return;
+        }
+
+        using var context = await contextFactory.CreateDbContextAsync();
+        var contractIncome = await context.ContractIncome
+        .Where(x => x.ContractualAgreementId == EntityId)
+        .Include(e => e.Attachment)
+        .Include(e => e.InvoiceDateReference)
+        .Include(e => e.SalesEntity)
+        .Include(e => e.ExpensesEntity)
+        .FirstOrDefaultAsync();
+
+        if (contractIncome is null)
+        {
+            NavigationManager.NavigateTo($"/Contracts/Edit/${EntityId}");
+            return;
+        }
+
+        contractIncome.InvoiceDateReference.Date = DateOnly.FromDateTime(Date);
+        contractIncome.BusinessName = Buyer ?? string.Empty;
+
+        if (contractIncome.SalesEntity is null)
+        {
+            contractIncome.SalesEntity = new()
+            {
+                SalesId = Guid.NewGuid(),
+                DateReference = contractIncome.InvoiceDateReference
+            };
+
+            context.Sales.Add(contractIncome.SalesEntity);
+        }
+
+        contractIncome.SalesEntity.GST = (SaleGst ?? []).Sum();
+        contractIncome.SalesEntity.Amount = (SaleAmount ?? []).Sum();
+        contractIncome.SalesEntity.BusinessName = contractIncome.BusinessName;
+
+
+        if (contractIncome.ExpensesEntity is null)
+        {
+            contractIncome.ExpensesEntity = new()
+            {
+                ExpensesId = Guid.NewGuid(),
+                DateReference = contractIncome.InvoiceDateReference
+            };
+
+            context.Expenses.Add(contractIncome.ExpensesEntity);
+        }
+
+        contractIncome.ExpensesEntity.GST = (ExpenseGst ?? []).Sum();
+        contractIncome.ExpensesEntity.Amount = (ExpenseAmount ?? []).Sum();
+        contractIncome.ExpensesEntity.BusinessName = contractIncome.BusinessName;
+
+        if (RemoveAttachment ?? false)
+        {
+            contractIncome.Attachment = null;
+        }
+        else if (Attachment is not null)
+        {
+            using MemoryStream? memoryStream = new MemoryStream();
+            await Attachment.CopyToAsync(memoryStream);
+            FileEncryptionResult encryptionResult = AttachmentEntity.Encrypt(memoryStream.ToArray(),
+            tenantProvider.GetUserObjectId());
+
+            AttachmentEntity attachmentEntity = new()
+            {
+                CustomerFilename = Attachment.FileName,
+                AttachmentId = Guid.NewGuid(),
+                SizeBytes = (int)memoryStream.Length,
+                MD5Hash = Convert.ToHexString(MD5.HashData(memoryStream.ToArray())),
+                Key = encryptionResult.Key
+            };
+            contractIncome.Attachment = attachmentEntity;
+            context.Attachments.Add(attachmentEntity);
+            var directory = tenantProvider.AttachmentsDirectory();
+            var filePath = AttachmentEntity.GetPath(directory, attachmentEntity.AttachmentId);
+            File.WriteAllBytes(filePath, encryptionResult.Bytes);
+        }
+
+        await context.SaveChangesAsync();
+        NavigationManager.NavigateTo($"/Contracts/Edit/{EntityId}", forceLoad: true);
+    }
+
+
+
+
+}

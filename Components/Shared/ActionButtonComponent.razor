@@ -1,0 +1,13 @@
+<a href="@Uri" class="btn btn-outline text-1xl"><span class=@($"icon-[{Icon}]")></span> @Text</a>
+
+
+@code {
+    [Parameter]
+    public required string Uri { get; set; }
+
+    [Parameter]
+    public required string Text { get; set; }
+
+    [Parameter]
+    public required string Icon { get; set; }
+}

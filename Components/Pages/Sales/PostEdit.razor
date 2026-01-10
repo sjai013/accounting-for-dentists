@@ -1,0 +1,101 @@
+@page "/Sales/Post/Edit/{EntityId:guid}"
+@using AccountingForDentists.Infrastructure
+@using AccountingForDentists.Models
+@using Microsoft.EntityFrameworkCore
+@using System.Security.Cryptography
+
+<form @formname="edit-sale-form" method="post" @onsubmit="HandleSubmit"></form>
+@inject NavigationManager NavigationManager;
+@inject IDbContextFactory<AccountingContext> contextFactory
+@inject TenantProvider tenantProvider
+
+
+@code {
+    [CascadingParameter]
+    public HttpContext? HttpContext { get; set; }
+
+    [SupplyParameterFromForm]
+    DateTime Date { get; set; }
+
+    [SupplyParameterFromForm]
+    string? Description { get; set; }
+
+    [SupplyParameterFromForm]
+    decimal Amount { get; set; }
+
+    [SupplyParameterFromForm]
+    decimal Gst { get; set; }
+
+    [SupplyParameterFromForm]
+    string? Buyer { get; set; }
+
+    [SupplyParameterFromForm]
+    IFormFile? Attachment { get; set; }
+
+    [SupplyParameterFromForm]
+    bool? RemoveAttachment { get; set; }
+
+    [Parameter]
+    public Guid EntityId { get; set; }
+
+
+    private async Task HandleSubmit()
+    {
+        if (HttpContext?.Request.Method != HttpMethod.Post.Method)
+        {
+            NavigationManager.NavigateTo($"/Sales/Edit/${EntityId}");
+            return;
+        }
+
+        using var context = await contextFactory.CreateDbContextAsync();
+        var salesEntity = await context.Sales
+        .Where(x => x.SalesId == EntityId)
+        .Include(e => e.Attachment)
+        .Include(e => e.DateReference)
+        .FirstOrDefaultAsync();
+
+        if (salesEntity is null)
+        {
+            NavigationManager.NavigateTo($"/Sales/Edit/${EntityId}");
+            return;
+        }
+
+        salesEntity.DateReference.Date = DateOnly.FromDateTime(Date);
+        salesEntity.BusinessName = Buyer ?? string.Empty;
+        salesEntity.Description = Description ?? string.Empty;
+        salesEntity.Amount = Amount;
+        salesEntity.GST = Gst;
+        if (RemoveAttachment ?? false)
+        {
+            salesEntity.Attachment = null;
+        }
+        else if (Attachment is not null)
+        {
+            using MemoryStream? memoryStream = new MemoryStream();
+            await Attachment.CopyToAsync(memoryStream);
+            FileEncryptionResult encryptionResult = AttachmentEntity.Encrypt(memoryStream.ToArray(),
+            tenantProvider.GetUserObjectId());
+
+            AttachmentEntity attachmentEntity = new()
+            {
+                CustomerFilename = Attachment.FileName,
+                AttachmentId = Guid.NewGuid(),
+                SizeBytes = (int)memoryStream.Length,
+                MD5Hash = Convert.ToHexString(MD5.HashData(memoryStream.ToArray())),
+                Key = encryptionResult.Key
+            };
+            salesEntity.Attachment = attachmentEntity;
+            context.Attachments.Add(attachmentEntity);
+            var directory = tenantProvider.AttachmentsDirectory();
+            var filePath = AttachmentEntity.GetPath(directory, attachmentEntity.AttachmentId);
+            File.WriteAllBytes(filePath, encryptionResult.Bytes);
+        }
+
+        await context.SaveChangesAsync();
+        NavigationManager.NavigateTo($"/Sales/Edit/{EntityId}", forceLoad: true);
+    }
+
+
+
+
+}

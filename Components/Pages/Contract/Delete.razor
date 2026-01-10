@@ -1,17 +1,29 @@
-@page "/Contracts/Edit/{EntityId:guid}"
+@page "/Contracts/Delete/{EntityId:guid}"
 @using AccountingForDentists.Infrastructure
 @using Microsoft.EntityFrameworkCore
 @inject IDbContextFactory<AccountingContext> contextFactory
 
 <PageTitle>Edit Contract Income</PageTitle>
 
-<FormComponent Title="Edit Contract Income" FormName="edit-contract-income-form" ReturnUri="/Contracts"
-    ActionText="Update Contract Income"
-    ActionUri=@($"/Contracts/Post/Edit/{ContractEntity?.ContractualAgreementId.ToString()}") AllowRemoveAttachment=true    ContractIncomeEntity="@ContractEntity" BusinessNames="@BusinessNames"></FormComponent>
+@if (error)
+{
+    <div class="alert alert-error ml-auto mr-auto grow my-2 px-5 w-lg justify-center">There was an error deleting this sale.
+        Please try again
+        later.</div>
+}
+
+
+<FormComponent Title="Delete Contract Income" FormName="delete-contract-income-form" ReturnUri="/Contracts"
+    Disabled=true ActionText="Delete"
+    ActionUri=@($"/Contracts/Post/Delete/{ContractEntity?.ContractualAgreementId.ToString()}")
+    AllowRemoveAttachment=false ContractIncomeEntity="@ContractEntity" BusinessNames="@BusinessNames"></FormComponent>
 
 @code {
     [Parameter]
     public required Guid EntityId { get; set; }
+
+    [SupplyParameterFromQuery]
+    bool error { get; set; } = false;
 
     List<string>? BusinessNames { get; set; } = [];
     List<string>? SellerNames { get; set; } = [];
@@ -19,16 +31,10 @@
 
     protected override async Task OnInitializedAsync()
     {
-        await LoadBusinesses();
         await LoadContractData();
         await base.OnInitializedAsync();
     }
 
-    private async Task LoadBusinesses()
-    {
-        using var context = await contextFactory.CreateDbContextAsync();
-        BusinessNames = await context.Businesses.Select(x => x.Name).Distinct().AsNoTracking().ToListAsync();
-    }
 
     private async Task LoadContractData()
     {

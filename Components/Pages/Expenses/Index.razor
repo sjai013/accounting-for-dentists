@@ -1,71 +1,116 @@
 @page "/Expenses"
-@using AccountingForDentists.Components.Pages.Expenses.Shared
-@using AccountingForDentists.Components.Pages.Shared.InputDatalist
-@using AccountingForDentists.Components.Pages.Shared.YearBusinessFilter
+@using AccountingForDentists.Components.Pages.Shared.DetailsFilter
+@using AccountingForDentists.Components.Shared
+@using AccountingForDentists.Infrastructure
 @using AccountingForDentists.Models
-@rendermode InteractiveServer
-<PageTitle>View Expenses</PageTitle>
+@using Microsoft.AspNetCore.WebUtilities
+@using Microsoft.EntityFrameworkCore
+@inject IDbContextFactory<AccountingContext> contextFactory
+@inject NavigationManager navigationManager
 
-<h1 class="fw-light fs-3">Expenses</h1>
+<PageTitle>Expenses</PageTitle>
 
-@if (Error is not null)
-{
-    <div class="alert alert-warning" role="alert">
-        @(Error)
-    </div>
-}
+<div class="mx-10">
+    <PageTitleComponent Title="Expenses">
+        <Button>
+            <ActionButtonComponent Text="Add New Expense" Uri="/Expenses/Add" Icon="material-symbols--add-2-rounded" />
+        </Button>
+    </PageTitleComponent>
+    <hr />
+    <DetailsFilterComponent BusinessOptions="@BusinessOptions" FYOptions="@FYOptions" SelectedFY="@FY"
+        SelectedBusinesses="@Business">
+    </DetailsFilterComponent>
 
-<hr />
-<YearBusinessFilter @bind-SelectedFY:get="FY" @bind-SelectedFY:set="SelectFY" @bind-SelectedBusiness:get="Business"
-    @bind-SelectedBusiness:set="SelectBusiness" Businesses="Businesses!" />
-<hr />
-
-@if (ExpenseEntities is null)
-{
-    <div class="d-flex flex-column gap-2">
-        <div class="p-0 container-fluid placeholder-glow">
-            <div style="height:50px" class="placeholder col-12 rounded-2"></div>
-        </div>
-        <div class="p-0 container-fluid placeholder-glow">
-            <div style="height:150px" class="placeholder col-12 rounded-2"></div>
-        </div>
-        <div class="p-0 container-fluid placeholder-glow">
-            <div style="height:50px" class="placeholder col-12 rounded-2"></div>
-        </div>
-        <div class="p-0 container-fluid placeholder-glow">
-            <div style="height:50px" class="placeholder col-12 rounded-2"></div>
-        </div>
-    </div>
-}
-else
-{
-
-    @foreach (ExpensesEntity item in ExpenseEntities)
+    <hr class="my-4"/>
+    @foreach (var model in ExpenseEntities ?? Enumerable.Empty<ExpensesEntity>())
     {
-        <ExpensesListItem Model="ExpensesEntityToViewModel(item)" OnEditClicked="async () => await EditExpense(item)"
-            OnDownloadClicked="async () => await DownloadInvoice(item)"
-            OnDeleteClicked="async () => await DeleteConfirmModal.ShowModal(item)" />
-        <hr />
+
+        <DataListLayout>
+            <Header>@model.DateReference.Date.ToString("dd/MM/yyyy")</Header>
+            <SecondaryHeader>
+            <span class="font-bold">@model.BusinessName </span>
+            @if (!string.IsNullOrWhiteSpace(model.Description))
+            {   
+                <span> - </span> <span class="font-extralight">@model.Description</span>
+            }
+            </SecondaryHeader>
+            <PrimaryValue>
+                $@model.Amount.ToString("#,##0.00")
+            </PrimaryValue>
+            <ButtonBar>
+                <a href="@BuildUri(model, "Edit")" class="btn btn-outline p-2 h-10 w-10"><span class="icon-[material-symbols--edit] w-8 h-8"> </span>
+                </a>
+                <a href="@BuildUri(model, "Delete")" class="btn btn-outline p-2 h-10 w-10"><span class="icon-[material-symbols--delete-outline-rounded] w-8 h-8"></span></a>
+
+            </ButtonBar>
+        </DataListLayout>
+        <hr class="my-4"/>
+    }
+
+</div>
+
+@code {
+    [Parameter][SupplyParameterFromQuery] public int[] FY { get => field ?? []; set; }
+    [Parameter][SupplyParameterFromQuery] public string[] Business { get; set; } = [];
+
+    List<ExpensesEntity>? ExpenseEntities { get; set; }
+
+    int[] FYOptions { get; set; } = [];
+    string[] BusinessOptions { get; set; } = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        await InitialiseFYOptions();
+        await IntitialiseBusinessOptions();
+        await LoadExpenseData();
+        await base.OnInitializedAsync();
+    }
+
+    private async Task LoadExpenseData()
+    {
+        using var context = await contextFactory.CreateDbContextAsync();
+        IQueryable<ExpensesEntity>? entitiesQuery = context.Expenses
+        .Include(x => x.DateReference)
+        .Include(x => x.Attachment)
+        .Where(x => Business.Length == 0 || Business.Contains(x.BusinessName.Trim()));
+
+        if (FY.Length > 0)
+        {
+            entitiesQuery = entitiesQuery.Where(x => FY.Contains(x.DateReference.Date.AddMonths(6).Year));
+        }
+
+        ExpenseEntities = await entitiesQuery.OrderByDescending(x => x.DateReference.Date).ToListAsync();
 
     }
-    <table class="table">
-        <thead>
-            <th class="text-center" scope="col">Amount</th>
-            <th class="text-center" scope="col">GST</th>
-            <th class="text-center" scope="col">Total</th>
-        </thead>
+    private async Task InitialiseFYOptions()
+    {
+        const int numberOfFY = 10;
+        var maxFY = DateTime.Now.AddMonths(6).Year;
+        var minFY = maxFY - 9;
+        FYOptions = new int[numberOfFY];
+        for (int i = minFY, j = 0; i <= maxFY; i++, j++)
+        {
+            FYOptions[j] = i;
+        }
+        FYOptions = FYOptions.OrderByDescending(x => x).ToArray();
+    }
 
-        <tfoot class="table-group-divider fw-bold">
-            <tr>
-                <td class="text-center">$@(ExpenseEntities.Sum(x => x.Amount).ToString("0.00"))</td>
-                <td class="text-center">$@(ExpenseEntities.Sum(x => x.GST).ToString("0.00"))</td>
-                <td class="text-center">$@(ExpenseEntities.Sum(x => x.Total).ToString("0.00"))</td>
-            </tr>
-        </tfoot>
-    </table>
+    private async Task IntitialiseBusinessOptions()
+    {
+        using var context = await contextFactory.CreateDbContextAsync();
+        string[] businessesEntities = await context.Expenses
+        .Select(x => x.BusinessName.Trim())
+        .Where(x => !string.IsNullOrWhiteSpace(x))
+        .OrderBy(x => x)
+        .Distinct()
+        .ToArrayAsync();
+        BusinessOptions = businessesEntities;
+    }
 
-    <button class="btn btn-primary w-100" @onclick="AddExpense">Add New</button>
+
+        private string BuildUri(ExpensesEntity item, string action) {
+        string currentBaseUri = navigationManager.ToAbsoluteUri(navigationManager.Uri).GetLeftPart(UriPartial.Path);
+        string editUri = $"{currentBaseUri}/{action}/{item.ExpensesId}";
+        return editUri.ToString();
+    }
 }
-
-
-<DeleteModal @ref="DeleteConfirmModal" OnDeleteEntity="DeleteExpense" />
