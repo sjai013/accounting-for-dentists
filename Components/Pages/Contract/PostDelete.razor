@@ -1,0 +1,67 @@
+@page "/Contracts/Post/Delete/{EntityId:guid}"
+@using AccountingForDentists.Infrastructure
+@using AccountingForDentists.Models
+@using Microsoft.EntityFrameworkCore
+@using System.Security.Cryptography
+
+<form @formname="delete-contract-income-form" method="post" @onsubmit="HandleSubmit"></form>
+@inject NavigationManager NavigationManager;
+@inject IDbContextFactory<AccountingContext> contextFactory
+@inject TenantProvider tenantProvider
+
+
+@code {
+    [CascadingParameter]
+    public HttpContext? HttpContext { get; set; }
+
+    [Parameter]
+    public Guid EntityId { get; set; }
+
+
+    private async Task HandleSubmit()
+    {
+
+        if (HttpContext?.Request.Method != HttpMethod.Post.Method)
+        {
+            NavigationManager.NavigateTo($"/Sales/Delete/${EntityId}");
+            return;
+        }
+
+        using var context = await contextFactory.CreateDbContextAsync();
+        var contractIncome = await context.ContractIncome
+        .Where(x => x.ContractualAgreementId == EntityId)
+        .Include(e => e.Attachment)
+        .Include(e => e.InvoiceDateReference)
+        .Include(e => e.SalesEntity)
+        .Include(e => e.ExpensesEntity)
+        .FirstOrDefaultAsync();
+
+        if (contractIncome is null)
+        {
+            NavigationManager.NavigateTo($"/Contracts/Delete/${EntityId}");
+            return;
+        }
+
+        if (contractIncome.SalesEntity is not null) context.Sales.Remove(contractIncome.SalesEntity);
+        if (contractIncome.ExpensesEntity is not null) context.Expenses.Remove(contractIncome.ExpensesEntity);
+        if (contractIncome.Attachment is not null) context.Attachments.Remove(contractIncome.Attachment);
+        context.DateReferences.Remove(contractIncome.InvoiceDateReference);
+        context.ContractIncome.Remove(contractIncome);
+
+        try
+        {
+            await context.SaveChangesAsync();
+        }
+        catch (Exception e)
+        {
+            // Log the error (uncomment ex variable name and write a log.)
+            NavigationManager.NavigateTo($"/Contracts/Delete/{EntityId}?error=true");
+            return;
+        }
+        NavigationManager.NavigateTo($"/Contracts", forceLoad: true);
+    }
+
+
+
+
+}

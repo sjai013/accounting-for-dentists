@@ -1,10 +1,11 @@
 @page "/About"
+@using System.Reflection
 @attribute [Microsoft.AspNetCore.Authorization.AllowAnonymous]
 <PageTitle>About</PageTitle>
 
 <section class="mx-auto max-w-3xl px-4 py-12 text-slate-800">
     <h1 class="mb-6 text-3xl font-semibold tracking-tight text-slate-900">
-        About Accounting for Dentists
+        About Accounting for Dentists (@("v" + version))
     </h1>
 
     <p class="mb-4 text-base leading-relaxed">
@@ -99,3 +100,7 @@
     </p>
 </section>
 `
+@code {
+    static Assembly? assembly = Assembly.GetEntryAssembly();
+    string version = assembly?.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion ?? "";
+}
