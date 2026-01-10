@@ -13,14 +13,17 @@
             }
         </fieldset>
 
-        <fieldset class="flex gap-2 items-center">
-            <label class="label w-20">Business</label>
-            @foreach (var business in BusinessOptions)
-            {
-                <input class="btn" type="checkbox" checked="@(SelectedBusinesses.Contains(business))" name="Business"
-                    value="@business" aria-label="@business" />
-            }
-        </fieldset>
+        @if (BusinessOptions.Length > 0)
+        {
+            <fieldset class="flex gap-2 items-center">
+                <label class="label w-20">Business</label>
+                @foreach (var business in BusinessOptions)
+                {
+                    <input class="btn" type="checkbox" checked="@(SelectedBusinesses.Contains(business))" name="Business"
+                        value="@business" aria-label="@business" />
+                }
+            </fieldset>
+        }
         <div>
             <button class="btn btn-primary w-32 mt-2" type="submit">Apply Filters</button>
             <button class="btn btn-primary w-32 mt-2" type="button" onclick="resetForm(event)">Clear</button>

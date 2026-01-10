@@ -1,12 +1,12 @@
 <div class=@($"flex gap-2 {NamePrefix}-input-row w-full")>
     <div class="w-28 grow-2">
         <label class="label">Amount</label>
-        <input readonly=@Disabled class="amount-input input" type="number" step="0.01" name=@($"{NamePrefix}-amount")
+        <input readonly=@Disabled class="amount-input input" type="number" step="0.01" name=@($"{NamePrefix}Amount")
             onchange=@OnChangeCallback value=@DefaultAmountValue?.ToString("0.00") />
     </div>
     <div class="w-24 grow">
         <label class="label">GST</label>
-        <input readonly=@Disabled class="gst-input input" type="number" step="0.01" name=@($"{NamePrefix}-gst")
+        <input readonly=@Disabled class="gst-input input" type="number" step="0.01" name=@($"{NamePrefix}Gst")
             onchange=@OnChangeCallback value=@DefaultGstValue?.ToString("0.00") />
     </div>
 </div>

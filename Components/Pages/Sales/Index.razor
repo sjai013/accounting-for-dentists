@@ -108,7 +108,7 @@
 
     private string BuildUri(SalesEntity item, string action) {
         string currentBaseUri = navigationManager.ToAbsoluteUri(navigationManager.Uri).GetLeftPart(UriPartial.Path);
-        string editUri = $"{currentBaseUri}/{action}/{item.SalesId}";
-        return editUri.ToString();
+        string uri = $"{currentBaseUri}/{action}/{item.SalesId}";
+        return uri.ToString();
     }
 }

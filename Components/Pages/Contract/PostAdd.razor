@@ -1,0 +1,118 @@
+@page "/Contracts/Post/Add"
+@using AccountingForDentists.Infrastructure
+@using AccountingForDentists.Models
+@using Microsoft.EntityFrameworkCore
+@using System.Security.Cryptography
+
+<form @formname="add-contract-income-form" method="post" @onsubmit="HandleSubmit"></form>
+@inject NavigationManager NavigationManager;
+@inject IDbContextFactory<AccountingContext> contextFactory
+@inject TenantProvider tenantProvider
+
+
+@code {
+    [CascadingParameter]
+    HttpContext? HttpContext { get; set; }
+
+    [SupplyParameterFromForm]
+    DateTime Date { get; set; }
+
+    [SupplyParameterFromForm]
+    string? Buyer { get; set; }
+
+    [SupplyParameterFromForm]
+    decimal[]? SaleAmount { get; set; }
+
+    [SupplyParameterFromForm]
+    decimal[]? SaleGst { get; set; }
+
+    [SupplyParameterFromForm]
+    decimal[]? ExpenseAmount { get; set; }
+
+    [SupplyParameterFromForm]
+    decimal[]? ExpenseGst { get; set; }
+
+    [SupplyParameterFromForm]
+    IFormFile? Attachment { get; set; }
+
+    [SupplyParameterFromForm]
+    bool? RemoveAttachment { get; set; }
+
+    [Parameter]
+    public Guid EntityId { get; set; }
+
+    private async Task HandleSubmit()
+    {
+        if (HttpContext?.Request.Method != HttpMethod.Post.Method)
+        {
+            NavigationManager.NavigateTo($"/Contracts/Edit/${EntityId}");
+            return;
+        }
+        using var context = await contextFactory.CreateDbContextAsync();
+
+        ContractIncomeEntity contractIncome = new()
+        {
+            ContractualAgreementId = EntityId,
+            InvoiceDateReference = new()
+            {
+                DateContainerId = Guid.NewGuid(),
+                Date = DateOnly.FromDateTime(Date)
+            },
+            BusinessName = Buyer ?? string.Empty
+        };
+
+        SalesEntity salesEntity = new()
+        {
+            SalesId = Guid.NewGuid(),
+            DateReference = contractIncome.InvoiceDateReference,
+            GST = (SaleGst ?? []).Sum(),
+            Amount = (SaleAmount ?? []).Sum(),
+            BusinessName = contractIncome.BusinessName
+        };
+        contractIncome.SalesEntity = salesEntity;
+
+        ExpensesEntity expensesEntity = new()
+        {
+            ExpensesId = Guid.NewGuid(),
+            DateReference = contractIncome.InvoiceDateReference,
+            GST = (ExpenseGst ?? []).Sum(),
+            Amount = (ExpenseAmount ?? []).Sum(),
+            BusinessName = contractIncome.BusinessName
+        };
+        contractIncome.ExpensesEntity = expensesEntity;
+
+        context.ContractIncome.Add(contractIncome);
+        context.DateReferences.Add(contractIncome.InvoiceDateReference);
+        context.Sales.Add(salesEntity);
+        context.Expenses.Add(expensesEntity);
+
+        if (Attachment is not null)
+        {
+            using MemoryStream? memoryStream = new MemoryStream();
+            await Attachment.CopyToAsync(memoryStream);
+            FileEncryptionResult encryptionResult = AttachmentEntity.Encrypt(memoryStream.ToArray(),
+            tenantProvider.GetUserObjectId());
+
+            AttachmentEntity attachmentEntity = new()
+            {
+                CustomerFilename = Attachment.FileName,
+                AttachmentId = Guid.NewGuid(),
+                SizeBytes = (int)memoryStream.Length,
+                MD5Hash = Convert.ToHexString(MD5.HashData(memoryStream.ToArray())),
+                Key = encryptionResult.Key
+            };
+            contractIncome.Attachment = attachmentEntity;
+            context.Attachments.Add(attachmentEntity);
+            var directory = tenantProvider.AttachmentsDirectory();
+            var filePath = AttachmentEntity.GetPath(directory, attachmentEntity.AttachmentId);
+            File.WriteAllBytes(filePath, encryptionResult.Bytes);
+        }
+
+        await context.SaveChangesAsync();
+        NavigationManager.NavigateTo($"/Contracts", forceLoad: true);
+    }
+
+
+
+
+}

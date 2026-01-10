@@ -1,0 +1,31 @@
+@page "/Contracts/Add"
+@using AccountingForDentists.Infrastructure
+@using Microsoft.EntityFrameworkCore
+@inject IDbContextFactory<AccountingContext> contextFactory
+
+<PageTitle>Add Contract Income</PageTitle>
+
+<FormComponent Title="Add Contract Income" FormName="add-contract-income-form" ReturnUri="/Contracts"
+    ActionText="Add Contract Income" ActionUri=@($"/Contracts/Post/Add") AllowRemoveAttachment=false    ContractIncomeEntity="null" BusinessNames="@BusinessNames"></FormComponent>
+
+@code {
+    [Parameter]
+    public required Guid EntityId { get; set; }
+
+    List<string>? BusinessNames { get; set; } = [];
+    List<string>? SellerNames { get; set; } = [];
+    Models.ContractIncomeEntity? ContractEntity { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadBusinesses();
+        await base.OnInitializedAsync();
+    }
+
+    private async Task LoadBusinesses()
+    {
+        using var context = await contextFactory.CreateDbContextAsync();
+        BusinessNames = await context.Businesses.Select(x => x.Name).Distinct().AsNoTracking().ToListAsync();
+    }
+
+}
