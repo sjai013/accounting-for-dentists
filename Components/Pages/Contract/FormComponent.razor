@@ -101,7 +101,7 @@
                 <div class="flex flex-col gap-2">
                     <div class="grow">
                         <label class="label">Income</label>
-                        <input readonly id="income" class="input" type="number" step="0.01"
+                        <input readonly id="payment-total" class="input" type="number" step="0.01"
                             value="@((ContractIncomeEntity?.SalesEntity?.Amount - ContractIncomeEntity?.ExpensesEntity?.Amount)?.ToString("0.00"))" />
                     </div>
                     <div class="grow">
@@ -181,16 +181,35 @@
         return calculateTotal("form", "expenseGst");
     }
 
+    calculateCommission = (income, expenses) => {
+        if (income === 0) {
+            return 0;
+        }
+        if (expenses === 0) {
+            return 100;
+        }
+        return ((income - expenses) / income) * 100;
+    }
+
     updateTotals = () => {
         const salesAmount = totalSalesAmount();
         const salesGst = totalSalesGst();
         const expenseAmount = totalExpenseAmount();
         const expenseGst = totalExpenseGst();
+        const totalAmount = (salesAmount + salesGst) - (expenseAmount + expenseGst);
+        const totalGst = expenseGst - salesGst;
+        const totalPayment = totalAmount + totalGst;
+        const commission = calculateCommission(salesAmount, expenseAmount);
         document.getElementById('sale-amount-total').value = salesAmount.toFixed(2);
         document.getElementById('sale-gst-total').value = salesGst.toFixed(2);
         document.getElementById('expense-amount-total').value = expenseAmount.toFixed(2);
         document.getElementById('expense-gst-total').value = expenseGst.toFixed(2);
+        document.getElementById('amount-total').value = totalAmount.toFixed(2);
+        document.getElementById('gst-total').value = totalGst.toFixed(2);
+        document.getElementById('payment-total').value = totalPayment.toFixed(2);
+        document.getElementById('commission').value = commission.toFixed(2);
     }
+
 
 
 
