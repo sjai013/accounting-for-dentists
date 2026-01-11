@@ -12,7 +12,7 @@
                 <NavigationItemsComponent />
             </ul>
         </div>
-        <a class="btn btn-ghost text-xl" href="/">Accounting For Dentists</a>
+        <a class="btn btn-ghost lg:text-xl text-sm" href="/">Accounting For Dentists</a>
     </div>
     <div class="navbar-center hidden lg:flex">
         <ul class="menu menu-horizontal px-1">
@@ -25,7 +25,7 @@
                 <Authorized>
                     <div class="flex gap-2 items-center">
                         <div><a class="btn btn-sm btn-outline" href="/account/logout">Logout
-                                <span>@context?.User.Identity?.Name</span></a></div>
+                                <span class="hidden lg:block">@context?.User.Identity?.Name</span></a></div>
                     </div>
                 </Authorized>
                 <NotAuthorized>

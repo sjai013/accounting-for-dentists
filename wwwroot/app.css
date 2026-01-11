@@ -13,3 +13,17 @@
 h1:focus {
     outline: none;
 }
+
+.transposed-table tr {
+    display: block;
+    float: left;
+    /* Aligns rows horizontally */
+}
+
+.transposed-table th,
+.transposed-table td {
+    display: block;
+    /* Stacks header/data vertically within the 'row' */
+    border: 1px solid #ccc;
+    padding: 5px;
+}

@@ -3,25 +3,29 @@
     <summary class="group-open:border-b group-open:pb-2 border-b-gray-300">FY @(SelectedFY.Length > 0 ? string.Join(",",
                 SelectedFY) : "(All)") |
         Businesses: @(SelectedBusinesses.Length > 0 ? string.Join(",", SelectedBusinesses) : "(All)")</summary>
-    <form class="flex flex-col gap-2 mt-2" method="get">
-        <fieldset class="flex gap-2 items-center">
-            <label class="label w-20">FY</label>
-            @foreach (var fy in FYOptions)
-            {
-                <input class="btn" type="checkbox" checked="@(SelectedFY.Contains(fy))" name="FY" value="@fy"
-                    aria-label="@fy" />
-            }
+    <form class="flex flex-col gap-4 mt-2" method="get">
+        <fieldset class="flex gap-2 items-start lg:items-center">
+            <label class="label min-w-20">FY</label>
+            <div class="flex gap-2 flex-wrap">
+                @foreach (var fy in FYOptions)
+                {
+                    <input class="btn" type="checkbox" checked="@(SelectedFY.Contains(fy))" name="FY" value="@fy"
+                        aria-label="@fy" />
+                }
+            </div>
         </fieldset>
 
         @if (BusinessOptions.Length > 0)
         {
-            <fieldset class="flex gap-2 items-center">
-                <label class="label w-20">Business</label>
-                @foreach (var business in BusinessOptions)
-                {
-                    <input class="btn" type="checkbox" checked="@(SelectedBusinesses.Contains(business))" name="Business"
-                        value="@business" aria-label="@business" />
-                }
+            <fieldset class="flex flex-row gap-2 items-start lg:items-center">
+                <label class="label min-w-20">Business</label>
+                <div class="flex gap-2 flex-wrap">
+                    @foreach (var business in BusinessOptions)
+                    {
+                        <input class="btn" type="checkbox" checked="@(SelectedBusinesses.Contains(business))" name="Business"
+                            value="@business" aria-label="@business" />
+                    }
+                </div>
             </fieldset>
         }
         <div>
