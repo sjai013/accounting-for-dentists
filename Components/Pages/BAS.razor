@@ -176,6 +176,12 @@
         public int ExpenseGST { get; set; }
     }
 
+    /// <summary>
+    /// Calculate the amount of GST-free sales from a sales record.
+    /// We assume that if the GST is less than 10% of the amount, the difference is GST-free sales.
+    /// </summary>
+    /// <param name="sales"></param>
+    /// <returns></returns>
     private decimal CalculateGSTFreeSalesAmount(Models.SalesEntity sales)
     {
         decimal expectedGst = sales.Amount * 0.1m;
