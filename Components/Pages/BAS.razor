@@ -14,69 +14,74 @@
     <DetailsFilterComponent BusinessOptions="[]" FYOptions="@FYOptions" SelectedFY="@FY" SelectedBusinesses="@Business">
     </DetailsFilterComponent>
 
-    <hr class="my-4" />
-    <div class="relative overflow-x-auto bg-neutral-primary shadow-xs rounded-base border border-default rounded-md">
-        <table class="w-full text-sm text-left rtl:text-right text-body rounded-md">
-            <thead class="text-right text-sm text-neutral-500  bg-neutral-50 border-b border-default">
-                <tr>
-                    <th class="border-r border-neutral-300 text-left px-6 py-3 font-medium" scope="col">Month</th>
-                    <th class="border-r border-neutral-300 px-6 py-3 font-medium" scope="col">Total Sales (G1)</th>
-                    <th class="border-r border-neutral-300 px-6 py-3 font-medium" scope="col">GST-Free Sales(G3)</th>
-                    <th class="border-r border-neutral-300 px-6 py-3 font-medium" scope="col">GST on Sales (1A)</th>
-                    <th class="border-r border-neutral-300 px-6 py-3 font-medium" scope="col">Total Purchases</th>
-                    <th class="border-r border-neutral-300 px-6 py-3 font-medium" scope="col">GST on Purchases (1B)
-                    </th>
-                    <th class="border-r border-neutral-300 px-6 py-3 font-medium" scope="col">GST Claim</th>
+    <div class="flex justify-end my-2">
+        <a class="btn btn-outline" href="@BuildExportUri()"><span
+            class="icon-[material-symbols--download-rounded]"></span> Export selected FY</a>
+        </div>
 
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (KeyValuePair<MonthModel, BASViewModel> item in MonthlyBAS.OrderByDescending(x =>
-                                x.Key.Year).ThenByDescending(x => x.Key.Month))
-                {
-
-                    <tr class="text-right even:bg-neutral-50/80 border-b border-default hover:bg-neutral-100/80">
-                        <th scope="row"
-                            class="border-r border-neutral-300 text-left px-6 py-4 font-medium text-heading whitespace-nowrap">
-                            @(new DateTime(item.Key.Year, item.Key.Month, 1).ToString("yyyy-MM"))
+        <hr class="my-4" />
+        <div class="relative overflow-x-auto bg-neutral-primary shadow-xs rounded-base border border-default rounded-md">
+            <table class="w-full text-sm text-left rtl:text-right text-body rounded-md">
+                <thead class="text-right text-sm text-neutral-500  bg-neutral-50 border-b border-default">
+                    <tr>
+                        <th class="border-r border-neutral-300 text-left px-6 py-3 font-medium" scope="col">Month</th>
+                        <th class="border-r border-neutral-300 px-6 py-3 font-medium" scope="col">Total Sales (G1)</th>
+                        <th class="border-r border-neutral-300 px-6 py-3 font-medium" scope="col">GST-Free Sales(G3)</th>
+                        <th class="border-r border-neutral-300 px-6 py-3 font-medium" scope="col">GST on Sales (1A)</th>
+                        <th class="border-r border-neutral-300 px-6 py-3 font-medium" scope="col">Total Purchases</th>
+                        <th class="border-r border-neutral-300 px-6 py-3 font-medium" scope="col">GST on Purchases (1B)
                         </th>
-                        <td class="border-r border-neutral-300 px-6 py-4">$@((item.Value.Sales).ToString("N0"))</td>
-                        <td class="border-r border-neutral-300 px-6 py-4">$@item.Value.GSTFreeSales.ToString("N0")</td>
-                        <td class="border-r border-neutral-300 px-6 py-4">$@item.Value.SalesGST.ToString("N0")</td>
-                        <td class="border-r border-neutral-300 px-6 py-4">$@item.Value.Expenses.ToString("N0")</td>
-                        <td class="border-r border-neutral-300 px-6 py-4">$@item.Value.ExpenseGST.ToString("N0")</td>
-                        <td class="border-r border-neutral-300 px-6 py-4">$@((item.Value.ExpenseGST -
-                                                    item.Value.SalesGST).ToString("N0"))</td>
+                        <th class="border-r border-neutral-300 px-6 py-3 font-medium" scope="col">GST Claim</th>
+
                     </tr>
-                }
-            </tbody>
-            <tfoot class="border-t-2 border-neutral-600">
-                <tr class="text-right">
-                    <th scope="row"
-                        class="border-r border-neutral-300 text-left px-6 py-4 text-heading whitespace-nowrap font-semibold">
-                        Totals
-                    </th>
-                    <td class="border-r border-neutral-300 px-6 py-4">$@MonthlyBAS.Sum(x =>
-                                                x.Value.Sales).ToString("N0")
-                    </td>
-                    <td class="border-r border-neutral-300 px-6 py-4">$@MonthlyBAS.Sum(x =>
-                                                x.Value.GSTFreeSales).ToString("N0")</td>
-                    <td class="border-r border-neutral-300 px-6 py-4">$@MonthlyBAS.Sum(x =>
-                                                x.Value.SalesGST).ToString("N0")</td>
-                    <td class="border-r border-neutral-300 px-6 py-4">$@MonthlyBAS.Sum(x =>
-                                                x.Value.Expenses).ToString("N0")</td>
-                    <td class="border-r border-neutral-300 px-6 py-4">$@MonthlyBAS.Sum(x =>
-                                                x.Value.ExpenseGST).ToString("N0")</td>
-                    <td class="border-r border-neutral-300 px-6 py-4">$@(MonthlyBAS.Sum(x => x.Value.ExpenseGST -
-                                                x.Value.SalesGST).ToString("N0"))
-                    </td>
-                </tr>
-            </tfoot>
-        </table>
-    </div>
+                </thead>
+                <tbody>
+                    @foreach (KeyValuePair<MonthModel, BASViewModel> item in MonthlyBAS.OrderByDescending(x =>
+                                    x.Key.Year).ThenByDescending(x => x.Key.Month))
+                    {
+
+                        <tr class="text-right even:bg-neutral-50/80 border-b border-default hover:bg-neutral-100/80">
+                            <th scope="row"
+                                class="border-r border-neutral-300 text-left px-6 py-4 font-medium text-heading whitespace-nowrap">
+                                @(new DateTime(item.Key.Year, item.Key.Month, 1).ToString("yyyy-MM"))
+                            </th>
+                            <td class="border-r border-neutral-300 px-6 py-4">$@((item.Value.Sales).ToString("N0"))</td>
+                            <td class="border-r border-neutral-300 px-6 py-4">$@item.Value.GSTFreeSales.ToString("N0")</td>
+                            <td class="border-r border-neutral-300 px-6 py-4">$@item.Value.SalesGST.ToString("N0")</td>
+                            <td class="border-r border-neutral-300 px-6 py-4">$@item.Value.Expenses.ToString("N0")</td>
+                            <td class="border-r border-neutral-300 px-6 py-4">$@item.Value.ExpenseGST.ToString("N0")</td>
+                            <td class="border-r border-neutral-300 px-6 py-4">$@((item.Value.ExpenseGST -
+                                                                                    item.Value.SalesGST).ToString("N0"))</td>
+                            </tr>
+                        }
+                    </tbody>
+                    <tfoot class="border-t-2 border-neutral-600">
+                        <tr class="text-right">
+                            <th scope="row"
+                                class="border-r border-neutral-300 text-left px-6 py-4 text-heading whitespace-nowrap font-semibold">
+                                Totals
+                            </th>
+                            <td class="border-r border-neutral-300 px-6 py-4">$@MonthlyBAS.Sum(x =>
+                                                                                x.Value.Sales).ToString("N0")
+                            </td>
+                            <td class="border-r border-neutral-300 px-6 py-4">$@MonthlyBAS.Sum(x =>
+                                                                                x.Value.GSTFreeSales).ToString("N0")</td>
+                                <td class="border-r border-neutral-300 px-6 py-4">$@MonthlyBAS.Sum(x =>
+                                                                                    x.Value.SalesGST).ToString("N0")</td>
+                                    <td class="border-r border-neutral-300 px-6 py-4">$@MonthlyBAS.Sum(x =>
+                                                                                        x.Value.Expenses).ToString("N0")</td>
+                                        <td class="border-r border-neutral-300 px-6 py-4">$@MonthlyBAS.Sum(x =>
+                                                                                            x.Value.ExpenseGST).ToString("N0")</td>
+                                            <td class="border-r border-neutral-300 px-6 py-4">$@(MonthlyBAS.Sum(x => x.Value.ExpenseGST -
+                                                                                                x.Value.SalesGST).ToString("N0"))
+                                            </td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
 
 
-</div>
+                        </div>
 
 @code {
 
@@ -193,5 +198,11 @@
         var salesWithoutGst = sales.Amount - salesWithGst;
         if (salesWithoutGst < 0) return 0;
         return salesWithoutGst;
+    }
+
+    private string BuildExportUri()
+    {
+        if (FY.Length == 0) return "/api/export";
+        return "/api/export?" + string.Join("&", FY.Select(year => $"FY={year}"));
     }
 }
